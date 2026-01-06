@@ -213,8 +213,48 @@ public class BlockEarningsHandler {
         rewards.lastBlockCenterPos = pos;
         rewards.ticksSinceLastBlock = 0;
         
+        // CRITICAL: Capture block state IMMEDIATELY before tree/vein miner destroys everything
+        // If we don't have a previous scan yet, do it now (first block break)
+        if (!previousBlockStates.containsKey(playerUUID)) {
+            captureBlockState(world, serverPlayer, pos);
+        }
+        
         if (DEBUG_LOGGING) {
             System.out.println("[SHOP] Batch: " + rewards.blocksBroken + " blocks, $" + rewards.totalMoney);
+        }
+    }
+    
+    /**
+     * Immediately capture the block state around a position
+     */
+    private static void captureBlockState(Level level, ServerPlayer player, BlockPos centerPos) {
+        UUID playerId = player.getUUID();
+        Map<BlockPos, Block> captured = new HashMap<>();
+        int range = (int) RADIUS;
+        
+        for (int x = -range; x <= range; x++) {
+            for (int y = -range; y <= range; y++) {
+                for (int z = -range; z <= range; z++) {
+                    BlockPos checkPos = centerPos.offset(x, y, z);
+                    BlockState state = level.getBlockState(checkPos);
+                    Block block = state.getBlock();
+                    
+                    if (isExcludedBlock(block)) {
+                        continue;
+                    }
+                    
+                    long value = getBlockValue(block);
+                    if (value > 0 || getBlockXP(block) > 0) {
+                        captured.put(checkPos, block);
+                    }
+                }
+            }
+        }
+        
+        previousBlockStates.put(playerId, captured);
+        
+        if (DEBUG_LOGGING) {
+            System.out.println("[SHOP] Captured " + captured.size() + " blocks in initial scan");
         }
     }
     
