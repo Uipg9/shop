@@ -2,6 +2,7 @@ package com.shopmod.events;
 
 import com.shopmod.currency.CurrencyManager;
 import com.shopmod.upgrades.UpgradeManager;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -14,14 +15,62 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Universal earnings system for all block breaking activities
  * Players earn money and XP for breaking blocks
+ * Batches rewards for compatibility with timber/vein miner mods
  */
 public class BlockEarningsHandler {
     
+    // Batch rewards for timber/vein miner compatibility
+    private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
+    private static final int BATCH_DELAY_TICKS = 2; // Wait 2 ticks before displaying
+    
+    private static class PendingRewards {
+        long totalMoney = 0;
+        int totalXP = 0;
+        int ticksRemaining = BATCH_DELAY_TICKS;
+    }
+    
     public static void register() {
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
+        
+        // Process batched rewards
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            pendingRewards.entrySet().removeIf(entry -> {
+                entry.getValue().ticksRemaining--;
+                
+                if (entry.getValue().ticksRemaining <= 0) {
+                    ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                    if (player != null) {
+                        PendingRewards rewards = entry.getValue();
+                        
+                        // Award money and XP
+                        if (rewards.totalMoney > 0) {
+                            CurrencyManager.addMoney(player, rewards.totalMoney);
+                        }
+                        if (rewards.totalXP > 0) {
+                            player.giveExperiencePoints(rewards.totalXP);
+                        }
+                        
+                        // Show combined earnings in action bar only
+                        if (rewards.totalMoney > 0 || rewards.totalXP > 0) {
+                            String message = "§6+$" + String.format("%,d", rewards.totalMoney);
+                            if (rewards.totalXP > 0) {
+                                message += " §a+" + rewards.totalXP + " XP";
+                            }
+                            player.displayClientMessage(Component.literal(message), true);
+                        }
+                    }
+                    return true; // Remove from map
+                }
+                return false; // Keep in map
+            });
+        });
     }
     
     private static void onBlockBreak(Level world, Player player, BlockPos pos, 
@@ -45,22 +94,12 @@ public class BlockEarningsHandler {
         long finalMoney = (long)(baseMoneyReward * incomeMultiplier);
         int finalXP = (int)(baseXpReward * xpMultiplier);
         
-        // Award money and XP
-        if (finalMoney > 0) {
-            CurrencyManager.addMoney(serverPlayer, finalMoney);
-        }
-        if (finalXP > 0) {
-            serverPlayer.giveExperiencePoints(finalXP);
-        }
-        
-        // Show earnings in action bar
-        if (finalMoney > 0 || finalXP > 0) {
-            String message = "§6+$" + String.format("%,d", finalMoney);
-            if (finalXP > 0) {
-                message += " §a+" + finalXP + " XP";
-            }
-            serverPlayer.displayClientMessage(Component.literal(message), true);
-        }
+        // Add to pending rewards (batch for timber/vein miner)
+        UUID playerUUID = serverPlayer.getUUID();
+        PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> new PendingRewards());
+        rewards.totalMoney += finalMoney;
+        rewards.totalXP += finalXP;
+        rewards.ticksRemaining = BATCH_DELAY_TICKS; // Reset timer
     }
     
     /**
