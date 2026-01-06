@@ -27,7 +27,8 @@ public class BlockEarningsHandler {
     
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
     private static final int ACCUMULATION_TICKS = 20;
-    private static final double RADIUS = 100.0;
+    private static final double RADIUS = 3.0; // Small radius to avoid counting distant trees
+    private static final int MAX_BLOCKS_PER_SCAN = 64; // Maximum blocks to count in one scan
     private static final int MAX_BLOCKS_PER_TICK = 128; // Cap scan operations per tick
     private static final boolean DEBUG_LOGGING = false; // Set to true for verbose logs
     private static final Set<UUID> recentBreakers = new HashSet<>();
@@ -133,12 +134,16 @@ public class BlockEarningsHandler {
             }
         }
         
-        // Find blocks that disappeared
+        // Find blocks that disappeared (with maximum limit per scan)
         int processedDestroyedBlocks = 0;
+        int totalBlocksThisScan = 0;
         for (BlockPos pos : previous.keySet()) {
             if (!current.containsKey(pos)) {
                 if (++processedDestroyedBlocks > MAX_BLOCKS_PER_TICK) {
                     break; // Cap processing to avoid lag
+                }
+                if (++totalBlocksThisScan > MAX_BLOCKS_PER_SCAN) {
+                    break; // Cap total blocks counted per scan to prevent exploits
                 }
                 
                 Block block = previous.get(pos);
