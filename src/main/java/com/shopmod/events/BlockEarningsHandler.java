@@ -173,47 +173,8 @@ public class BlockEarningsHandler {
             }
         }
 
-        // Count fresh item drops near the player (covers mods that drop items directly)
-        AABB box = new AABB(scanCenter).inflate(RADIUS);
-        List<ItemEntity> drops = level.getEntitiesOfClass(ItemEntity.class, box);
-        for (ItemEntity drop : drops) {
-            if (processedDropEntities.contains(drop.getUUID())) {
-                continue;
-            }
-            if (drop.getAge() > DROP_AGE_WINDOW) {
-                continue; // Too old; likely not from this break chain
-            }
-
-            ItemStack stack = drop.getItem();
-            Block dropBlock = Block.byItem(stack.getItem());
-            if (dropBlock == Blocks.AIR) {
-                continue;
-            }
-
-            long money = getBlockValue(dropBlock);
-            int xp = getBlockXP(dropBlock);
-            if (money <= 0 && xp <= 0) {
-                continue;
-            }
-
-            int count = stack.getCount();
-            double multiplier = UpgradeManager.getIncomeMultiplier(playerId);
-            double xpMult = UpgradeManager.getXPMultiplier(playerId);
-
-            long finalMoney = (long)(money * multiplier * count);
-            int finalXP = (int)(xp * xpMult * count);
-
-            rewards.totalMoney += finalMoney;
-            rewards.totalXP += finalXP;
-            rewards.blocksBroken += count;
-            rewards.lastBlockCenterPos = drop.blockPosition();
-            rewards.ticksSinceLastBlock = 0;
-            processedDropEntities.add(drop.getUUID());
-
-            if (DEBUG_LOGGING) {
-                System.out.println("[SHOP] Drop: " + stack.getCount() + "x " + dropBlock.getName().getString() + " = $" + finalMoney);
-            }
-        }
+        // Drop counting disabled - block state comparison is more accurate
+        // (Previously this caused double-counting with vein/tree miners)
         
         previousBlockStates.put(playerId, current);
     }
