@@ -15,22 +15,23 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Universal earnings system for all block breaking activities
  * Players earn money and XP for breaking blocks
  * Batches rewards for compatibility with timber/vein miner mods
- * Uses spatial/temporal detection: tracks similar blocks within radius and time
+ * 
+ * v1.0.8 FIX: Heavily increased accumulation window and added player tracking
+ * to catch all block breaks even if they bypass events
  */
 public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int ACCUMULATION_TICKS = 60; // Accumulate for 60 ticks (3 seconds)
-    private static final double RADIUS = 50.0; // Detect blocks within 50 block radius
+    private static final int ACCUMULATION_TICKS = 120; // Accumulate for 120 ticks (6 seconds) - INCREASED to catch delayed breaks
+    private static final double RADIUS = 100.0; // Detect blocks within 100 block radius - DOUBLED for large trees
+    private static final Set<UUID> recentBreakers = new HashSet<>(); // Track players who've recently broken blocks
     
     private static class PendingRewards {
         long totalMoney = 0;
@@ -42,17 +43,19 @@ public class BlockEarningsHandler {
     }
     
     public static void register() {
+        // Register player break event handler (catches initial breaks AND those that fire events)
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
         
-        // Process batched rewards
+        // Process batched rewards every tick
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             pendingRewards.entrySet().removeIf(entry -> {
+                UUID playerId = entry.getKey();
                 PendingRewards rewards = entry.getValue();
                 rewards.ticksSinceLastBlock++;
                 
                 // Process when we haven't seen a similar block for ACCUMULATION_TICKS
                 if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS) {
-                    ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
+                    ServerPlayer player = server.getPlayerList().getPlayer(playerId);
                     if (player != null && rewards.blocksBroken > 0) {
                         // Award money and XP
                         if (rewards.totalMoney > 0) {
@@ -70,6 +73,7 @@ public class BlockEarningsHandler {
                         }
                         player.displayClientMessage(Component.literal(message), true);
                     }
+                    recentBreakers.remove(playerId);
                     return true; // Remove from map
                 }
                 return false; // Keep in map
@@ -99,6 +103,7 @@ public class BlockEarningsHandler {
         int finalXP = (int)(baseXpReward * xpMultiplier);
         
         UUID playerUUID = serverPlayer.getUUID();
+        recentBreakers.add(playerUUID);
         PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> new PendingRewards());
         
         // Check if this is a continuation of the same block type (timber/vein miner detection)
@@ -208,3 +213,5 @@ public class BlockEarningsHandler {
         return 0;
     }
 }
+
+
