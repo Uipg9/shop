@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "shop",
+	"version": "${version}",
+	"name": "Shop Mod",
+	"description": "Virtual economy and shop system for Minecraft - Buy/sell items, earn money through gameplay",
+	"authors": [
+		"Uipg9"
+	],
+	"contact": {
+		"homepage": "https://github.com/Uipg9/shop",
+		"sources": "https://github.com/Uipg9/shop"
+	},
+	"license": "MIT",
+	"icon": "assets/shop/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.shopmod.ShopMod"
+		],
+		"client": [
+			"com.shopmod.ShopModClient"
+		]
+	},
+	"mixins": [
+		"shop.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.0",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+	}
+}

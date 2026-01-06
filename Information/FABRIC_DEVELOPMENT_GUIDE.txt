@@ -1,0 +1,428 @@
+================================================================================
+  FABRIC MOD DEVELOPMENT - KEY CONCEPTS AND BEST PRACTICES
+  Reference Guide for QOL Mod Development
+================================================================================
+
+================================================================================
+1. FABRIC API vs MIXINS - WHEN TO USE WHAT
+================================================================================
+
+ALWAYS PREFER FABRIC API WHEN AVAILABLE!
+-----------------------------------------
+Fabric API provides events and hooks that are:
+- Less likely to conflict with other mods
+- More stable across Minecraft updates
+- Easier to maintain and debug
+
+Use Mixins only when:
+- Fabric API doesn't provide the functionality
+- You need to modify vanilla behavior that has no hooks
+- Performance is critical and events add too much overhead
+
+
+Common Fabric API Events:
+--------------------------
+// Lifecycle Events
+ServerLifecycleEvents.SERVER_STARTING
+ServerLifecycleEvents.SERVER_STARTED
+ServerLifecycleEvents.SERVER_STOPPING
+ServerLifecycleEvents.SERVER_STOPPED
+
+// Player Events
+ServerPlayConnectionEvents.JOIN
+ServerPlayConnectionEvents.DISCONNECT
+PlayerBlockBreakEvents.BEFORE
+PlayerBlockBreakEvents.AFTER
+AttackEntityCallback.EVENT
+
+// Item Events
+UseItemCallback.EVENT
+UseBlockCallback.EVENT
+AttackBlockCallback.EVENT
+
+// Tick Events
+ServerTickEvents.START_SERVER_TICK
+ServerTickEvents.END_SERVER_TICK
+ClientTickEvents.START_CLIENT_TICK
+ClientTickEvents.END_CLIENT_TICK
+
+
+Example Event Usage:
+--------------------
+// In your main mod class or event handler
+ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+    ServerPlayerEntity player = handler.player;
+    // Do something when player joins
+    player.sendMessage(Text.literal("Welcome!"), false);
+});
+
+
+================================================================================
+2. MIXIN BASICS - SAFE USAGE
+================================================================================
+
+Mixin Priority (from safest to most dangerous):
+1. @Inject with @At("HEAD") - inject at method start
+2. @Inject with @At("RETURN") - inject before returns
+3. @Inject with @At("INVOKE") - inject before specific method call
+4. @ModifyVariable - modify local variables
+5. @Redirect - redirect method calls (HIGH CONFLICT RISK)
+6. @Overwrite - replace entire method (VERY DANGEROUS)
+
+
+Safe Mixin Example - Adding to a Method:
+-----------------------------------------
+@Mixin(PlayerEntity.class)
+public class PlayerEntityMixin {
+    
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void onTick(CallbackInfo ci) {
+        // Your code here runs every tick
+        // 'this' refers to the PlayerEntity instance
+        PlayerEntity player = (PlayerEntity)(Object)this;
+    }
+}
+
+
+Accessing Private Fields - Use @Accessor:
+------------------------------------------
+@Mixin(SomeClass.class)
+public interface SomeClassAccessor {
+    @Accessor("privateField")
+    int getPrivateField();
+    
+    @Accessor("privateField")
+    void setPrivateField(int value);
+}
+
+// Usage:
+((SomeClassAccessor)instance).getPrivateField();
+
+
+Adding Interface to Vanilla Class:
+-----------------------------------
+// Your interface
+public interface MyCustomInterface {
+    void myCustomMethod();
+}
+
+// Mixin
+@Mixin(PlayerEntity.class)
+public abstract class PlayerEntityMixin implements MyCustomInterface {
+    
+    @Unique
+    @Override
+    public void myCustomMethod() {
+        // Implementation
+    }
+}
+
+// Usage:
+if (player instanceof MyCustomInterface custom) {
+    custom.myCustomMethod();
+}
+
+
+================================================================================
+3. REGISTERING ITEMS AND BLOCKS
+================================================================================
+
+Use Fabric's Registry System:
+------------------------------
+public class ModItems {
+    // Create item
+    public static final Item MY_ITEM = new Item(new Item.Settings());
+    
+    public static void register() {
+        Registry.register(
+            Registries.ITEM,
+            Identifier.of("qol-mod", "my_item"),
+            MY_ITEM
+        );
+    }
+}
+
+// Call in main mod class:
+@Override
+public void onInitialize() {
+    ModItems.register();
+}
+
+
+Item Settings:
+--------------
+new Item.Settings()
+    .maxCount(64)              // Stack size
+    .maxDamage(100)            // Durability
+    .fireproof()               // Immune to fire
+    .rarity(Rarity.RARE)       // Rarity color
+
+
+Blocks:
+-------
+public static final Block MY_BLOCK = new Block(
+    AbstractBlock.Settings.create()
+        .strength(3.0f)        // Hardness
+        .sounds(BlockSoundGroup.STONE)
+        .requiresTool()
+);
+
+// Don't forget to register the BlockItem too!
+Registry.register(
+    Registries.ITEM,
+    Identifier.of("qol-mod", "my_block"),
+    new BlockItem(MY_BLOCK, new Item.Settings())
+);
+
+
+================================================================================
+4. CONFIGURATION SYSTEM
+================================================================================
+
+Recommended: Use Cloth Config API
+----------------------------------
+Add to build.gradle:
+dependencies {
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:11.1.106") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+}
+
+Create config class:
+--------------------
+public class ModConfig {
+    public static boolean enableFeature = true;
+    public static int someValue = 10;
+    
+    public static void load() {
+        // Load from file
+    }
+    
+    public static void save() {
+        // Save to file
+    }
+}
+
+
+Alternative: Simple JSON Config:
+---------------------------------
+Use Gson to read/write JSON files:
+- Store in config/qol-mod.json
+- Load during mod initialization
+- Save when changed
+
+
+================================================================================
+5. KEYBINDINGS
+================================================================================
+
+Register Keybindings (Client-side only):
+-----------------------------------------
+public class ModKeybindings {
+    public static KeyBinding exampleKey;
+    
+    public static void register() {
+        exampleKey = KeyBindingHelper.registerKeyBinding(
+            new KeyBinding(
+                "key.qol-mod.example",  // Translation key
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_R,        // Default key
+                "category.qol-mod"      // Category
+            )
+        );
+    }
+}
+
+Handle key presses:
+-------------------
+ClientTickEvents.END_CLIENT_TICK.register(client -> {
+    while (ModKeybindings.exampleKey.wasPressed()) {
+        // Key was pressed
+    }
+});
+
+
+Translation keys (lang/en_us.json):
+------------------------------------
+{
+  "key.qol-mod.example": "Example Key",
+  "category.qol-mod": "QOL Mod"
+}
+
+
+================================================================================
+6. NETWORKING
+================================================================================
+
+Register Packet:
+----------------
+public static final Identifier PACKET_ID = 
+    Identifier.of("qol-mod", "example_packet");
+
+Server receiving:
+-----------------
+ServerPlayNetworking.registerGlobalReceiver(PACKET_ID, 
+    (server, player, handler, buf, responseSender) -> {
+        // Read data from buf
+        int data = buf.readInt();
+        
+        // Process on server thread
+        server.execute(() -> {
+            // Do something with data
+        });
+    }
+);
+
+Client sending:
+---------------
+PacketByteBuf buf = PacketByteBufs.create();
+buf.writeInt(123);
+ClientPlayNetworking.send(PACKET_ID, buf);
+
+
+================================================================================
+7. DATA GENERATION
+================================================================================
+
+For recipes, tags, and loot tables, use Data Generation:
+
+Create data generator:
+----------------------
+public class ModDataGenerator implements DataGeneratorEntrypoint {
+    @Override
+    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
+        FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
+        
+        pack.addProvider(RecipeProvider::new);
+        pack.addProvider(LootTableProvider::new);
+        pack.addProvider(BlockTagProvider::new);
+    }
+}
+
+Run data generation:
+    .\gradlew.bat runDatagen
+
+
+================================================================================
+8. COMMON PATTERNS FOR QOL MODS
+================================================================================
+
+Auto-pickup items:
+------------------
+ItemEntityMixin to modify item pickup logic
+
+Inventory sorting:
+------------------
+Hook into screen opening/closing events
+Use Screen.children() to access inventory slots
+
+Tool durability warning:
+------------------------
+ItemStackMixin to check durability
+Client-side rendering for warning display
+
+Waypoint system:
+----------------
+Store waypoints in persistent player data (NBT)
+Client-side rendering for waypoint markers
+Network packets to sync waypoints
+
+
+================================================================================
+9. TESTING AND DEBUGGING
+================================================================================
+
+Logging:
+--------
+public static final Logger LOGGER = LoggerFactory.getLogger("qol-mod");
+
+LOGGER.info("Info message");
+LOGGER.warn("Warning message");
+LOGGER.error("Error message");
+
+Debug Mode:
+-----------
+Add command to toggle debug features:
+/qolmod debug <on|off>
+
+Use debug rendering:
+- DrawContext for 2D overlays
+- WorldRenderer for 3D debug shapes
+
+
+================================================================================
+10. COMMON MISTAKES TO AVOID
+================================================================================
+
+1. DON'T modify Minecraft code directly - use Fabric API or mixins
+2. DON'T use @Overwrite mixins unless absolutely necessary
+3. DON'T forget to check if code is running on client or server
+4. DON'T hardcode values - use configuration
+5. DON'T forget to test in multiplayer
+6. DON'T skip reading the logs - they tell you what went wrong
+7. DON'T use outdated tutorials - Minecraft changes frequently
+8. DON'T forget to handle edge cases and null checks
+9. DON'T ignore warnings about deprecated methods
+10. DON'T forget to update your mod when Minecraft updates
+
+
+================================================================================
+11. PERFORMANCE CONSIDERATIONS
+================================================================================
+
+Tick Events:
+- Only register if needed
+- Keep tick event code minimal
+- Cache frequently accessed values
+
+Rendering:
+- Batch similar rendering operations
+- Use Immediate mode rendering appropriately
+- Avoid rendering when not visible
+
+Memory:
+- Clean up references when no longer needed
+- Use weak references for caches
+- Avoid creating new objects every frame
+
+
+================================================================================
+12. USEFUL VANILLA METHODS AND CLASSES
+================================================================================
+
+World Interaction:
+- world.setBlockState(pos, state)
+- world.getBlockState(pos)
+- world.spawnEntity(entity)
+- world.getClosestPlayer(x, y, z, range)
+
+Player:
+- player.getInventory()
+- player.giveItemStack(stack)
+- player.sendMessage(text, overlay)
+- player.getPos() / player.getX/Y/Z()
+
+ItemStack:
+- stack.getDamage() / setDamage()
+- stack.getCount() / setCount()
+- stack.getNbt() / setNbt()
+- stack.getItem()
+
+Block/BlockState:
+- state.getBlock()
+- state.get(Properties.FACING)
+- state.with(Properties.FACING, direction)
+
+
+================================================================================
+REMEMBER
+================================================================================
+
+1. Start small and test frequently
+2. Read the Fabric API source code - it's well documented
+3. Check existing mods for examples (especially Fabric API test mods)
+4. Ask for help on the Fabric Discord when stuck
+5. Keep your code organized and commented
+6. Update your documentation as you learn new things!
+
+Good luck with your QOL mod! 🎮

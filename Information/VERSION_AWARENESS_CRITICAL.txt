@@ -1,0 +1,205 @@
+================================================================================
+  ⚠️ CRITICAL: MINECRAFT VERSION AWARENESS
+  Important Information About Minecraft Versions
+================================================================================
+
+🚨 VERY IMPORTANT: MINECRAFT 1.21.11 vs 1.21.1
+===============================================
+
+THIS PROJECT USES: Minecraft 1.21.11
+NOT: Minecraft 1.21.1
+
+CRITICAL DIFFERENCE:
+--------------------
+❌ 1.21.1  - WRONG VERSION (older)
+✅ 1.21.11 - CORRECT VERSION (much newer)
+
+These are COMPLETELY DIFFERENT versions!
+- 1.21.1 is an older release
+- 1.21.11 is significantly newer (11 releases ahead)
+- They have different Fabric API versions
+- They have different Yarn mappings
+- They are NOT compatible with each other
+
+
+================================================================================
+CORRECT VERSIONS FOR THIS PROJECT
+================================================================================
+
+Minecraft Version: 1.21.11 ✅
+Yarn Mappings: 1.21.11+build.1
+Fabric Loader: 0.18.1+1.21.11
+Fabric API: 0.140.0+1.21.11
+Java Version: 21
+
+
+THESE VERSIONS ARE CONFIGURED IN:
+----------------------------------
+1. gradle.properties
+   minecraft_version=1.21.11
+
+2. fabric.mod.json
+   "minecraft": "~1.21.11"
+
+
+================================================================================
+WHY THIS IS EXTREMELY IMPORTANT
+================================================================================
+
+Using the wrong Minecraft version will cause:
+❌ Mod won't load in the correct Minecraft version
+❌ Incompatible with target game version
+❌ Different APIs and code structure
+❌ Potential crashes and errors
+❌ Wasted development time
+
+ALWAYS verify you're using 1.21.11 before:
+- Building the mod
+- Running the client
+- Publishing the mod
+- Testing with other mods
+
+
+================================================================================
+HOW TO VERIFY YOUR VERSION
+================================================================================
+
+Check gradle.properties:
+------------------------
+Look for: minecraft_version=1.21.11
+Should say: 1.21.11 (NOT 1.21.1)
+
+Check fabric.mod.json:
+----------------------
+Look for: "minecraft": "~1.21.11"
+Should say: 1.21.11 (NOT 1.21.1)
+
+Check Build Output:
+-------------------
+When running gradlew.bat build or runClient, look for:
+"Loading Minecraft 1.21.11"
+
+
+================================================================================
+IF YOU SEE 1.21.1 ANYWHERE - FIX IT IMMEDIATELY!
+================================================================================
+
+This is a common mistake because:
+- AI assistants may default to older versions
+- Online tutorials may reference older versions
+- Copy-paste examples may use wrong versions
+- Version numbers look similar (1.21.1 vs 1.21.11)
+
+
+ALWAYS DOUBLE-CHECK THE VERSION NUMBER!
+1.21.11 has TWO 1's after the decimal: 1.21.11
+NOT one 1 after decimal: 1.21.1
+
+
+================================================================================
+VERSION HISTORY CONTEXT
+================================================================================
+
+Minecraft 1.21.x Release Timeline:
+-----------------------------------
+1.21.0  → Initial release
+1.21.1  → First patch
+1.21.2  → Second patch
+...
+1.21.10 → Tenth patch
+1.21.11 → Eleventh patch ← WE ARE HERE ✅
+
+Each version has:
+- Different bug fixes
+- Different features
+- Different Fabric API versions
+- Different mappings
+
+
+================================================================================
+UPDATING TO A NEWER VERSION (Future Reference)
+================================================================================
+
+If Minecraft 1.21.12 or 1.22 comes out, update:
+
+1. gradle.properties:
+   - minecraft_version
+   - yarn_mappings
+   - loader_version
+   - fabric_version
+
+2. fabric.mod.json:
+   - "minecraft": version requirement
+   - "fabricloader": version requirement
+
+3. Check https://fabricmc.net/develop/ for correct versions
+
+4. Run: cmd /c gradlew.bat build --refresh-dependencies
+
+5. Test thoroughly!
+
+
+================================================================================
+COMMON VERSION MISTAKES TO AVOID
+================================================================================
+
+❌ Using 1.21.1 when you mean 1.21.11
+❌ Mixing versions (1.21.11 MC with 1.21.1 Fabric API)
+❌ Not updating all version references
+❌ Copying old gradle.properties without checking
+❌ Assuming versions are backward compatible
+❌ Not checking build logs for version loaded
+
+
+================================================================================
+CHECKLIST: VERSION VERIFICATION
+================================================================================
+
+Before building or running:
+☐ gradle.properties says: minecraft_version=1.21.11
+☐ fabric.mod.json says: "minecraft": "~1.21.11"
+☐ Fabric API version matches: 0.140.0+1.21.11
+☐ Loader version matches: 0.18.1+1.21.11
+☐ Yarn mappings match: 1.21.11+build.1
+
+Before publishing:
+☐ Verify build log shows "Loading Minecraft 1.21.11"
+☐ Test in actual Minecraft 1.21.11 installation
+☐ Confirm mod metadata shows correct version
+☐ Double-check all documentation references
+
+
+================================================================================
+REMEMBER
+================================================================================
+
+🚨 THIS PROJECT IS FOR MINECRAFT 1.21.11 🚨
+
+NOT 1.21.1
+NOT 1.21.10
+NOT 1.21.2
+
+EXACTLY 1.21.11 (The 11th patch of Minecraft 1.21)
+
+Always verify this version in:
+✓ gradle.properties
+✓ fabric.mod.json  
+✓ Build logs
+✓ Test environment
+
+If you see 1.21.1 anywhere (with only one 1 after the decimal), 
+STOP and fix it immediately!
+
+
+================================================================================
+THIS IS THE MOST IMPORTANT FILE IN THE INFORMATION FOLDER!
+================================================================================
+
+Refer to this file EVERY TIME before:
+- Building
+- Running
+- Publishing
+- Updating dependencies
+- Helping others with your mod
+
+Version correctness is CRITICAL to mod development success!

@@ -1,0 +1,240 @@
+================================================================================
+  QOL MOD - PROJECT SETUP AND STRUCTURE
+  Minecraft 1.21.1 Fabric Mod
+  Created: January 5, 2026
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+This is a Quality of Life (QOL) mod for Minecraft 1.21.1 using Fabric.
+The goal is to add small improvements that enhance gameplay without changing
+the core game mechanics.
+
+MOD ID: qol-mod
+Maven Group: com.qolmod
+Base Package: com.qolmod
+
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+Root Directory:
+├── gradle/                     - Gradle wrapper files
+├── src/
+│   ├── main/
+│   │   ├── java/com/qolmod/   - Main mod code (server + client)
+│   │   └── resources/          - Mod resources (JSON, textures, etc.)
+│   └── client/
+│       └── java/com/qolmod/   - Client-only code
+├── build.gradle                - Build configuration
+├── gradle.properties           - Version definitions and properties
+├── settings.gradle             - Project settings
+└── README.md                   - Project documentation
+
+
+Key Files:
+-----------
+1. fabric.mod.json - Mod metadata and entry points
+2. qol-mod.mixins.json - Mixin configuration
+3. QOLMod.java - Main mod initializer (runs on both client and server)
+4. QOLModClient.java - Client-only initializer
+
+
+================================================================================
+CURRENT SETUP
+================================================================================
+
+Minecraft Version: 1.21.1
+Fabric Loader: 0.16.9
+Fabric API: 0.110.0+1.21.1
+Yarn Mappings: 1.21.1+build.3
+Java Version: 21
+
+IMPORTANT NOTES:
+- Using Yarn mappings (NOT Mojang mappings for this version)
+- Java 21 is REQUIRED for Minecraft 1.21.1
+- Fabric API is included as a dependency
+
+
+================================================================================
+DEPENDENCIES
+================================================================================
+
+Required:
+- Fabric Loader (>=0.16.0)
+- Minecraft (~1.21.1)
+- Java (>=21)
+- Fabric API (*)
+
+The Fabric API provides:
+- Event system (lifecycle, networking, etc.)
+- Registry helpers
+- Common hooks and utilities
+- Networking API
+- Rendering utilities
+
+
+================================================================================
+BUILDING THE MOD
+================================================================================
+
+Build Commands:
+---------------
+Standard build:
+    .\gradlew.bat build
+
+Clean build:
+    .\gradlew.bat clean build
+
+Build without tests:
+    .\gradlew.bat build -x test
+
+Generate sources (for reading MC code):
+    .\gradlew.bat genSources
+
+Download assets:
+    .\gradlew.bat downloadAssets
+
+
+The built mod JAR will be in: build/libs/
+
+
+================================================================================
+RUNNING THE MOD
+================================================================================
+
+Using IDE (IntelliJ IDEA):
+1. Import as Gradle project
+2. Wait for Gradle sync to complete
+3. Run the "Minecraft Client" or "Minecraft Server" configuration
+4. If run configs don't appear, try:
+   - Close and reopen the project
+   - Run: .\gradlew.bat ideaSyncTask
+
+Using Command Line:
+    .\gradlew.bat runClient    - Run Minecraft client
+    .\gradlew.bat runServer    - Run Minecraft server
+
+
+================================================================================
+RECOMMENDED QOL MOD FEATURES
+================================================================================
+
+Based on research of popular QOL mods, consider implementing:
+
+Quality of Life Improvements:
+-----------------------------
+1. Inventory Management
+   - Auto-sort inventory
+   - Quick stack to nearby chests
+   - Middle-click to quickly move items
+   - Smart item pickup
+
+2. Mining & Farming
+   - Vein mining (mine entire ore veins)
+   - Tree chopper (chop entire trees)
+   - Auto-replant crops
+   - Tool durability warnings
+
+3. Movement & Travel
+   - Waypoints system
+   - Death waypoint marker
+   - Better ladder/vine climbing
+   - Sprint toggle
+
+4. Interface Improvements
+   - More informative tooltips
+   - Item stats display
+   - Recipe book improvements
+   - Better coordinate display
+
+5. Multiplayer Features
+   - Better chat formatting
+   - Player list improvements
+   - Ping display
+
+6. Visual Improvements
+   - Dynamic lighting
+   - Better particles
+   - Custom HUD elements
+   - Equipment durability display
+
+
+================================================================================
+EXAMPLE MOD STRUCTURES STUDIED
+================================================================================
+
+1. TerraFirmaCraft (Satin)
+   - Complex mod with custom registries
+   - Uses event system extensively
+   - Custom rendering and shaders
+   - Data-driven recipes and worldgen
+
+2. Ladysnake/Satin
+   - Shader management library
+   - Good example of client-side code organization
+   - Shows proper use of mixins
+   - Excellent testing structure
+
+Key Takeaways:
+- Separate client and server code properly
+- Use Fabric API events instead of mixins when possible
+- Organize code into logical packages (items/, blocks/, mixin/, etc.)
+- Keep mixin config clean and documented
+- Use data generation for recipes and tags when possible
+
+
+================================================================================
+PACKAGE STRUCTURE RECOMMENDATIONS
+================================================================================
+
+Suggested package organization:
+com.qolmod/
+├── QOLMod.java                 - Main initializer
+├── QOLModClient.java           - Client initializer
+├── config/                     - Configuration classes
+├── item/                       - Custom items
+├── block/                      - Custom blocks
+├── event/                      - Event handlers
+├── network/                    - Networking code
+├── util/                       - Utility classes
+├── mixin/                      - Mixin classes
+└── client/                     - Client-only code
+    ├── render/                 - Rendering code
+    ├── gui/                    - GUI screens
+    └── keybind/                - Keybindings
+
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Define specific QOL features to implement
+2. Set up configuration system (Cloth Config recommended)
+3. Create basic items/blocks if needed
+4. Implement event handlers
+5. Add mixins only when necessary
+6. Test thoroughly in single player and multiplayer
+
+Remember: Start small, test often, and add features incrementally!
+
+
+================================================================================
+USEFUL RESOURCES
+================================================================================
+
+Official Documentation:
+- Fabric Wiki: https://fabricmc.net/wiki/
+- Fabric API Javadocs: https://maven.fabricmc.net/docs/fabric-api-*/
+- Yarn Mappings: https://fabricmc.net/develop/
+
+Community Resources:
+- Fabric Discord: https://discord.gg/v6v4pMv
+- /r/fabricmc subreddit
+- Example mods: https://github.com/FabricMC/fabric-example-mod
+
+Third-Party Libraries:
+- Cloth Config: Config GUI library
+- ModMenu: Mod list and config access
+- REI/EMI: Recipe viewing integration

@@ -1,0 +1,380 @@
+================================================================================
+  COMMON ISSUES AND SOLUTIONS - QOL MOD DEVELOPMENT
+  Quick Reference for Troubleshooting
+================================================================================
+
+This file supplements the existing FABRIC_MOD_TROUBLESHOOTING_GUIDE.txt with
+additional common issues specific to 1.21.1 and modern Fabric development.
+
+
+================================================================================
+MINECRAFT 1.21.1 SPECIFIC NOTES
+================================================================================
+
+Java Version: MUST be Java 21 or newer
+- Download from: https://adoptium.net/
+- Set JAVA_HOME environment variable
+- In IntelliJ: File → Project Structure → Project SDK
+
+Fabric Loader: 0.16.9+ required
+Fabric API: 0.110.0+ for 1.21.1
+
+Key Changes from 1.20.x:
+- Registry system changes
+- Component system for items (replaces some NBT)
+- Network protocol changes
+- Some event signatures changed
+
+
+================================================================================
+GRADLE BUILD ISSUES
+================================================================================
+
+Issue: "Could not find fabric-loom"
+Solution:
+- Check internet connection
+- Clear Gradle cache: .\gradlew.bat clean --refresh-dependencies
+- Delete .gradle folder in project root
+- Re-sync Gradle project
+
+Issue: "Unsupported class file major version 65"
+Solution:
+- You're using Java 21 code with older Java runtime
+- Update Java to version 21
+- Check gradle.properties has: org.gradle.jvmargs=-Xmx3G
+- In IntelliJ: File → Project Structure → SDK
+
+Issue: Build hangs at "Configuring loom"
+Solution:
+- Kill all Java processes
+- Delete build/ and .gradle/ folders
+- Run: .\gradlew.bat clean --no-daemon
+
+Issue: "Could not resolve dependencies"
+Solution:
+- Check fabricmc.net is accessible
+- Try with VPN if network issues
+- Use --refresh-dependencies flag
+- Check versions in gradle.properties are correct
+
+
+================================================================================
+IDE SETUP ISSUES (IntelliJ)
+================================================================================
+
+Issue: No run configurations appear
+Solution:
+1. Close IntelliJ
+2. Delete .idea folder
+3. Reopen project
+4. Let Gradle sync complete
+5. Run: .\gradlew.bat ideaSyncTask
+
+Issue: "Cannot find symbol" errors in IDE but builds fine
+Solution:
+- File → Invalidate Caches → Invalidate and Restart
+- Gradle tab → Reload All Gradle Projects
+- Run: .\gradlew.bat genSources
+
+Issue: Minecraft client/server configs missing
+Solution:
+- Check settings.gradle has correct plugin versions
+- Run: .\gradlew.bat ideaSyncTask
+- Manually create run config if needed:
+  - Main class: net.fabricmc.devlaunchinjector.Main
+  - VM options: -Dfabric.development=true
+  - Working directory: $PROJECT_DIR$/run
+
+Issue: Module compilation errors
+Solution:
+- Build → Rebuild Project
+- Check build.gradle has correct Java version (21)
+- Verify sourceCompatibility and targetCompatibility are set
+
+
+================================================================================
+RUNTIME ERRORS
+================================================================================
+
+Issue: "Failed to find Minecraft"
+Solution:
+- Run: .\gradlew.bat downloadAssets
+- Check internet connection during first launch
+- Clear loom cache: .\gradlew.bat cleanloom
+
+Issue: "Mixin transformation failed"
+Solution:
+- Check mixin JSON syntax is correct
+- Verify target class names are correct
+- Check compatibility level matches Java version (JAVA_21)
+- Enable mixin debug output in VM options:
+  -Dmixin.debug.export=true
+
+Issue: "ClassNotFoundException" for your mod class
+Solution:
+- Check fabric.mod.json entrypoints match your class names
+- Verify package names are correct
+- Make sure classes implement correct interfaces:
+  - Main: ModInitializer
+  - Client: ClientModInitializer
+
+Issue: Game crashes on startup with mod installed
+Solution:
+1. Check latest.log in run/ folder
+2. Common causes:
+   - Missing dependencies in fabric.mod.json
+   - Syntax error in JSON files
+   - Mixin target not found
+   - Invalid registry entries
+3. Remove mod to verify vanilla works
+4. Re-add features one at a time to isolate issue
+
+
+================================================================================
+COMMON CODING ERRORS
+================================================================================
+
+Issue: "Cannot access server-only class from client"
+Solution:
+- Split code properly between src/main and src/client
+- Use environment checks:
+  if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
+- Annotate with @Environment(EnvType.CLIENT) when appropriate
+
+Issue: "ConcurrentModificationException" during events
+Solution:
+- Don't modify collections while iterating
+- Use server.execute(() -> {}) to defer modifications
+- Create copy of collection before modifying
+
+Issue: "NullPointerException" in mixin
+Solution:
+- Add null checks
+- Use @Nullable annotation
+- Check if method is called in expected context
+- Verify target method exists in Minecraft version
+
+Issue: Registry entry not found
+Solution:
+- Verify Identifier is correct: Identifier.of("modid", "item_name")
+- Check registration happens in onInitialize
+- Don't register same thing twice
+- Make sure resource files exist (models, textures)
+
+
+================================================================================
+NETWORKING ISSUES
+================================================================================
+
+Issue: Packet not received
+Solution:
+- Check packet is registered on both sides
+- Verify Identifier matches exactly
+- Use server.execute() for server-side processing
+- Log packet sending/receiving for debugging
+
+Issue: "Payload may not be larger than 2097152 bytes"
+Solution:
+- Packet too large
+- Split into multiple packets
+- Compress data
+- Send less data per packet
+
+Issue: Desynch between client and server
+Solution:
+- Server is authority - always verify on server
+- Use packets to sync changes
+- Don't trust client data
+- Use server -> client packets for confirmation
+
+
+================================================================================
+RESOURCE LOADING ISSUES
+================================================================================
+
+Issue: Texture not found
+Solution:
+- Check path: assets/qol-mod/textures/item/my_item.png
+- Use lowercase and underscores (not spaces or capitals)
+- Verify .png file format
+- Check fabric.mod.json has correct mod ID
+
+Issue: Model not loading
+Solution:
+- JSON syntax must be perfect (no trailing commas)
+- Check parent model exists
+- Verify texture references are correct
+- Use minecraft:item/generated for simple items
+
+Issue: Recipe not working
+Solution:
+- Check recipe JSON syntax
+- Verify ingredient items exist
+- Make sure recipe is in correct folder: data/qol-mod/recipes/
+- Check recipe type is supported
+
+
+================================================================================
+MIXIN DEBUG TIPS
+================================================================================
+
+Enable Mixin Debug Output:
+Add to VM options (in run config):
+-Dmixin.debug.export=true
+-Dmixin.debug.verbose=true
+
+This exports:
+- Transformed classes to run/.mixin.out/
+- Detailed mixin application logs
+
+Check Mixin Applied:
+Look for in logs:
+[Mixin]: Successfully applied mixin...
+
+Common Mixin Errors:
+- "Target not found" - Class or method name wrong
+- "Injection point not found" - @At target wrong
+- "Critical injection failure" - Target method modified by another mod
+
+
+================================================================================
+TESTING CHECKLIST
+================================================================================
+
+Before Releasing:
+□ Test in single player
+□ Test in multiplayer (client + dedicated server)
+□ Test with only your mod + Fabric API
+□ Test with other popular mods
+□ Test performance (F3 to check FPS impact)
+□ Test all features work as expected
+□ Test config changes are saved and loaded
+□ Check for errors/warnings in logs
+□ Verify all resources load correctly
+□ Test on different operating systems if possible
+
+
+================================================================================
+PERFORMANCE DEBUGGING
+================================================================================
+
+Use the Profiler:
+- Press F3 + L to start profiling
+- Do actions that might be slow
+- Press F3 + L to stop
+- Check results in .minecraft/debug/
+
+Check Tick Time:
+- F3 debug screen shows tick time
+- Keep server tick time < 50ms
+- Optimize code in tick events
+
+Memory Leaks:
+- Use VisualVM or JProfiler
+- Look for growing collections
+- Check for unreleased event listeners
+- Monitor memory over time
+
+
+================================================================================
+QUICK FIXES
+================================================================================
+
+If Nothing Works:
+1. .\gradlew.bat clean
+2. Delete .gradle folder
+3. Delete build folder
+4. Delete run folder
+5. .\gradlew.bat build --refresh-dependencies
+6. Restart IDE
+7. Let Gradle sync completely
+8. Try again
+
+Still Not Working:
+- Check Fabric Discord for known issues
+- Search GitHub issues for similar problems
+- Ask for help with:
+  - Minecraft version
+  - Fabric Loader version
+  - Fabric API version
+  - Full error log
+  - What you've tried
+
+
+================================================================================
+USEFUL COMMANDS
+================================================================================
+
+Gradle:
+.\gradlew.bat clean          - Clean build files
+.\gradlew.bat build          - Build mod
+.\gradlew.bat runClient      - Run client
+.\gradlew.bat runServer      - Run server
+.\gradlew.bat genSources     - Generate MC sources
+.\gradlew.bat ideaSyncTask   - Sync IDE configs
+.\gradlew.bat --refresh-dependencies - Force refresh
+.\gradlew.bat --no-daemon    - Don't use daemon
+
+In-Game:
+F3 + T                       - Reload resources
+F3 + F4                      - Open game mode switcher
+F3 + N                       - Cycle game modes
+F3 + C (hold)                - Copy coordinates
+
+
+================================================================================
+LOG FILE LOCATIONS
+================================================================================
+
+Development:
+- run/logs/latest.log        - Latest run
+- run/logs/debug.log         - Debug output (if enabled)
+- run/crash-reports/         - Crash reports
+
+Production (.minecraft):
+- logs/latest.log
+- logs/debug.log
+- crash-reports/
+
+Check logs FIRST when debugging!
+
+
+================================================================================
+COMPATIBILITY NOTES
+================================================================================
+
+Mod Conflicts:
+- Optifine: May conflict with mixins and rendering
+- Sodium: Generally compatible, test thoroughly
+- Iris: Shader mod, may affect custom rendering
+- Other mixin-heavy mods: Potential conflicts
+
+Version Compatibility:
+- Fabric API is version-specific
+- Loader is usually backward compatible
+- Test each Minecraft version separately
+- Don't assume code works across versions
+
+
+================================================================================
+RESOURCES FOR HELP
+================================================================================
+
+Official:
+- Fabric Wiki: https://fabricmc.net/wiki/
+- Fabric GitHub: https://github.com/FabricMC
+- Fabric Discord: https://discord.gg/v6v4pMv
+
+Learning:
+- Fabric Example Mod: https://github.com/FabricMC/fabric-example-mod
+- Fabric API Source: https://github.com/FabricMC/fabric
+- YouTube tutorials (check date - use recent ones!)
+
+Community:
+- r/fabricmc subreddit
+- Minecraft Mod Development Discord servers
+- StackOverflow with [fabric-mod] tag
+
+
+Remember: Most errors are simple mistakes. Check logs, read errors carefully,
+and Google the error message. Someone has probably had the same issue!

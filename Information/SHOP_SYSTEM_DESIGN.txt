@@ -1,0 +1,456 @@
+================================================================================
+  QOL MOD - SHOP SYSTEM DESIGN DOCUMENT
+  Virtual Economy & Creative Shop
+================================================================================
+
+OVERVIEW
+--------
+A single-player economy system with virtual currency (no physical items) where
+players can buy ANY item (creative menu-style) and sell items for profit.
+Includes passive income based on playtime and activity-based earnings.
+
+================================================================================
+1. CORE FEATURES
+================================================================================
+
+A. VIRTUAL CURRENCY SYSTEM
+---------------------------
+- Currency Name: "Dollars" (configurable)
+- Storage: NBT data in player's persistent data
+- Display: Chat messages, action bar
+- No physical item representation
+- Persistent across sessions
+
+B. SHOP GUI INTERFACE
+----------------------
+- Command: /shop
+- Opens chest-style GUI (54 slots = 6 rows)
+- Tab System:
+  * BUY Tab - Browse and purchase items (creative menu)
+  * SELL Tab - Sell items from inventory
+  * BALANCE Tab - View stats and income history
+
+C. BUYING SYSTEM
+-----------------
+- Browse ALL Minecraft items (like creative menu)
+- Category filtering: Blocks, Items, Food, Tools, Combat, etc.
+- Search functionality
+- Shows item price
+- Click to buy (adds to inventory)
+- Bulk buying with shift-click
+
+D. SELLING SYSTEM
+------------------
+- Displays player's inventory items
+- Shows sell price for each item
+- Click to sell one item
+- Shift-click to sell entire stack
+- Confirmation for valuable items
+
+E. ITEM PRICING
+----------------
+- Base prices for all items (configurable)
+- Buy Price = Base Price × Buy Multiplier (default: 1.5x)
+- Sell Price = Base Price × Sell Multiplier (default: 0.5x)
+- Special pricing for:
+  * Renewable resources (crops, wood) - Lower buy, decent sell
+  * Rare items (diamonds, netherite) - High buy, good sell
+  * Creative-only items - Very high buy, no sell
+
+F. PASSIVE INCOME
+------------------
+- Time-based earnings while playing
+- Earn money every X minutes (configurable, default: 5 minutes)
+- Chat notification: "You earned $X for Y minutes of playtime!"
+- Amount increases slightly with total playtime (soft bonus)
+- Does NOT spam chat (max once per 5 minutes)
+
+G. ACTIVITY-BASED INCOME
+--------------------------
+- Farming: Break crops → earn money
+  * Wheat, Carrots, Potatoes, Beetroot: $1-2 per harvest
+  * Melons, Pumpkins: $3-5
+  * Sugarcane, Bamboo: $0.50-1
+  
+- Logging: Break logs → earn money
+  * Any log type: $2-3 per log
+  * Bonus for breaking naturally (not player-placed)
+  
+- Mining: Break ores → earn money
+  * Coal, Iron: $5-10
+  * Gold, Diamond: $20-50
+  * Ancient Debris: $100
+  
+- Fishing: Catch fish → earn money
+  * Common fish: $5-10
+  * Treasure: $50-100
+
+================================================================================
+2. TECHNICAL ARCHITECTURE
+================================================================================
+
+A. DATA STORAGE
+----------------
+File: ShopDataManager.java
+- Uses Minecraft's PersistentState system
+- Stores per-player data:
+  * Currency balance (long)
+  * Total playtime (long ticks)
+  * Last passive income time (long)
+  * Total items bought/sold (stats)
+  
+- Saved to: world/data/qol-shop-data.dat
+- Auto-saves every 5 minutes + on world save
+
+B. CURRENCY MANAGEMENT
+-----------------------
+File: CurrencyManager.java
+- Methods:
+  * getBalance(ServerPlayer) → long
+  * addMoney(ServerPlayer, long) → void
+  * removeMoney(ServerPlayer, long) → boolean
+  * canAfford(ServerPlayer, long) → boolean
+  * formatCurrency(long) → String ($1,234)
+  
+C. ITEM PRICING SYSTEM
+-----------------------
+File: ItemPricing.java
+- Map<Item, PriceData> registry
+- PriceData:
+  * baseBuyPrice (long)
+  * baseSellPrice (long)
+  * category (enum)
+  * renewable (boolean)
+  
+- Default pricing algorithm:
+  * Rarity-based (common/uncommon/rare/epic)
+  * Resource cost estimation
+  * Stack size consideration
+  
+- Load from config file: config/qol-mod-prices.json
+
+D. GUI LIBRARY: SGui (sgui)
+----------------------------
+- Maven: eu.pb4:sgui:2.0+
+- Lightweight server-side GUI
+- No client-side mod needed
+- Key classes:
+  * SimpleGui - Basic chest GUI
+  * GuiElementBuilder - Button creation
+  * ClickType - Click detection
+  
+Example Usage:
+    SimpleGui gui = new SimpleGui(MenuType.GENERIC_9x6, player, false);
+    gui.setTitle(Component.literal("Shop"));
+    gui.setSlot(0, new GuiElementBuilder(Items.DIAMOND)
+        .setName(Component.literal("Buy Diamond - $100"))
+        .setCallback((index, type, action) -> {
+            // Handle purchase
+        }));
+    gui.open();
+
+E. COMMAND SYSTEM
+------------------
+File: ShopCommand.java
+- Register in QOLMod.java
+- Commands:
+  * /shop - Opens shop GUI
+  * /shop balance - Shows current balance
+  * /shop buy <item> [amount] - Direct buy command
+  * /shop sell <item> [amount] - Direct sell command
+  * /balance - Alias for balance check
+  * /bal - Short alias
+
+F. EVENT LISTENERS
+-------------------
+File: ShopEventHandlers.java
+- ServerTickEvents.END_SERVER_TICK
+  * Track playtime for passive income
+  * Check for passive income triggers
+  
+- PlayerBlockBreakEvents.AFTER
+  * Detect farming (crop breaks)
+  * Detect logging (log breaks)
+  * Detect mining (ore breaks)
+  * Award money accordingly
+  
+- ServerPlayConnectionEvents.JOIN
+  * Initialize player shop data
+  * Show welcome message with balance
+
+================================================================================
+3. GUI DESIGN SPECIFICATIONS
+================================================================================
+
+MAIN SHOP GUI (6 rows, 54 slots)
+----------------------------------
+Row 1: Navigation & Info
+[0] = BUY tab (Green Glass Pane)
+[1] = SELL tab (Red Glass Pane)
+[2] = Balance display (Gold Ingot with balance in name)
+[3] = Empty
+[4] = Search (Name Tag - future feature)
+[5-8] = Empty
+
+Rows 2-5: Item Display Area (36 slots)
+[9-44] = Dynamic content based on tab
+
+Row 6: Navigation
+[45-53] = Category filters or pagination
+
+BUY TAB LAYOUT:
+----------------
+- Shows all buyable items
+- Categories as filters:
+  * Building Blocks
+  * Decorations
+  * Food
+  * Tools & Utilities
+  * Combat
+  * Redstone
+  * Transportation
+  * Miscellaneous
+  
+- Item display format:
+  Name: Item name
+  Lore Line 1: "Buy Price: $XXX"
+  Lore Line 2: "Click to buy 1"
+  Lore Line 3: "Shift+Click to buy 64"
+
+SELL TAB LAYOUT:
+-----------------
+- Shows player's inventory items
+- Only items with sell value > 0
+- Item display format:
+  Name: Item name
+  Lore Line 1: "Sell Price: $XXX each"
+  Lore Line 2: "You have: X items"
+  Lore Line 3: "Click to sell 1"
+  Lore Line 4: "Shift+Click to sell all"
+
+BALANCE TAB LAYOUT:
+--------------------
+- Shows statistics:
+  * Current Balance: $XXX
+  * Total Earned: $XXX
+  * Total Spent: $XXX
+  * Items Bought: XXX
+  * Items Sold: XXX
+  * Playtime Bonus Earned: $XXX
+  * Activity Bonus Earned: $XXX
+
+================================================================================
+4. CONFIGURATION FILE FORMAT
+================================================================================
+
+File: config/qol-mod-shop.json
+
+{
+  "currencyName": "Dollars",
+  "currencySymbol": "$",
+  "passiveIncome": {
+    "enabled": true,
+    "intervalMinutes": 5,
+    "baseAmount": 10,
+    "playtimeBonus": 0.01,
+    "maxAmount": 100,
+    "notification": true
+  },
+  "activityIncome": {
+    "enabled": true,
+    "farming": {
+      "enabled": true,
+      "cropMultiplier": 1.0
+    },
+    "logging": {
+      "enabled": true,
+      "logMultiplier": 1.0,
+      "naturalOnly": false
+    },
+    "mining": {
+      "enabled": true,
+      "oreMultiplier": 1.0
+    }
+  },
+  "shop": {
+    "buyMultiplier": 1.5,
+    "sellMultiplier": 0.5,
+    "enableSearch": true,
+    "enableCategories": true
+  }
+}
+
+================================================================================
+5. ITEM GIVING SOLUTION (FROM TROUBLESHOOTING)
+================================================================================
+
+PROBLEM: Difficulty giving items to players
+SOLUTION: Use correct method with proper error handling
+
+CORRECT CODE:
+--------------
+// Method 1: Simple inventory add
+ItemStack stack = new ItemStack(Items.DIAMOND, amount);
+boolean added = player.getInventory().add(stack);
+
+if (!added) {
+    // Inventory full - drop at player's feet
+    player.drop(stack, false);
+    player.sendSystemMessage(Component.literal("Inventory full! Items dropped."));
+}
+
+// Method 2: With slot checking
+if (player.getInventory().getFreeSlot() != -1) {
+    player.getInventory().add(stack);
+} else {
+    player.drop(stack, false);
+}
+
+// Method 3: Direct slot placement
+int slot = player.getInventory().getFreeSlot();
+if (slot != -1) {
+    player.getInventory().setItem(slot, stack);
+}
+
+IMPORTANT NOTES:
+----------------
+1. ALWAYS check if inventory has space
+2. Use player.drop() if inventory is full
+3. Notify player when items are dropped
+4. Update inventory after changes: player.inventoryMenu.broadcastChanges()
+
+================================================================================
+6. IMPLEMENTATION ORDER
+================================================================================
+
+Phase 1: Foundation (Day 1)
+----------------------------
+1. Add sgui dependency to build.gradle
+2. Create ShopDataManager for persistence
+3. Create CurrencyManager with basic methods
+4. Test data saving/loading
+
+Phase 2: Basic Shop (Day 1-2)
+------------------------------
+1. Create ShopCommand and register it
+2. Create basic ShopGUI class
+3. Implement BUY tab with hardcoded items
+4. Implement purchasing logic
+5. Test buying items
+
+Phase 3: Selling System (Day 2)
+--------------------------------
+1. Implement SELL tab
+2. Create ItemPricing system
+3. Add sell functionality
+4. Test selling items
+
+Phase 4: Full Item Catalog (Day 2-3)
+-------------------------------------
+1. Generate pricing for ALL items
+2. Add category filtering
+3. Add pagination for large lists
+4. Implement search (optional)
+
+Phase 5: Passive Income (Day 3)
+--------------------------------
+1. Create PassiveIncomeManager
+2. Hook into server tick event
+3. Implement time tracking
+4. Add chat notifications
+
+Phase 6: Activity Income (Day 3-4)
+-----------------------------------
+1. Hook into block break events
+2. Detect activity types (farming, logging, mining)
+3. Award money based on activity
+4. Add action bar notifications
+
+Phase 7: Polish & Config (Day 4-5)
+-----------------------------------
+1. Create config file system
+2. Add balance tab with stats
+3. Implement config reloading
+4. Add admin commands
+5. Balance pricing
+6. Add help messages
+
+Phase 8: Testing (Day 5+)
+--------------------------
+1. Test all features in survival
+2. Test edge cases (full inventory, etc.)
+3. Performance testing
+4. Bug fixes
+
+================================================================================
+7. KEY REFERENCES
+================================================================================
+
+ServerShop Mod (Reference):
+- Command-based shop system
+- /shop, /buy, /sell commands
+- Balance management
+- Auction system
+
+SGui Library (Primary GUI):
+- GitHub: https://github.com/Patbox/sgui
+- Maven: eu.pb4:sgui:2.0+
+- Documentation: README.md
+- Examples: SGuiTest.java
+
+Item Giving Solutions:
+- player.getInventory().add(ItemStack)
+- player.drop(ItemStack, boolean)
+- player.getInventory().setItem(slot, ItemStack)
+
+Event Registration:
+- ServerTickEvents.END_SERVER_TICK.register(...)
+- PlayerBlockBreakEvents.AFTER.register(...)
+- ServerPlayConnectionEvents.JOIN.register(...)
+
+NBT Data Persistence:
+- PersistentState system
+- CompoundTag for data storage
+- Save to world/data/ directory
+
+================================================================================
+8. ESTIMATED FEATURES & COMPLEXITY
+================================================================================
+
+COMPLEXITY RATINGS (1-5, 5 = most complex):
+
+✓ Virtual Currency Storage: 2/5
+✓ Basic Shop GUI: 2/5
+✓ Item Buying System: 2/5
+✓ Item Selling System: 3/5
+✓ Item Pricing Database: 3/5
+✓ Passive Income System: 2/5
+✓ Activity Detection (Farming): 3/5
+✓ Activity Detection (Logging): 3/5
+✓ Activity Detection (Mining): 3/5
+✓ Category Filtering: 4/5
+✓ Search System: 4/5
+✓ Configuration System: 3/5
+✓ Balance Statistics: 2/5
+✓ Admin Commands: 2/5
+
+TOTAL ESTIMATED TIME: 3-5 days of development
+
+================================================================================
+9. SUGGESTED IMPROVEMENTS (FOR LATER)
+================================================================================
+
+1. Dynamic Pricing - Prices change based on supply/demand
+2. Item Rarity System - Special items with enhanced effects
+3. Daily Quests - "Sell 64 wheat for bonus $100"
+4. Achievements - "Earn $10,000", "Buy 1000 items"
+5. Shop Upgrades - Unlock better prices with playtime
+6. Trading System - Trade with NPCs (even in singleplayer)
+7. Investment System - "Invest $1000, get $1200 in 10 hours"
+8. Item Bundles - "Starter Pack: Tools + Food for $500"
+9. Prestige System - Reset balance for permanent bonuses
+10. Custom Shop Items - Items with special NBT data
+
+================================================================================
+END OF DESIGN DOCUMENT
+================================================================================

@@ -1,0 +1,1048 @@
+================================================================================
+  FABRIC MOD DEVELOPMENT TROUBLESHOOTING GUIDE
+  Minecraft 1.21.11 - Complete Reference
+  Based on Real Development Experience with Voxel Scape
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+1. Initial Setup & Configuration
+2. Mapping Issues (Yarn vs Mojang)
+3. Build Errors & Solutions
+4. Import Problems
+5. NBT Data Persistence
+6. Command System
+7. Event Handling
+8. GUI Development with SGui
+9. Gradle Issues
+10. Testing & Debugging
+11. Git & Version Control
+12. Common Code Patterns
+13. Performance Optimization
+14. Online Resources
+
+
+================================================================================
+1. INITIAL SETUP & CONFIGURATION
+================================================================================
+
+MINECRAFT VERSION: 1.21.11
+--------------------------
+CRITICAL: Minecraft 1.21.11 is NOT the same as 1.21.1!
+- Always use 1.21.11 in all configuration files
+- Check Fabric API compatibility for 1.21.11 specifically
+- Verify Fabric Loader version supports 1.21.11
+
+REQUIRED FILES FOR FABRIC MOD:
+------------------------------
+1. build.gradle - Build configuration
+2. gradle.properties - Version definitions
+3. settings.gradle - Project settings
+4. fabric.mod.json - Mod metadata
+5. gradlew.bat - Gradle wrapper (Windows)
+6. gradle/wrapper/gradle-wrapper.properties
+
+CORRECT gradle.properties:
+-------------------------
+minecraft_version=1.21.11
+yarn_mappings=1.21.11+build.1
+loader_version=0.18.1+1.21.11
+fabric_version=0.140.0+1.21.11
+mod_version=1.0.0
+maven_group=com.yourmodid
+archives_base_name=yourmodid
+
+CORRECT build.gradle (KEY SECTIONS):
+------------------------------------
+plugins {
+    id 'fabric-loom' version '1.13.6'
+    id 'maven-publish'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.officialMojangMappings()  // <-- CRITICAL LINE
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+WHY MOJANG MAPPINGS?
+-------------------
+- More stable than Yarn for 1.21.11
+- Better compatibility with Minecraft's official code
+- Fewer breaking changes between updates
+- Standard class names that match documentation
+
+
+================================================================================
+2. MAPPING ISSUES (YARN VS MOJANG)
+================================================================================
+
+PROBLEM: Build fails with "cannot find symbol" errors
+------------------------------------------------------
+SYMPTOM: Classes like ServerPlayer, Component, CompoundTag not found
+
+ROOT CAUSE: Wrong mapping system (Yarn vs Mojang)
+
+SOLUTION: Use Mojang Official Mappings
+---------------------------------------
+In build.gradle, line 13:
+    mappings loom.officialMojangMappings()
+
+NOT this:
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+
+AFTER CHANGING MAPPINGS:
+------------------------
+1. Delete the .gradle folder in project root
+2. Run: .\gradlew.bat clean build --no-daemon
+3. Wait for Gradle to re-download dependencies
+4. Refresh IDE (File → Invalidate Caches if needed)
+
+CORRECT IMPORTS WITH MOJANG MAPPINGS:
+-------------------------------------
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.MinecraftServer;
+
+COMMON MAPPING DIFFERENCES:
+---------------------------
+Yarn Name              →  Mojang Name
+-----------------         ------------------
+PlayerEntity          →  Player / ServerPlayer
+Text                  →  Component
+NbtCompound           →  CompoundTag
+CommandContext        →  CommandSourceStack
+ItemStacks            →  ItemStack
+
+
+================================================================================
+3. BUILD ERRORS & SOLUTIONS
+================================================================================
+
+ERROR: "Task :compileJava FAILED"
+----------------------------------
+CAUSE 1: Syntax errors in Java code
+SOLUTION: Check latest.log for specific line numbers
+          Fix compilation errors before building
+
+CAUSE 2: Missing imports
+SOLUTION: Add proper import statements
+          Use IDE auto-import (Alt+Enter in IntelliJ)
+
+CAUSE 3: Wrong method signatures
+SOLUTION: Check Minecraft/Fabric API documentation
+          Verify method names match Mojang mappings
+
+ERROR: "java.lang.NoClassDefFoundError"
+---------------------------------------
+CAUSE: Missing dependency or wrong Fabric API version
+SOLUTION: 
+1. Check Fabric API version matches Minecraft version
+2. Verify fabric.mod.json has correct dependencies
+3. Ensure Fabric API is in mods folder when testing
+
+ERROR: "Gradle daemon disappeared unexpectedly"
+-----------------------------------------------
+CAUSE: Insufficient memory or corrupted Gradle cache
+SOLUTION:
+1. Add to gradle.properties:
+   org.gradle.jvmargs=-Xmx3G -XX:MaxMetaspaceSize=512m
+2. Or use: .\gradlew.bat build --no-daemon
+3. Delete .gradle folder and rebuild
+
+ERROR: "Could not resolve all files for configuration"
+-------------------------------------------------------
+CAUSE: Network issues or wrong repository URLs
+SOLUTION:
+1. Check internet connection
+2. Try: .\gradlew.bat build --refresh-dependencies
+3. Verify repositories in build.gradle:
+   repositories {
+       mavenCentral()
+       maven { url 'https://maven.fabricmc.net/' }
+   }
+
+BUILD COMMAND BEST PRACTICES:
+-----------------------------
+Standard build:
+    .\gradlew.bat build --no-daemon
+
+Clean build (if issues):
+    .\gradlew.bat clean build --no-daemon
+
+Faster build (skip tests):
+    .\gradlew.bat build --no-daemon -x test
+
+Force refresh dependencies:
+    .\gradlew.bat build --refresh-dependencies
+
+
+================================================================================
+4. IMPORT PROBLEMS
+================================================================================
+
+PROBLEM: "Cannot resolve symbol" in IDE
+----------------------------------------
+SOLUTION 1: Refresh Gradle project
+    - Right-click build.gradle → Reload Gradle Project
+    - Or: Gradle panel → Reload All Gradle Projects
+
+SOLUTION 2: Generate sources
+    .\gradlew.bat genSources
+
+SOLUTION 3: Reimport project
+    - Close project
+    - Delete .idea folder (IntelliJ) or .vscode folder (VS Code)
+    - Reopen and reimport
+
+PROBLEM: IDE shows errors but Gradle builds successfully
+---------------------------------------------------------
+SOLUTION: IDE cache issue
+    - IntelliJ: File → Invalidate Caches → Restart
+    - VS Code: Reload Window (Ctrl+Shift+P → Reload Window)
+    - Eclipse: Project → Clean
+
+COMMON MISSING IMPORTS:
+-----------------------
+For Commands:
+    import net.minecraft.commands.CommandSourceStack;
+    import net.minecraft.commands.Commands;
+    import com.mojang.brigadier.Command;
+    import com.mojang.brigadier.context.CommandContext;
+
+For NBT:
+    import net.minecraft.nbt.CompoundTag;
+    import net.minecraft.nbt.Tag;
+    import net.minecraft.nbt.ListTag;
+
+For Events:
+    import net.fabricmc.fabric.api.event.lifecycle.v1.*;
+    import net.fabricmc.fabric.api.networking.v1.*;
+
+For GUI (with SGui):
+    import eu.pb4.sgui.api.gui.SimpleGui;
+    import eu.pb4.sgui.api.elements.GuiElementBuilder;
+
+
+================================================================================
+5. NBT DATA PERSISTENCE
+================================================================================
+
+PROBLEM: Player data not saving between sessions
+-------------------------------------------------
+CAUSE: NBT data not being written or read correctly
+
+SOLUTION: Use proper NBT methods
+--------------------------------
+SAVING DATA:
+    public CompoundTag toNbt() {
+        CompoundTag nbt = new CompoundTag();
+        nbt.putInt("questPoints", questPoints);
+        nbt.putIntArray("completedQuests", completedQuests.stream()
+            .mapToInt(Integer::intValue).toArray());
+        
+        // For lists:
+        ListTag listTag = new ListTag();
+        for (int id : myList) {
+            CompoundTag tag = new CompoundTag();
+            tag.putInt("id", id);
+            listTag.add(tag);
+        }
+        nbt.put("myList", listTag);
+        return nbt;
+    }
+
+LOADING DATA:
+    public static PlayerData fromNbt(CompoundTag nbt) {
+        PlayerData data = new PlayerData();
+        data.questPoints = nbt.getInt("questPoints");
+        
+        // Load int array:
+        int[] array = nbt.getIntArray("completedQuests");
+        data.completedQuests = Arrays.stream(array)
+            .boxed()
+            .collect(Collectors.toSet());
+        
+        // Load list:
+        ListTag listTag = nbt.getList("myList", Tag.TAG_COMPOUND);
+        for (int i = 0; i < listTag.size(); i++) {
+            CompoundTag tag = listTag.getCompound(i);
+            data.myList.add(tag.getInt("id"));
+        }
+        return data;
+    }
+
+PROBLEM: Data lost on server restart
+-------------------------------------
+SOLUTION: Use Fabric's persistent state
+    - Extend PersistentState class
+    - Or use player's persistent NBT data
+    - Save on PlayerSaveEvent
+    - Load on PlayerJoinEvent
+
+NBT DATA TYPES:
+---------------
+putBoolean / getBoolean
+putByte / getByte
+putShort / getShort
+putInt / getInt
+putLong / getLong
+putFloat / getFloat
+putDouble / getDouble
+putString / getString
+putIntArray / getIntArray
+putLongArray / getLongArray
+put / get (for compound tags)
+
+BEST PRACTICES:
+---------------
+1. Always check if key exists before reading:
+   if (nbt.contains("key")) {
+       value = nbt.getInt("key");
+   }
+
+2. Use Optional for safety:
+   Optional.ofNullable(nbt.contains("key") ? nbt.getInt("key") : null)
+
+3. Validate data after loading:
+   if (questPoints < 0) questPoints = 0;
+
+4. Version your NBT format:
+   nbt.putInt("dataVersion", 1);
+
+
+================================================================================
+6. COMMAND SYSTEM
+================================================================================
+
+PROBLEM: Commands not registering
+----------------------------------
+CAUSE: Not registered in mod initializer
+
+SOLUTION: Register in onInitialize()
+-------------------------------------
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+
+@Override
+public void onInitialize() {
+    CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+        YourCommand.register(dispatcher);
+    });
+}
+
+COMMAND STRUCTURE:
+------------------
+public class YourCommand {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("yourcommand")
+            .requires(source -> source.hasPermission(0)) // Permission level
+            .executes(context -> {
+                ServerPlayer player = context.getSource().getPlayerOrException();
+                // Command logic here
+                return Command.SINGLE_SUCCESS;
+            }));
+    }
+}
+
+COMMAND WITH ARGUMENTS:
+-----------------------
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+
+dispatcher.register(Commands.literal("quest")
+    .then(Commands.argument("id", IntegerArgumentType.integer())
+        .executes(context -> {
+            int id = IntegerArgumentType.getInteger(context, "id");
+            // Use id
+            return Command.SINGLE_SUCCESS;
+        })));
+
+SENDING MESSAGES TO PLAYERS:
+-----------------------------
+player.sendSystemMessage(Component.literal("Hello!"));
+player.sendSystemMessage(Component.literal("§aGreen text!"));
+player.sendSystemMessage(Component.literal("§cRed text!"));
+
+COLOR CODES:
+------------
+§0 - Black       §8 - Dark Gray
+§1 - Dark Blue   §9 - Blue
+§2 - Dark Green  §a - Green
+§3 - Dark Aqua   §b - Aqua
+§4 - Dark Red    §c - Red
+§5 - Purple      §d - Light Purple
+§6 - Gold        §e - Yellow
+§7 - Gray        §f - White
+§l - Bold        §o - Italic
+§n - Underline   §r - Reset
+
+
+================================================================================
+7. EVENT HANDLING
+================================================================================
+
+COMMON EVENTS:
+--------------
+1. Player Join:
+   ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+       ServerPlayer player = handler.getPlayer();
+       // Handle join
+   });
+
+2. Server Tick:
+   ServerTickEvents.END_SERVER_TICK.register(server -> {
+       // Runs every tick
+   });
+
+3. Block Break:
+   PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
+       // Handle block break
+   });
+
+4. Item Pickup:
+   ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+       // Handle respawn
+   });
+
+5. Entity Death:
+   ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, damageAmount) -> {
+       // Handle death
+       return true; // Allow death
+   });
+
+PROBLEM: Event not firing
+--------------------------
+SOLUTION 1: Check if event is registered
+    - Events must be registered in onInitialize()
+    - Verify correct event type (Server vs Client)
+
+SOLUTION 2: Check conditions
+    - Is the player on server side? (!world.isClientSide)
+    - Does the event have the right parameters?
+
+SOLUTION 3: Check for conflicts
+    - Other mods might be canceling the event
+    - Test with only your mod loaded
+
+CUSTOM EVENTS:
+--------------
+Create callback interface:
+    public interface QuestCompleteCallback {
+        void onQuestComplete(ServerPlayer player, int questId);
+    }
+
+Register custom event:
+    Event<QuestCompleteCallback> QUEST_COMPLETE = 
+        EventFactory.createArrayBacked(QuestCompleteCallback.class,
+            callbacks -> (player, questId) -> {
+                for (QuestCompleteCallback callback : callbacks) {
+                    callback.onQuestComplete(player, questId);
+                }
+            });
+
+
+================================================================================
+8. GUI DEVELOPMENT WITH SGUI
+================================================================================
+
+ADDING SGUI DEPENDENCY:
+-----------------------
+In build.gradle:
+    repositories {
+        maven { url 'https://maven.nucleoid.xyz' }
+    }
+    
+    dependencies {
+        modImplementation include("eu.pb4:sgui:1.12.0+1.21.11")
+    }
+
+BASIC GUI CREATION:
+-------------------
+import eu.pb4.sgui.api.gui.SimpleGui;
+import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import net.minecraft.world.inventory.MenuType;
+
+public class MyGui extends SimpleGui {
+    public MyGui(ServerPlayer player) {
+        super(MenuType.GENERIC_9x6, player, false); // 6 rows (54 slots)
+        this.setTitle(Component.literal("My GUI"));
+        build();
+    }
+    
+    private void build() {
+        // Add items
+        this.setSlot(0, new GuiElementBuilder(Items.DIAMOND)
+            .setName(Component.literal("§bDiamond"))
+            .addLoreLine(Component.literal("§7Click me!"))
+            .setCallback((index, type, action) -> {
+                this.close();
+                player.sendSystemMessage(Component.literal("Clicked!"));
+            }));
+    }
+}
+
+OPENING THE GUI:
+----------------
+gui.open();
+
+GUI SIZES:
+----------
+MenuType.GENERIC_9x1 - 9 slots (1 row)
+MenuType.GENERIC_9x2 - 18 slots (2 rows)
+MenuType.GENERIC_9x3 - 27 slots (3 rows)
+MenuType.GENERIC_9x4 - 36 slots (4 rows)
+MenuType.GENERIC_9x5 - 45 slots (5 rows)
+MenuType.GENERIC_9x6 - 54 slots (6 rows)
+
+PAGINATION:
+-----------
+private int currentPage = 0;
+private static final int ITEMS_PER_PAGE = 45;
+
+private void buildPage() {
+    this.clearSlots(); // Clear previous page
+    
+    int start = currentPage * ITEMS_PER_PAGE;
+    int end = Math.min(start + ITEMS_PER_PAGE, totalItems);
+    
+    // Add items for current page
+    for (int i = start; i < end; i++) {
+        // Add item at slot (i - start)
+    }
+    
+    // Previous page button (slot 45)
+    if (currentPage > 0) {
+        this.setSlot(45, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§ePrevious Page"))
+            .setCallback((index, type, action) -> {
+                currentPage--;
+                buildPage();
+            }));
+    }
+    
+    // Next page button (slot 53)
+    if (end < totalItems) {
+        this.setSlot(53, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§eNext Page"))
+            .setCallback((index, type, action) -> {
+                currentPage++;
+                buildPage();
+            }));
+    }
+}
+
+PROBLEM: GUI items not clickable
+---------------------------------
+SOLUTION: Ensure callback is set
+    .setCallback((index, type, action) -> { /* logic */ })
+
+PROBLEM: GUI closes immediately
+--------------------------------
+SOLUTION: Don't call this.close() in constructor
+          Call it only when intended
+
+
+================================================================================
+9. GRADLE ISSUES
+================================================================================
+
+PROBLEM: "Deprecated Gradle features were used"
+------------------------------------------------
+IGNORE: This is a warning, not an error
+SOLUTION: Mod will still work fine
+          Update Gradle version if desired
+
+PROBLEM: Build takes too long
+------------------------------
+SOLUTION 1: Use --no-daemon flag
+    .\gradlew.bat build --no-daemon
+
+SOLUTION 2: Increase memory
+    Add to gradle.properties:
+    org.gradle.jvmargs=-Xmx4G
+
+SOLUTION 3: Enable parallel builds
+    Add to gradle.properties:
+    org.gradle.parallel=true
+
+PROBLEM: "Connection timed out" during build
+---------------------------------------------
+SOLUTION: Network issue with Maven repositories
+    - Check internet connection
+    - Try again later
+    - Use VPN if blocked
+    - Add timeout to build.gradle:
+      tasks.withType(JavaCompile) {
+          options.compilerArgs << "-Xlint:unchecked"
+      }
+
+PROBLEM: Outdated Gradle wrapper
+---------------------------------
+SOLUTION: Update wrapper
+    .\gradlew.bat wrapper --gradle-version 8.10.2
+
+CLEANING GRADLE CACHE:
+----------------------
+Delete these folders:
+    - .gradle (in project root)
+    - build (in project root)
+    - C:\Users\[username]\.gradle\caches (global cache)
+
+Then rebuild:
+    .\gradlew.bat clean build --no-daemon
+
+
+================================================================================
+10. TESTING & DEBUGGING
+================================================================================
+
+RUNNING IN DEVELOPMENT:
+-----------------------
+Method 1: Gradle task
+    .\gradlew.bat runClient
+    .\gradlew.bat runServer
+
+Method 2: IDE configuration
+    - Create Run Configuration
+    - Main class: net.fabricmc.loader.impl.launch.knot.KnotClient
+    - VM options: -Dfabric.development=true
+
+TESTING THE MOD:
+----------------
+1. Build the mod:
+   .\gradlew.bat build
+
+2. Find JAR in:
+   build\libs\yourmod-1.0.0.jar
+
+3. Copy to Minecraft mods folder:
+   %appdata%\.minecraft\mods\
+
+4. Launch Minecraft with Fabric loader
+
+LOGGING FOR DEBUGGING:
+----------------------
+Add to your main class:
+    private static final Logger LOGGER = LoggerFactory.getLogger("yourmodid");
+
+Use in code:
+    LOGGER.info("This is an info message");
+    LOGGER.warn("This is a warning");
+    LOGGER.error("This is an error");
+    LOGGER.debug("Debug message: {}", variable);
+
+Check logs in:
+    .minecraft\logs\latest.log
+
+COMMON DEBUGGING TECHNIQUES:
+----------------------------
+1. Log everything:
+   LOGGER.info("Method called with parameter: {}", param);
+
+2. Check player side:
+   if (player.level().isClientSide) {
+       LOGGER.info("Client side");
+   } else {
+       LOGGER.info("Server side");
+   }
+
+3. Validate data:
+   if (data == null) {
+       LOGGER.error("Data is null!");
+       return;
+   }
+
+4. Use try-catch:
+   try {
+       // Risky code
+   } catch (Exception e) {
+       LOGGER.error("Error occurred: ", e);
+   }
+
+PROBLEM: Mod doesn't load
+-------------------------
+CHECK 1: fabric.mod.json is correct
+CHECK 2: Mod ID matches in all files
+CHECK 3: Fabric API is installed
+CHECK 4: Minecraft version matches
+CHECK 5: Check latest.log for errors
+
+PROBLEM: Changes not appearing in game
+---------------------------------------
+SOLUTION:
+1. Rebuild mod (.\gradlew.bat build)
+2. Copy new JAR to mods folder
+3. Restart Minecraft completely
+4. Verify you're testing the right world
+
+
+================================================================================
+11. GIT & VERSION CONTROL
+================================================================================
+
+INITIAL GIT SETUP:
+------------------
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/username/repo.git
+git push -u origin main
+
+.gitignore FOR FABRIC MODS:
+---------------------------
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# Minecraft
+run/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Other
+*.log
+*.jar
+
+VERSIONING STRATEGY:
+--------------------
+Use Semantic Versioning (MAJOR.MINOR.PATCH)
+- MAJOR: Breaking changes
+- MINOR: New features (backwards compatible)
+- PATCH: Bug fixes
+
+Example:
+v1.0.0 - Initial release
+v1.1.0 - Added new perks
+v1.1.1 - Fixed perk bug
+v1.2.0 - Added daily quests
+v2.0.0 - Complete rewrite
+
+CREATING RELEASES:
+------------------
+1. Update version in gradle.properties
+2. Update CHANGELOG.md
+3. Build the mod
+4. Commit changes:
+   git add -A
+   git commit -m "v1.2.0 - Description"
+   git tag v1.2.0
+   git push origin main --tags
+
+5. Create GitHub release:
+   gh release create v1.2.0 "build\libs\yourmod-1.2.0.jar" --title "v1.2.0" --notes "Release notes"
+
+
+================================================================================
+12. COMMON CODE PATTERNS
+================================================================================
+
+SINGLETON PATTERN FOR DATA MANAGER:
+------------------------------------
+public class DataManager {
+    private static final Map<UUID, PlayerData> DATA = new HashMap<>();
+    
+    public static PlayerData getData(ServerPlayer player) {
+        return DATA.computeIfAbsent(player.getUUID(), 
+            uuid -> new PlayerData(player));
+    }
+    
+    public static void saveData(ServerPlayer player) {
+        PlayerData data = DATA.get(player.getUUID());
+        if (data != null) {
+            // Save to NBT
+        }
+    }
+}
+
+CHECKING ITEM IN INVENTORY:
+----------------------------
+public boolean hasItem(ServerPlayer player, Item item, int count) {
+    int found = 0;
+    for (ItemStack stack : player.getInventory().items) {
+        if (stack.is(item)) {
+            found += stack.getCount();
+            if (found >= count) return true;
+        }
+    }
+    return false;
+}
+
+GIVING ITEMS TO PLAYER:
+-----------------------
+public void giveItem(ServerPlayer player, ItemStack stack) {
+    if (!player.getInventory().add(stack)) {
+        // Inventory full, drop at feet
+        player.drop(stack, false);
+    }
+}
+
+TELEPORTING PLAYER:
+-------------------
+player.teleportTo(x, y, z);
+player.setDeltaMovement(0, 0, 0); // Reset velocity
+player.fallDistance = 0; // Prevent fall damage
+
+APPLYING POTION EFFECTS:
+-------------------------
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+
+player.addEffect(new MobEffectInstance(
+    MobEffects.NIGHT_VISION,  // Effect type
+    Integer.MAX_VALUE,         // Duration (infinite)
+    0,                         // Amplifier (0 = level 1)
+    false,                     // Ambient
+    false                      // Show particles
+));
+
+REMOVING EFFECTS:
+-----------------
+player.removeEffect(MobEffects.NIGHT_VISION);
+
+PLAYING SOUNDS:
+---------------
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+
+player.level().playSound(null, player.blockPosition(), 
+    SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 1.0f);
+
+SPAWNING PARTICLES:
+-------------------
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+
+if (player.level() instanceof ServerLevel serverLevel) {
+    serverLevel.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+        player.getX(), player.getY() + 1, player.getZ(),
+        10, 0.5, 0.5, 0.5, 0.1);
+}
+
+
+================================================================================
+13. PERFORMANCE OPTIMIZATION
+================================================================================
+
+AVOID EXPENSIVE OPERATIONS IN TICK EVENTS:
+-------------------------------------------
+BAD:
+    ServerTickEvents.END_SERVER_TICK.register(server -> {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            // Heavy computation every tick
+        }
+    });
+
+GOOD:
+    private int tickCounter = 0;
+    ServerTickEvents.END_SERVER_TICK.register(server -> {
+        tickCounter++;
+        if (tickCounter >= 20) { // Once per second
+            tickCounter = 0;
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                // Computation
+            }
+        }
+    });
+
+USE CACHING:
+------------
+private static final Map<UUID, Long> COOLDOWNS = new HashMap<>();
+
+public boolean isOnCooldown(UUID uuid) {
+    long lastUse = COOLDOWNS.getOrDefault(uuid, 0L);
+    return System.currentTimeMillis() - lastUse < 60000; // 1 minute
+}
+
+LAZY LOADING:
+-------------
+private List<Quest> quests;
+
+public List<Quest> getQuests() {
+    if (quests == null) {
+        quests = loadQuests();
+    }
+    return quests;
+}
+
+BATCH OPERATIONS:
+-----------------
+Instead of multiple NBT writes:
+    nbt.putInt("value1", v1);
+    nbt.putInt("value2", v2);
+    // ... many more
+
+Consider grouping:
+    CompoundTag values = new CompoundTag();
+    values.putInt("value1", v1);
+    values.putInt("value2", v2);
+    nbt.put("values", values);
+
+
+================================================================================
+14. ONLINE RESOURCES
+================================================================================
+
+OFFICIAL DOCUMENTATION:
+-----------------------
+Fabric Wiki:
+    https://fabricmc.net/wiki/
+
+Fabric API Documentation:
+    https://maven.fabricmc.net/docs/fabric-api-latest/
+
+Mojang Mappings Reference:
+    https://maven.parchmentmc.org/
+
+COMMUNITY RESOURCES:
+--------------------
+Fabric Discord:
+    https://discord.gg/v6v4pMv
+
+Minecraft Forge/Fabric Reddit:
+    https://reddit.com/r/fabricmc
+
+Stack Overflow:
+    Tag: [minecraft-forge] [fabric-mod]
+
+TUTORIAL WEBSITES:
+------------------
+Fabric Modding Tutorials:
+    https://fabricmc.net/wiki/tutorial:introduction
+
+ModdingByKaupenjoe (YouTube):
+    Comprehensive Fabric tutorials for 1.21+
+
+USEFUL GITHUB REPOSITORIES:
+----------------------------
+Fabric Example Mods:
+    https://github.com/FabricMC/fabric-example-mod
+
+SGui Library:
+    https://github.com/Patbox/sgui
+
+Reference Mods (Learn from others):
+    Search GitHub for "fabric 1.21 mod"
+
+WHEN TO LOOK ONLINE:
+--------------------
+1. Unknown error messages - Google the exact error
+2. API changes - Check Fabric wiki for updates
+3. New features - Look for examples on GitHub
+4. Performance issues - Search for best practices
+5. Compatibility - Check mod compatibility lists
+
+SEARCHING TIPS:
+---------------
+- Include version: "fabric 1.21.11 [your issue]"
+- Use quotes for exact matches: "Cannot find symbol ServerPlayer"
+- Check date of posts (Minecraft versions change fast)
+- Look at GitHub issues in Fabric API repository
+- Check other mods' source code for patterns
+
+
+================================================================================
+TROUBLESHOOTING CHECKLIST
+================================================================================
+
+BEFORE ASKING FOR HELP:
+------------------------
+[ ] Read the error message completely
+[ ] Check latest.log file
+[ ] Google the exact error message
+[ ] Verify all versions match (MC, Fabric Loader, Fabric API)
+[ ] Try clean build (gradlew clean build)
+[ ] Check if issue persists with only your mod
+[ ] Review recent code changes
+[ ] Check if mappings are correct (Mojang vs Yarn)
+[ ] Verify fabric.mod.json is valid JSON
+[ ] Test in a clean Minecraft instance
+
+WHEN REPORTING ISSUES:
+----------------------
+Include:
+1. Minecraft version
+2. Fabric Loader version
+3. Fabric API version
+4. Full error log (use pastebin/gist)
+5. Steps to reproduce
+6. What you've tried already
+7. Relevant code snippets
+
+DO NOT:
+- Just say "it doesn't work"
+- Screenshot code instead of pasting text
+- Paste huge logs directly in chat
+- Skip version information
+- Assume others know your setup
+
+
+================================================================================
+FINAL NOTES
+================================================================================
+
+LESSONS LEARNED FROM VOXEL SCAPE DEVELOPMENT:
+----------------------------------------------
+1. Always use Mojang mappings for 1.21.11
+2. Build incrementally - test after each feature
+3. Log everything during development
+4. Save player data on multiple events (join, quit, tick)
+5. Validate all data after loading from NBT
+6. Use --no-daemon flag if Gradle is slow
+7. Keep backups before major changes
+8. Test with other mods to check compatibility
+9. Document your code (future you will thank you)
+10. Version control is your friend - commit often
+
+COMMON MISTAKES TO AVOID:
+-------------------------
+- Forgetting to register commands/events
+- Not checking if player is on server side
+- Infinite loops in tick events
+- Not handling null values
+- Assuming data exists (always validate)
+- Hard-coding values (use constants/config)
+- Not testing edge cases
+- Forgetting to update version numbers
+
+REMEMBER:
+---------
+- Modding has a learning curve - be patient
+- Errors are learning opportunities
+- The Fabric community is helpful - LOOK ONLINE FOR HELP!!!
+- Read other mods' code to learn patterns
+- Keep documentation updated
+- Test thoroughly before releasing
+- Back up your work regularly
+- Have fun creating!
+
+
+================================================================================
+This guide is based on real experience developing Voxel Scape from v1.0 to v1.4.0
+Last Updated: January 5, 2026
+Author: Uipg9 Lessons learned from hands-on Fabric mod development
+================================================================================
