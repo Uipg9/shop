@@ -126,6 +126,11 @@ public class BlockEarningsHandler {
                     BlockState state = level.getBlockState(checkPos);
                     Block block = state.getBlock();
                     
+                    // Skip leaves, flowers, and other non-valuable blocks
+                    if (isExcludedBlock(block)) {
+                        continue;
+                    }
+                    
                     long value = getBlockValue(block);
                     if (value > 0 || getBlockXP(block) > 0) {
                         current.put(checkPos, block);
@@ -327,5 +332,30 @@ public class BlockEarningsHandler {
         if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.LOGS)) return 1;
         
         return 0;
+    }
+    
+    /**
+     * Check if a block should be excluded from scanning/rewards
+     * Excludes leaves, flowers, grass, and other decorative blocks
+     */
+    private static boolean isExcludedBlock(Block block) {
+        // Exclude all leaves
+        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.LEAVES)) return true;
+        
+        // Exclude flowers and plants
+        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.FLOWERS)) return true;
+        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.SAPLINGS)) return true;
+        
+        // Exclude grass, ferns, etc.
+        if (block == Blocks.SHORT_GRASS || block == Blocks.TALL_GRASS) return true;
+        if (block == Blocks.FERN || block == Blocks.LARGE_FERN) return true;
+        if (block == Blocks.DEAD_BUSH) return true;
+        if (block == Blocks.VINE || block == Blocks.GLOW_LICHEN) return true;
+        
+        // Exclude air and water
+        if (block == Blocks.AIR || block == Blocks.CAVE_AIR || block == Blocks.VOID_AIR) return true;
+        if (block == Blocks.WATER || block == Blocks.LAVA) return true;
+        
+        return false;
     }
 }
