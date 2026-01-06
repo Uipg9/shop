@@ -1,0 +1,212 @@
+# GitHub Release Automation Guide
+
+This document explains how to create GitHub releases with JAR files for the Shop Mod.
+
+## Creating Your First Release
+
+### Step 1: Create GitHub Repository
+1. Go to https://github.com/new
+2. Repository name: `shop`
+3. Description: "Virtual economy and shop system for Minecraft 1.21.11"
+4. Make it Public
+5. DO NOT initialize with README (we already have one)
+6. Click "Create repository"
+
+### Step 2: Push Your Code
+```bash
+cd "C:\Users\baesp\Desktop\iujhwerfoiuwhb iouwb\QOL"
+& "C:\Program Files\Git\cmd\git.exe" remote add origin https://github.com/Uipg9/shop.git
+& "C:\Program Files\Git\cmd\git.exe" branch -M main
+& "C:\Program Files\Git\cmd\git.exe" push -u origin main
+```
+
+### Step 3: Build the JAR
+```bash
+cd "C:\Users\baesp\Desktop\iujhwerfoiuwhb iouwb\QOL"
+cmd /c "gradlew.bat clean build"
+```
+
+The JAR will be in: `build/libs/shop-1.0.0.jar`
+
+### Step 4: Create GitHub Release
+1. Go to https://github.com/Uipg9/shop/releases
+2. Click "Create a new release"
+3. Tag version: `v1.0.0` (must start with 'v')
+4. Release title: `Shop Mod v1.0.0 - Initial Release`
+5. Description: Copy from CHANGELOG.md
+6. Attach file: Upload `build/libs/shop-1.0.0.jar`
+7. Click "Publish release"
+
+## Release Workflow for Future Updates
+
+### 1. Make Your Changes
+- Edit code
+- Test thoroughly
+
+### 2. Update Version Numbers
+Edit `gradle.properties`:
+```properties
+mod_version=1.1.0
+```
+
+### 3. Update CHANGELOG.md
+Add new section at top:
+```markdown
+## [1.1.0] - 2026-01-XX
+
+### Added
+- New feature X
+- New feature Y
+
+### Changed
+- Improved Z
+
+### Fixed
+- Bug fix A
+```
+
+### 4. Commit Changes
+```bash
+& "C:\Program Files\Git\cmd\git.exe" add .
+& "C:\Program Files\Git\cmd\git.exe" commit -m "v1.1.0: Add shop GUI and currency system"
+& "C:\Program Files\Git\cmd\git.exe" push
+```
+
+### 5. Build New JAR
+```bash
+cmd /c "gradlew.bat clean build"
+```
+
+### 6. Create GitHub Release
+1. Go to https://github.com/Uipg9/shop/releases/new
+2. Tag: `v1.1.0`
+3. Title: `Shop Mod v1.1.0 - Shop GUI & Currency`
+4. Copy description from CHANGELOG.md
+5. Upload `build/libs/shop-1.1.0.jar`
+6. Publish
+
+## Automated Release with GitHub Actions (Optional)
+
+Create `.github/workflows/release.yml`:
+
+```yaml
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    
+    - name: Build with Gradle
+      run: ./gradlew build
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/libs/*.jar
+        body_path: CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+With this GitHub Action, just push a tag and it automatically builds and releases:
+```bash
+& "C:\Program Files\Git\cmd\git.exe" tag v1.1.0
+& "C:\Program Files\Git\cmd\git.exe" push origin v1.1.0
+```
+
+## Version Numbering Convention
+
+Use [Semantic Versioning](https://semver.org/):
+- **MAJOR.MINOR.PATCH** (e.g., 1.2.3)
+- **MAJOR**: Breaking changes (1.0.0 → 2.0.0)
+- **MINOR**: New features (1.0.0 → 1.1.0)
+- **PATCH**: Bug fixes (1.0.0 → 1.0.1)
+
+Examples:
+- `v1.0.0` - Initial release
+- `v1.1.0` - Added shop GUI
+- `v1.1.1` - Fixed currency bug
+- `v1.2.0` - Added passive income system
+- `v2.0.0` - Complete rewrite
+
+## Checklist Before Each Release
+
+- [ ] Update version in `gradle.properties`
+- [ ] Update CHANGELOG.md with all changes
+- [ ] Test the mod in-game
+- [ ] Run `gradlew clean build` successfully
+- [ ] Commit all changes with descriptive message
+- [ ] Push to GitHub
+- [ ] Create GitHub release with tag
+- [ ] Upload JAR file
+- [ ] Verify release on GitHub
+- [ ] Test download link works
+
+## Common Issues
+
+### Issue: Git push fails with authentication error
+**Solution**: Use GitHub Personal Access Token
+1. GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate new token with `repo` scope
+3. Use token as password when pushing
+
+### Issue: JAR not building
+**Solution**: Clean and rebuild
+```bash
+cmd /c "gradlew.bat clean"
+cmd /c "gradlew.bat build --stacktrace"
+```
+
+### Issue: Wrong files in release
+**Solution**: Check .gitignore is correct
+- build/ folder should be ignored
+- Only source code and configs should be in Git
+- JAR is manually uploaded to releases
+
+## Best Practices
+
+1. **Always test before releasing** - Run the mod in-game
+2. **Write clear changelogs** - Users want to know what changed
+3. **Use descriptive commit messages** - Future you will thank you
+4. **Tag releases properly** - Use semantic versioning
+5. **Keep old releases** - Don't delete previous versions
+6. **Document breaking changes** - Warn users about incompatibilities
+
+## Quick Release Command Sequence
+
+```powershell
+# 1. Update gradle.properties mod_version
+# 2. Update CHANGELOG.md
+# 3. Build and release:
+
+cd "C:\Users\baesp\Desktop\iujhwerfoiuwhb iouwb\QOL"
+& "C:\Program Files\Git\cmd\git.exe" add .
+& "C:\Program Files\Git\cmd\git.exe" commit -m "v1.x.x: Description of changes"
+& "C:\Program Files\Git\cmd\git.exe" push
+cmd /c "gradlew.bat clean build"
+# Then manually create GitHub release with build/libs/shop-1.x.x.jar
+```
+
+## Resources
+
+- [GitHub Releases Documentation](https://docs.github.com/en/repositories/releasing-projects-on-github)
+- [Semantic Versioning](https://semver.org/)
+- [Keep a Changelog](https://keepachangelog.com/)
+- [GitHub Actions](https://docs.github.com/en/actions)

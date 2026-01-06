@@ -1,0 +1,549 @@
+package com.shopmod.gui;
+
+import com.shopmod.ShopMod;
+import com.shopmod.currency.CurrencyManager;
+import com.shopmod.shop.EnchantmentShop;
+import com.shopmod.shop.ItemPricing;
+import com.shopmod.shop.MoneyMakingGuide;
+import com.shopmod.shop.ShopTier;
+import eu.pb4.sgui.api.ClickType;
+import eu.pb4.sgui.api.elements.GuiElementBuilder;
+import eu.pb4.sgui.api.gui.SimpleGui;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Comprehensive shop GUI with buy/sell/enchants/tiers/balance tabs
+ * Features: Right-click to sell, tier-based filtering, pagination
+ */
+public class ShopGui extends SimpleGui {
+    private final ServerPlayer player;
+    private Tab currentTab = Tab.BUY;
+    private int page = 0;
+    
+    private enum Tab {
+        BUY,
+        SELL,
+        ENCHANTS,
+        TIERS,
+        GUIDE,
+        BALANCE
+    }
+    
+    public ShopGui(ServerPlayer player) {
+        super(MenuType.GENERIC_9x6, player, false);
+        this.player = player;
+        this.setTitle(Component.literal("Shop - Buy"));
+        updateDisplay();
+    }
+    
+    private void updateDisplay() {
+        this.clearSlots();
+        
+        // Tab switcher buttons (bottom row)
+        setSlot(45, new GuiElementBuilder(Items.CHEST)
+            .setName(Component.literal("Buy Items")
+                .withStyle(style -> style.withColor(currentTab == Tab.BUY ? 0x00FF00 : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.BUY ? "§a▶ Currently viewing" : "§7Click to view"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.BUY;
+                page = 0;
+                this.setTitle(Component.literal("Shop - Buy"));
+                updateDisplay();
+            })
+        );
+        
+        setSlot(46, new GuiElementBuilder(Items.GOLD_INGOT)
+            .setName(Component.literal("Sell Items")
+                .withStyle(style -> style.withColor(currentTab == Tab.SELL ? 0xFFAA00 : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.SELL ? "§6▶ Currently viewing" : "§7Click to view"))
+            .addLoreLine(Component.literal("§7Right-click any item to quick sell!"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.SELL;
+                page = 0;
+                this.setTitle(Component.literal("Shop - Sell"));
+                updateDisplay();
+            })
+        );
+        
+        setSlot(47, new GuiElementBuilder(Items.ENCHANTED_BOOK)
+            .setName(Component.literal("Enchantments")
+                .withStyle(style -> style.withColor(currentTab == Tab.ENCHANTS ? 0xAA00FF : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.ENCHANTS ? "§d▶ Currently viewing" : "§7Click to view"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.ENCHANTS;
+                page = 0;
+                this.setTitle(Component.literal("Shop - Enchantments"));
+                updateDisplay();
+            })
+        );
+        
+        setSlot(48, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("Tier System")
+                .withStyle(style -> style.withColor(currentTab == Tab.TIERS ? 0xFFFF00 : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.TIERS ? "§e▶ Currently viewing" : "§7Click to view"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.TIERS;
+                page = 0;
+                this.setTitle(Component.literal("Shop - Tiers"));
+                updateDisplay();
+            })
+        );
+        
+        setSlot(50, new GuiElementBuilder(Items.BOOK)
+            .setName(Component.literal("Money Guide")
+                .withStyle(style -> style.withColor(currentTab == Tab.GUIDE ? 0x55FFFF : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.GUIDE ? "§b▶ Currently viewing" : "§7Click to view"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.GUIDE;
+                page = 0;
+                this.setTitle(Component.literal("Shop - Money Guide"));
+                updateDisplay();
+            })
+        );
+        
+        setSlot(53, new GuiElementBuilder(Items.DIAMOND)
+            .setName(Component.literal("Balance: " + CurrencyManager.format(CurrencyManager.getBalance(player)))
+                .withStyle(style -> style.withColor(currentTab == Tab.BALANCE ? 0x00FFFF : 0xAAAAAA)))
+            .addLoreLine(Component.literal(currentTab == Tab.BALANCE ? "§b▶ Currently viewing" : "§7Click to view"))
+            .setCallback((index, type, action) -> {
+                currentTab = Tab.BALANCE;
+                this.setTitle(Component.literal("Shop - Balance"));
+                updateDisplay();
+            })
+        );
+        
+        // Display current tab content
+        switch (currentTab) {
+            case BUY -> setupBuyTab();
+            case SELL -> setupSellTab();
+            case ENCHANTS -> setupEnchantsTab();
+            case TIERS -> setupTiersTab();
+            case GUIDE -> setupGuideTab();
+            case BALANCE -> setupBalanceTab();
+        }
+    }
+    
+    private void setupBuyTab() {
+        int highestTier = ShopMod.dataManager.getHighestUnlockedTier(player);
+        
+        // Get all items the player can buy (from unlocked tiers)
+        List<Map.Entry<Item, ItemPricing.PriceData>> availableItems = new ArrayList<>();
+        for (int tier = 0; tier <= highestTier; tier++) {
+            availableItems.addAll(ItemPricing.getItemsForTier(tier));
+        }
+        
+        // Pagination
+        int itemsPerPage = 36; // 4 rows x 9 slots (top row for tier info)
+        int totalPages = Math.max(1, (availableItems.size() + itemsPerPage - 1) / itemsPerPage);
+        int startIndex = page * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, availableItems.size());
+        
+        // Show tier unlock info in top row
+        ShopTier currentTier = ShopTier.fromId(highestTier);
+        setSlot(4, new GuiElementBuilder(currentTier.getIcon())
+            .setName(Component.literal("Current Tier: " + currentTier.getColor() + currentTier.getName()))
+            .addLoreLine(Component.literal("§7Showing items from unlocked tiers"))
+            .addLoreLine(Component.literal("§7Total items: §f" + availableItems.size()))
+        );
+        
+        // Display items starting from row 2 (slot 9)
+        int slot = 9;
+        for (int i = startIndex; i < endIndex && slot < 45; i++) {
+            Map.Entry<Item, ItemPricing.PriceData> entry = availableItems.get(i);
+            addBuyItem(slot++, entry.getKey(), entry.getValue());
+        }
+        
+        // Page navigation (bottom row corners)
+        if (page > 0) {
+            setSlot(51, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§e← Previous Page"))
+                .addLoreLine(Component.literal("§7Page " + page + "/" + totalPages))
+                .setCallback((index, type, action) -> {
+                    page--;
+                    updateDisplay();
+                })
+            );
+        }
+        
+        if (page < totalPages - 1) {
+            setSlot(52, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§eNext Page →"))
+                .addLoreLine(Component.literal("§7Page " + (page + 2) + "/" + totalPages))
+                .setCallback((index, type, action) -> {
+                    page++;
+                    updateDisplay();
+                })
+            );
+        }
+    }
+    
+    private void addBuyItem(int slot, Item item, ItemPricing.PriceData priceData) {
+        long buyPrice = priceData.buyPrice();
+        ShopTier tier = ShopTier.fromId(priceData.tier());
+        
+        GuiElementBuilder builder = new GuiElementBuilder(item)
+            .setName(Component.literal(item.getName(item.getDefaultInstance()).getString()))
+            .addLoreLine(Component.literal("§aBuy: " + CurrencyManager.format(buyPrice) + " each"))
+            .addLoreLine(Component.literal("§7Tier: " + tier.getColor() + tier.getName()))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Left-click: Buy 1"))
+            .addLoreLine(Component.literal("§7Right-click: Buy 16"))
+            .addLoreLine(Component.literal("§7Shift-left: Buy 64"))
+            .setCallback((index, type, action) -> {
+                int amount = switch (type) {
+                    case MOUSE_RIGHT, MOUSE_RIGHT_SHIFT -> 16;
+                    case MOUSE_LEFT_SHIFT -> 64;
+                    default -> 1;
+                };
+                buyItem(item, buyPrice, amount);
+            });
+        
+        setSlot(slot, builder);
+    }
+    
+    private void buyItem(Item item, long priceEach, int amount) {
+        long totalPrice = priceEach * amount;
+        
+        if (!CurrencyManager.canAfford(player, totalPrice)) {
+            CurrencyManager.sendInsufficientFundsMessage(player, totalPrice);
+            return;
+        }
+        
+        if (CurrencyManager.removeMoney(player, totalPrice)) {
+            player.addItem(new ItemStack(item, amount));
+            CurrencyManager.sendMoneySpentMessage(player, totalPrice, "Purchased " + amount + "x " + item.getName(item.getDefaultInstance()).getString());
+            updateDisplay();
+        }
+    }
+    
+    private void setupSellTab() {
+        List<Map.Entry<Item, ItemPricing.PriceData>> sellableItems = ItemPricing.getAllPricedItems().entrySet().stream()
+            .filter(e -> e.getValue().sellPrice() > 0)
+            .toList();
+        
+        // Pagination
+        int itemsPerPage = 36;
+        int totalPages = Math.max(1, (sellableItems.size() + itemsPerPage - 1) / itemsPerPage);
+        int startIndex = page * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, sellableItems.size());
+        
+        // Info in top row
+        setSlot(4, new GuiElementBuilder(Items.GOLD_INGOT)
+            .setName(Component.literal("§6Sell Your Items"))
+            .addLoreLine(Component.literal("§7Right-click any item to quick sell!"))
+            .addLoreLine(Component.literal("§7Sell price is 80% of buy price"))
+        );
+        
+        // Display items starting from row 2
+        int slot = 9;
+        for (int i = startIndex; i < endIndex && slot < 45; i++) {
+            Map.Entry<Item, ItemPricing.PriceData> entry = sellableItems.get(i);
+            int playerCount = countItemInInventory(player, entry.getKey());
+            addSellItem(slot++, entry.getKey(), entry.getValue().sellPrice(), playerCount);
+        }
+        
+        // Page navigation
+        if (page > 0) {
+            setSlot(51, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§e← Previous Page"))
+                .setCallback((index, type, action) -> {
+                    page--;
+                    updateDisplay();
+                })
+            );
+        }
+        
+        if (page < totalPages - 1) {
+            setSlot(52, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§eNext Page →"))
+                .setCallback((index, type, action) -> {
+                    page++;
+                    updateDisplay();
+                })
+            );
+        }
+    }
+    
+    private void addSellItem(int slot, Item item, long sellPrice, int playerCount) {
+        GuiElementBuilder builder = new GuiElementBuilder(item)
+            .setName(Component.literal(item.getName(item.getDefaultInstance()).getString()))
+            .addLoreLine(Component.literal("§6Sell: " + CurrencyManager.format(sellPrice) + " each"))
+            .addLoreLine(Component.literal("§7You have: §f" + playerCount)
+                .withStyle(style -> style.withColor(playerCount > 0 ? 0x00FF00 : 0xFF5555)));
+        
+        if (playerCount > 0) {
+            builder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§7Left-click: Sell 1"))
+                .addLoreLine(Component.literal("§7Right-click: Sell 16"))
+                .addLoreLine(Component.literal("§7Shift-left: Sell 64"))
+                .setCallback((index, type, action) -> {
+                    int amount = switch (type) {
+                        case MOUSE_RIGHT, MOUSE_RIGHT_SHIFT -> 16;
+                        case MOUSE_LEFT_SHIFT -> 64;
+                        default -> 1;
+                    };
+                    sellItem(item, sellPrice, amount);
+                });
+        } else {
+            builder.addLoreLine(Component.literal("§cYou don't have any to sell!"));
+        }
+        
+        setSlot(slot, builder);
+    }
+    
+    private void sellItem(Item item, long priceEach, int amount) {
+        // Count how many they actually have
+        int available = countItemInInventory(player, item);
+        int toSell = Math.min(amount, available);
+        
+        if (toSell == 0) {
+            player.sendSystemMessage(Component.literal("§cYou don't have any " + item.getName(item.getDefaultInstance()).getString() + " to sell!"));
+            return;
+        }
+        
+        // Remove items from inventory
+        int removed = removeItemFromInventory(player, item, toSell);
+        
+        if (removed > 0) {
+            long totalEarned = priceEach * removed;
+            CurrencyManager.addMoney(player, totalEarned);
+            CurrencyManager.sendMoneyReceivedMessage(player, totalEarned, "Sold " + removed + "x " + item.getName(item.getDefaultInstance()).getString());
+            updateDisplay();
+        }
+    }
+    
+    private void setupEnchantsTab() {
+        int highestTier = ShopMod.dataManager.getHighestUnlockedTier(player);
+        
+        // Get all enchantments the player can buy
+        List<EnchantmentShop.EnchantData> availableEnchants = new ArrayList<>();
+        for (int tier = 0; tier <= highestTier; tier++) {
+            availableEnchants.addAll(EnchantmentShop.getEnchantsForTier(tier));
+        }
+        
+        // Pagination
+        int itemsPerPage = 36;
+        int totalPages = Math.max(1, (availableEnchants.size() + itemsPerPage - 1) / itemsPerPage);
+        int startIndex = page * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, availableEnchants.size());
+        
+        // Info in top row
+        setSlot(4, new GuiElementBuilder(Items.ENCHANTED_BOOK)
+            .setName(Component.literal("§dEnchantment Shop"))
+            .addLoreLine(Component.literal("§7Purchase enchanted books"))
+            .addLoreLine(Component.literal("§7Total available: §f" + availableEnchants.size()))
+        );
+        
+        // Display enchantments
+        int slot = 9;
+        for (int i = startIndex; i < endIndex && slot < 45; i++) {
+            EnchantmentShop.EnchantData enchant = availableEnchants.get(i);
+            addEnchantItem(slot++, enchant);
+        }
+        
+        // Page navigation
+        if (page > 0) {
+            setSlot(51, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§e← Previous Page"))
+                .setCallback((index, type, action) -> {
+                    page--;
+                    updateDisplay();
+                })
+            );
+        }
+        
+        if (page < totalPages - 1) {
+            setSlot(52, new GuiElementBuilder(Items.ARROW)
+                .setName(Component.literal("§eNext Page →"))
+                .setCallback((index, type, action) -> {
+                    page++;
+                    updateDisplay();
+                })
+            );
+        }
+    }
+    
+    private void addEnchantItem(int slot, EnchantmentShop.EnchantData enchant) {
+        ShopTier tier = ShopTier.fromId(enchant.tier());
+        
+        GuiElementBuilder builder = new GuiElementBuilder(Items.ENCHANTED_BOOK)
+            .setName(Component.literal("§d" + enchant.name() + " " + enchant.level()))
+            .addLoreLine(Component.literal("§aBuy: " + CurrencyManager.format(enchant.price())))
+            .addLoreLine(Component.literal("§7Tier: " + tier.getColor() + tier.getName()))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7" + enchant.description()))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Click to purchase"))
+            .setCallback((index, type, action) -> buyEnchantment(enchant));
+        
+        setSlot(slot, builder);
+    }
+    
+    private void buyEnchantment(EnchantmentShop.EnchantData enchant) {
+        long price = enchant.price();
+        
+        if (!CurrencyManager.canAfford(player, price)) {
+            CurrencyManager.sendInsufficientFundsMessage(player, totalPrice);
+            return;
+        }
+        
+        if (CurrencyManager.removeMoney(player, price)) {
+            // Create enchanted book
+            ItemStack book = EnchantmentShop.createEnchantedBook(enchant.name(), enchant.level());
+            player.addItem(book);
+            CurrencyManager.sendMoneySpentMessage(player, price, "Purchased " + enchant.name() + " " + enchant.level());
+            updateDisplay();
+        }
+    }
+    
+    private void setupTiersTab() {
+        // Display all tiers with unlock status
+        setSlot(4, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§eTier Progression System"))
+            .addLoreLine(Component.literal("§7Unlock tiers to access more items"))
+            .addLoreLine(Component.literal("§7Use /shop unlock <tier> to unlock"))
+        );
+        
+        int slot = 11; // Start in second row, centered
+        for (ShopTier tier : ShopTier.values()) {
+            boolean unlocked = ShopMod.dataManager.hasTierUnlocked(player, tier.getId());
+            
+            GuiElementBuilder builder = new GuiElementBuilder(unlocked ? tier.getIcon() : Items.GRAY_DYE)
+                .setName(Component.literal(tier.getColor() + tier.getName()))
+                .addLoreLine(Component.literal(unlocked ? "§a✓ Unlocked" : "§c✗ Locked"))
+                .addLoreLine(Component.literal("§7Cost: " + (tier.getUnlockCost() == 0 ? "FREE" : CurrencyManager.format(tier.getUnlockCost()))))
+                .addLoreLine(Component.literal(""));
+            
+            if (!unlocked && tier.getId() > 0) {
+                ShopTier prevTier = ShopTier.fromId(tier.getId() - 1);
+                boolean canUnlock = ShopMod.dataManager.hasTierUnlocked(player, prevTier.getId());
+                
+                if (canUnlock) {
+                    boolean canAfford = CurrencyManager.canAfford(player, tier.getUnlockCost());
+                    builder.addLoreLine(Component.literal(canAfford ? "§aClick to unlock!" : "§cInsufficient funds"))
+                        .setCallback((index, type, action) -> {
+                            if (CurrencyManager.canAfford(player, tier.getUnlockCost())) {
+                                if (CurrencyManager.removeMoney(player, tier.getUnlockCost())) {
+                                    ShopMod.dataManager.unlockTier(player, tier.getId());
+                                    player.sendSystemMessage(Component.literal("§a✓ Unlocked " + tier.getColor() + tier.getName() + " §atier!"));
+                                    updateDisplay();
+                                }
+                            } else {
+                                CurrencyManager.sendInsufficientFundsMessage(player, tier.getUnlockCost());
+                            }
+                        });
+                } else {
+                    builder.addLoreLine(Component.literal("§cMust unlock " + prevTier.getName() + " first"));
+                }
+            }
+            
+            setSlot(slot, builder);
+            slot += 2; // Skip a slot for spacing
+        }
+    }
+    
+    private void setupGuideTab() {
+        // Display money-making strategies
+        setSlot(4, new GuiElementBuilder(Items.BOOK)
+            .setName(Component.literal("§bMoney Making Guide"))
+            .addLoreLine(Component.literal("§7Tips for earning money quickly"))
+        );
+        
+        List<MoneyMakingGuide.Strategy> strategies = MoneyMakingGuide.getAllStrategies();
+        
+        int slot = 9;
+        for (MoneyMakingGuide.Strategy strategy : strategies) {
+            if (slot >= 45) break;
+            
+            GuiElementBuilder builder = new GuiElementBuilder(strategy.icon())
+                .setName(Component.literal("§e" + strategy.name()))
+                .addLoreLine(Component.literal("§aIncome: " + CurrencyManager.format(strategy.income()) + "/item"))
+                .addLoreLine(Component.literal("§7Difficulty: " + getDifficultyColor(strategy.difficulty()) + strategy.difficulty()))
+                .addLoreLine(Component.literal(""));
+            
+            // Split description into multiple lines
+            String[] descLines = strategy.description().split("\\. ");
+            for (String line : descLines) {
+                builder.addLoreLine(Component.literal("§7" + line + (line.endsWith(".") ? "" : ".")));
+            }
+            
+            setSlot(slot++, builder);
+        }
+    }
+    
+    private String getDifficultyColor(String difficulty) {
+        return switch (difficulty.toLowerCase()) {
+            case "easy" -> "§a";
+            case "medium" -> "§6";
+            case "hard" -> "§c";
+            default -> "§7";
+        };
+    }
+    
+    private void setupBalanceTab() {
+        long balance = CurrencyManager.getBalance(player);
+        int highestTier = ShopMod.dataManager.getHighestUnlockedTier(player);
+        ShopTier currentTier = ShopTier.fromId(highestTier);
+        
+        setSlot(22, new GuiElementBuilder(Items.DIAMOND)
+            .setName(Component.literal("§b§lYour Balance"))
+            .addLoreLine(Component.literal("§7Current: §a" + CurrencyManager.format(balance)))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Highest Tier: " + currentTier.getColor() + currentTier.getName()))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Earn money by:"))
+            .addLoreLine(Component.literal("§8• §7Mining blocks"))
+            .addLoreLine(Component.literal("§8• §7Chopping trees"))
+            .addLoreLine(Component.literal("§8• §7Farming crops"))
+            .addLoreLine(Component.literal("§8• §7Selling items in shop"))
+        );
+        
+        // Show next tier if not max
+        if (highestTier < ShopTier.values().length - 1) {
+            ShopTier nextTier = ShopTier.fromId(highestTier + 1);
+            long needed = nextTier.getUnlockCost() - balance;
+            
+            setSlot(31, new GuiElementBuilder(Items.NETHER_STAR)
+                .setName(Component.literal("§eNext Tier: " + nextTier.getColor() + nextTier.getName()))
+                .addLoreLine(Component.literal("§7Cost: " + CurrencyManager.format(nextTier.getUnlockCost())))
+                .addLoreLine(Component.literal(needed > 0 ? 
+                    "§cNeed " + CurrencyManager.format(needed) + " more" : 
+                    "§aYou can unlock this tier!"))
+            );
+        }
+    }
+    
+    private int countItemInInventory(ServerPlayer player, Item item) {
+        int count = 0;
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.getItem() == item) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+    
+    private int removeItemFromInventory(ServerPlayer player, Item item, int amount) {
+        int remaining = amount;
+        
+        for (ItemStack stack : player.getInventory().items) {
+            if (remaining <= 0) break;
+            if (stack.getItem() == item) {
+                int toRemove = Math.min(remaining, stack.getCount());
+                stack.shrink(toRemove);
+                remaining -= toRemove;
+            }
+        }
+        
+        return amount - remaining;
+    }
+}
