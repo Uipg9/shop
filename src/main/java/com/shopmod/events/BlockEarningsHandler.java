@@ -29,8 +29,8 @@ public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int ACCUMULATION_TICKS = 120; // Accumulate for 120 ticks (6 seconds) - INCREASED to catch delayed breaks
-    private static final double RADIUS = 100.0; // Detect blocks within 100 block radius - DOUBLED for large trees
+    private static final int ACCUMULATION_TICKS = 40; // Accumulate for 40 ticks (2 seconds) - SHORT WINDOW for responsiveness
+    private static final double RADIUS = 50.0; // Detect blocks within 50 block radius
     private static final Set<UUID> recentBreakers = new HashSet<>(); // Track players who've recently broken blocks
     
     private static class PendingRewards {
@@ -43,7 +43,14 @@ public class BlockEarningsHandler {
     }
     
     public static void register() {
-        // Register player break event handler (catches initial breaks AND those that fire events)
+        // Register BOTH BEFORE and AFTER to catch all block breaks
+        // BEFORE: Catches tree mods that process in BEFORE phase
+        // AFTER: Catches regular breaks and mods that use AFTER
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, entity) -> {
+            onBlockBreak(level, player, pos, state, entity);
+            return true; // Don't cancel
+        });
+        
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
         
         // Process batched rewards every tick
