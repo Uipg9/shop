@@ -43,6 +43,7 @@ public class BlockEarningsHandler {
         int ticksSinceLastBlock = 0;
         BlockPos lastBlockCenterPos = null;
         ServerPlayer player = null;
+        Block lastBrokenBlockType = null; // Track what type was broken
     }
     
     public static void register() {
@@ -111,29 +112,27 @@ public class BlockEarningsHandler {
         Map<BlockPos, Block> current = new HashMap<>();
         
         BlockPos scanCenter = rewards.lastBlockCenterPos != null ? rewards.lastBlockCenterPos : playerPos;
+        Block targetType = rewards.lastBrokenBlockType; // Only scan for blocks of this type
         int range = (int) RADIUS;
         
-        // Scan area for valuable blocks (with cap to prevent lag)
-        int scannedBlocks = 0;
-        outerLoop:
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    if (++scannedBlocks > MAX_BLOCKS_PER_TICK) {
-                        break outerLoop; // Cap per tick to avoid lag
-                    }
-                    BlockPos checkPos = scanCenter.offset(x, y, z);
-                    BlockState state = level.getBlockState(checkPos);
-                    Block block = state.getBlock();
-                    
-                    // Skip leaves, flowers, and other non-valuable blocks
-                    if (isExcludedBlock(block)) {
-                        continue;
-                    }
-                    
-                    long value = getBlockValue(block);
-                    if (value > 0 || getBlockXP(block) > 0) {
-                        current.put(checkPos, block);
+        // Only scan for blocks of the same type as what was broken
+        if (targetType != null) {
+            int scannedBlocks = 0;
+            outerLoop:
+            for (int x = -range; x <= range; x++) {
+                for (int y = -range; y <= range; y++) {
+                    for (int z = -range; z <= range; z++) {
+                        if (++scannedBlocks > MAX_BLOCKS_PER_TICK) {
+                            break outerLoop;
+                        }
+                        BlockPos checkPos = scanCenter.offset(x, y, z);
+                        BlockState state = level.getBlockState(checkPos);
+                        Block block = state.getBlock();
+                        
+                        // ONLY check blocks of the same type
+                        if (block == targetType) {
+                            current.put(checkPos, block);
+                        }
                     }
                 }
             }
@@ -211,12 +210,12 @@ public class BlockEarningsHandler {
         rewards.totalXP += finalXP;
         rewards.blocksBroken++;
         rewards.lastBlockCenterPos = pos;
+        rewards.lastBrokenBlockType = block; // Remember what type was broken
         rewards.ticksSinceLastBlock = 0;
         
-        // CRITICAL: Capture block state IMMEDIATELY before tree/vein miner destroys everything
-        // If we don't have a previous scan yet, do it now (first block break)
+        // CRITICAL: Capture ONLY blocks of the same type around the break position
         if (!previousBlockStates.containsKey(playerUUID)) {
-            captureBlockState(world, serverPlayer, pos);
+            captureBlockStateOfType(world, serverPlayer, pos, block);
         }
         
         if (DEBUG_LOGGING) {
@@ -225,9 +224,10 @@ public class BlockEarningsHandler {
     }
     
     /**
-     * Immediately capture the block state around a position
+     * Immediately capture blocks of the SAME TYPE around a position
+     * This prevents counting unrelated blocks like stone or other trees
      */
-    private static void captureBlockState(Level level, ServerPlayer player, BlockPos centerPos) {
+    private static void captureBlockStateOfType(Level level, ServerPlayer player, BlockPos centerPos, Block targetType) {
         UUID playerId = player.getUUID();
         Map<BlockPos, Block> captured = new HashMap<>();
         int range = (int) RADIUS;
@@ -239,12 +239,8 @@ public class BlockEarningsHandler {
                     BlockState state = level.getBlockState(checkPos);
                     Block block = state.getBlock();
                     
-                    if (isExcludedBlock(block)) {
-                        continue;
-                    }
-                    
-                    long value = getBlockValue(block);
-                    if (value > 0 || getBlockXP(block) > 0) {
+                    // ONLY capture blocks of the exact same type as what was broken
+                    if (block == targetType) {
                         captured.put(checkPos, block);
                     }
                 }
@@ -254,7 +250,7 @@ public class BlockEarningsHandler {
         previousBlockStates.put(playerId, captured);
         
         if (DEBUG_LOGGING) {
-            System.out.println("[SHOP] Captured " + captured.size() + " blocks in initial scan");
+            System.out.println("[SHOP] Captured " + captured.size() + " blocks of type " + targetType.getName().getString());
         }
     }
     
