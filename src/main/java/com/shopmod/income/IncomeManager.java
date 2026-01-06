@@ -26,8 +26,8 @@ import net.minecraft.network.chat.Component;
 public class IncomeManager {
     
     public static void initialize() {
-        // Register block break event for mining/logging rewards
-        PlayerBlockBreakEvents.AFTER.register(IncomeManager::onBlockBreak);
+        // Block break event handling moved to BlockEarningsHandler for proper batching
+        // Do NOT register duplicate handler here - causes conflicts with timber/vein miner batching
     }
     
     private static void onBlockBreak(Level world, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
