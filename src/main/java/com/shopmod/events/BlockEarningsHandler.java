@@ -28,6 +28,8 @@ public class BlockEarningsHandler {
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
     private static final int ACCUMULATION_TICKS = 20;
     private static final double RADIUS = 100.0;
+    private static final int MAX_BLOCKS_PER_TICK = 128; // Cap scan operations per tick
+    private static final boolean DEBUG_LOGGING = false; // Set to true for verbose logs
     private static final Set<UUID> recentBreakers = new HashSet<>();
     private static final Map<UUID, Map<BlockPos, Block>> previousBlockStates = new HashMap<>();
     private static final Set<UUID> processedDropEntities = new HashSet<>();
@@ -64,8 +66,6 @@ public class BlockEarningsHandler {
                 rewards.ticksSinceLastBlock++;
                 
                 if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS && rewards.blocksBroken > 0) {
-                    System.out.println("§b[SHOP] FINAL PAYOUT: " + rewards.blocksBroken + " blocks = $" + rewards.totalMoney);
-                    
                     if (rewards.player != null) {
                         if (rewards.totalMoney > 0) {
                             CurrencyManager.addMoney(rewards.player, rewards.totalMoney);
@@ -112,10 +112,15 @@ public class BlockEarningsHandler {
         BlockPos scanCenter = rewards.lastBlockCenterPos != null ? rewards.lastBlockCenterPos : playerPos;
         int range = (int) RADIUS;
         
-        // Scan area for valuable blocks
+        // Scan area for valuable blocks (with cap to prevent lag)
+        int scannedBlocks = 0;
+        outerLoop:
         for (int x = -range; x <= range; x++) {
             for (int y = -range; y <= range; y++) {
                 for (int z = -range; z <= range; z++) {
+                    if (++scannedBlocks > MAX_BLOCKS_PER_TICK) {
+                        break outerLoop; // Cap per tick to avoid lag
+                    }
                     BlockPos checkPos = scanCenter.offset(x, y, z);
                     BlockState state = level.getBlockState(checkPos);
                     Block block = state.getBlock();
@@ -129,8 +134,13 @@ public class BlockEarningsHandler {
         }
         
         // Find blocks that disappeared
+        int processedDestroyedBlocks = 0;
         for (BlockPos pos : previous.keySet()) {
             if (!current.containsKey(pos)) {
+                if (++processedDestroyedBlocks > MAX_BLOCKS_PER_TICK) {
+                    break; // Cap processing to avoid lag
+                }
+                
                 Block block = previous.get(pos);
                 long money = getBlockValue(block);
                 int xp = getBlockXP(block);
@@ -141,7 +151,9 @@ public class BlockEarningsHandler {
                 long finalMoney = (long)(money * multiplier);
                 int finalXP = (int)(xp * xpMult);
                 
-                System.out.println("§g[SHOP SCAN] Detected destroyed: " + block.getName().getString() + " = $" + finalMoney);
+                if (DEBUG_LOGGING) {
+                    System.out.println("[SHOP] Destroyed: " + block.getName().getString() + " = $" + finalMoney);
+                }
                 
                 rewards.totalMoney += finalMoney;
                 rewards.totalXP += finalXP;
@@ -188,7 +200,9 @@ public class BlockEarningsHandler {
             rewards.ticksSinceLastBlock = 0;
             processedDropEntities.add(drop.getUUID());
 
-            System.out.println("§g[SHOP DROP] Counted drop: " + stack.getCount() + "x " + dropBlock.getName().getString() + " = $" + finalMoney);
+            if (DEBUG_LOGGING) {
+                System.out.println("[SHOP] Drop: " + stack.getCount() + "x " + dropBlock.getName().getString() + " = $" + finalMoney);
+            }
         }
         
         previousBlockStates.put(playerId, current);
@@ -203,8 +217,6 @@ public class BlockEarningsHandler {
         Block block = state.getBlock();
         long baseMoneyReward = getBlockValue(block);
         int baseXpReward = getBlockXP(block);
-        
-        System.out.println("§e[SHOP EVENT] Block break: " + block.getName().getString() + " = $" + baseMoneyReward);
         
         if (baseMoneyReward <= 0 && baseXpReward <= 0) {
             return;
@@ -230,7 +242,9 @@ public class BlockEarningsHandler {
         rewards.lastBlockCenterPos = pos;
         rewards.ticksSinceLastBlock = 0;
         
-        System.out.println("§a[SHOP] Added to batch: total " + rewards.blocksBroken + " blocks, $" + rewards.totalMoney);
+        if (DEBUG_LOGGING) {
+            System.out.println("[SHOP] Batch: " + rewards.blocksBroken + " blocks, $" + rewards.totalMoney);
+        }
     }
     
     /**
