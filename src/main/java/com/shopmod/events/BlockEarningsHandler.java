@@ -8,84 +8,190 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
- * Universal earnings system for all block breaking activities
- * Players earn money and XP for breaking blocks
- * Batches rewards for compatibility with timber/vein miner mods
- * 
- * v1.0.8 FIX: Heavily increased accumulation window and added player tracking
- * to catch all block breaks even if they bypass events
+ * v1.0.10: Detects timber/vein miner harvesting by scanning for disappearing blocks
  */
 public class BlockEarningsHandler {
     
-    // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int ACCUMULATION_TICKS = 40; // Accumulate for 40 ticks (2 seconds) - SHORT WINDOW for responsiveness
-    private static final double RADIUS = 50.0; // Detect blocks within 50 block radius
-    private static final Set<UUID> recentBreakers = new HashSet<>(); // Track players who've recently broken blocks
+    private static final int ACCUMULATION_TICKS = 20;
+    private static final double RADIUS = 100.0;
+    private static final Set<UUID> recentBreakers = new HashSet<>();
+    private static final Map<UUID, Map<BlockPos, Block>> previousBlockStates = new HashMap<>();
+    private static final Set<UUID> processedDropEntities = new HashSet<>();
+    private static final int DROP_AGE_WINDOW = 40; // Only count drops spawned in last 2 seconds
     
     private static class PendingRewards {
         long totalMoney = 0;
         int totalXP = 0;
         int blocksBroken = 0;
         int ticksSinceLastBlock = 0;
-        Block lastBlockType = null;
-        BlockPos lastBlockPos = null;
+        BlockPos lastBlockCenterPos = null;
+        ServerPlayer player = null;
     }
     
     public static void register() {
-        // Register BOTH BEFORE and AFTER to catch all block breaks
-        // BEFORE: Catches tree mods that process in BEFORE phase
-        // AFTER: Catches regular breaks and mods that use AFTER
+        // Catch normal player block breaks
         PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, entity) -> {
             onBlockBreak(level, player, pos, state, entity);
-            return true; // Don't cancel
+            return true;
         });
         
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
         
-        // Process batched rewards every tick
+        // Scan for destroyed blocks each tick
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            server.getPlayerList().getPlayers().forEach(BlockEarningsHandler::scanForDestroyedBlocks);
+        });
+        
+        // Process payouts
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             pendingRewards.entrySet().removeIf(entry -> {
                 UUID playerId = entry.getKey();
                 PendingRewards rewards = entry.getValue();
                 rewards.ticksSinceLastBlock++;
                 
-                // Process when we haven't seen a similar block for ACCUMULATION_TICKS
-                if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS) {
-                    ServerPlayer player = server.getPlayerList().getPlayer(playerId);
-                    if (player != null && rewards.blocksBroken > 0) {
-                        // Award money and XP
+                if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS && rewards.blocksBroken > 0) {
+                    System.out.println("§b[SHOP] FINAL PAYOUT: " + rewards.blocksBroken + " blocks = $" + rewards.totalMoney);
+                    
+                    if (rewards.player != null) {
                         if (rewards.totalMoney > 0) {
-                            CurrencyManager.addMoney(player, rewards.totalMoney);
+                            CurrencyManager.addMoney(rewards.player, rewards.totalMoney);
                         }
                         if (rewards.totalXP > 0) {
-                            player.giveExperiencePoints(rewards.totalXP);
+                            rewards.player.giveExperiencePoints(rewards.totalXP);
                         }
                         
-                        // Show combined earnings in action bar only
                         String message = "§6+$" + String.format("%,d", rewards.totalMoney);
                         message += " §7(§e" + rewards.blocksBroken + " blocks§7)";
                         if (rewards.totalXP > 0) {
                             message += " §a+" + rewards.totalXP + " XP";
                         }
-                        player.displayClientMessage(Component.literal(message), true);
+                        rewards.player.displayClientMessage(Component.literal(message), true);
                     }
                     recentBreakers.remove(playerId);
-                    return true; // Remove from map
+                    previousBlockStates.remove(playerId);
+                    return true;
                 }
-                return false; // Keep in map
+                return false;
             });
         });
+    }
+    
+    private static void scanForDestroyedBlocks(ServerPlayer player) {
+        Level level = player.level();
+        UUID playerId = player.getUUID();
+        BlockPos playerPos = player.blockPosition();
+        
+        if (!recentBreakers.contains(playerId)) {
+            previousBlockStates.remove(playerId);
+            return;
+        }
+        
+        PendingRewards rewards = pendingRewards.get(playerId);
+        if (rewards == null) {
+            previousBlockStates.remove(playerId);
+            return;
+        }
+        
+        Map<BlockPos, Block> previous = previousBlockStates.computeIfAbsent(playerId, k -> new HashMap<>());
+        Map<BlockPos, Block> current = new HashMap<>();
+        
+        BlockPos scanCenter = rewards.lastBlockCenterPos != null ? rewards.lastBlockCenterPos : playerPos;
+        int range = (int) RADIUS;
+        
+        // Scan area for valuable blocks
+        for (int x = -range; x <= range; x++) {
+            for (int y = -range; y <= range; y++) {
+                for (int z = -range; z <= range; z++) {
+                    BlockPos checkPos = scanCenter.offset(x, y, z);
+                    BlockState state = level.getBlockState(checkPos);
+                    Block block = state.getBlock();
+                    
+                    long value = getBlockValue(block);
+                    if (value > 0 || getBlockXP(block) > 0) {
+                        current.put(checkPos, block);
+                    }
+                }
+            }
+        }
+        
+        // Find blocks that disappeared
+        for (BlockPos pos : previous.keySet()) {
+            if (!current.containsKey(pos)) {
+                Block block = previous.get(pos);
+                long money = getBlockValue(block);
+                int xp = getBlockXP(block);
+                
+                double multiplier = UpgradeManager.getIncomeMultiplier(playerId);
+                double xpMult = UpgradeManager.getXPMultiplier(playerId);
+                
+                long finalMoney = (long)(money * multiplier);
+                int finalXP = (int)(xp * xpMult);
+                
+                System.out.println("§g[SHOP SCAN] Detected destroyed: " + block.getName().getString() + " = $" + finalMoney);
+                
+                rewards.totalMoney += finalMoney;
+                rewards.totalXP += finalXP;
+                rewards.blocksBroken++;
+                rewards.lastBlockCenterPos = pos;
+                rewards.ticksSinceLastBlock = 0;
+            }
+        }
+
+        // Count fresh item drops near the player (covers mods that drop items directly)
+        AABB box = new AABB(scanCenter).inflate(RADIUS);
+        List<ItemEntity> drops = level.getEntitiesOfClass(ItemEntity.class, box);
+        for (ItemEntity drop : drops) {
+            if (processedDropEntities.contains(drop.getUUID())) {
+                continue;
+            }
+            if (drop.getAge() > DROP_AGE_WINDOW) {
+                continue; // Too old; likely not from this break chain
+            }
+
+            ItemStack stack = drop.getItem();
+            Block dropBlock = Block.byItem(stack.getItem());
+            if (dropBlock == Blocks.AIR) {
+                continue;
+            }
+
+            long money = getBlockValue(dropBlock);
+            int xp = getBlockXP(dropBlock);
+            if (money <= 0 && xp <= 0) {
+                continue;
+            }
+
+            int count = stack.getCount();
+            double multiplier = UpgradeManager.getIncomeMultiplier(playerId);
+            double xpMult = UpgradeManager.getXPMultiplier(playerId);
+
+            long finalMoney = (long)(money * multiplier * count);
+            int finalXP = (int)(xp * xpMult * count);
+
+            rewards.totalMoney += finalMoney;
+            rewards.totalXP += finalXP;
+            rewards.blocksBroken += count;
+            rewards.lastBlockCenterPos = drop.blockPosition();
+            rewards.ticksSinceLastBlock = 0;
+            processedDropEntities.add(drop.getUUID());
+
+            System.out.println("§g[SHOP DROP] Counted drop: " + stack.getCount() + "x " + dropBlock.getName().getString() + " = $" + finalMoney);
+        }
+        
+        previousBlockStates.put(playerId, current);
     }
     
     private static void onBlockBreak(Level world, Player player, BlockPos pos, 
@@ -98,11 +204,12 @@ public class BlockEarningsHandler {
         long baseMoneyReward = getBlockValue(block);
         int baseXpReward = getBlockXP(block);
         
+        System.out.println("§e[SHOP EVENT] Block break: " + block.getName().getString() + " = $" + baseMoneyReward);
+        
         if (baseMoneyReward <= 0 && baseXpReward <= 0) {
-            return; // No rewards for this block
+            return;
         }
         
-        // Apply upgrade multipliers
         double incomeMultiplier = UpgradeManager.getIncomeMultiplier(serverPlayer.getUUID());
         double xpMultiplier = UpgradeManager.getXPMultiplier(serverPlayer.getUUID());
         
@@ -111,35 +218,19 @@ public class BlockEarningsHandler {
         
         UUID playerUUID = serverPlayer.getUUID();
         recentBreakers.add(playerUUID);
-        PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> new PendingRewards());
+        PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> {
+            PendingRewards r = new PendingRewards();
+            r.player = serverPlayer;
+            return r;
+        });
         
-        // Check if this is a continuation of the same block type (timber/vein miner detection)
-        boolean isSameType = rewards.lastBlockType == block && 
-                           rewards.lastBlockPos != null && 
-                           pos.distSqr(rewards.lastBlockPos) <= (RADIUS * RADIUS);
+        rewards.totalMoney += finalMoney;
+        rewards.totalXP += finalXP;
+        rewards.blocksBroken++;
+        rewards.lastBlockCenterPos = pos;
+        rewards.ticksSinceLastBlock = 0;
         
-        if (isSameType) {
-            // Part of timber/vein-miner chain
-            rewards.totalMoney += finalMoney;
-            rewards.totalXP += finalXP;
-            rewards.blocksBroken++;
-            rewards.lastBlockPos = pos;
-            rewards.ticksSinceLastBlock = 0; // Reset counter on each similar block
-        } else {
-            // Different block type or too far away - start fresh batch
-            // But only if we had accumulated rewards, process them first
-            if (rewards.blocksBroken > 0) {
-                rewards.ticksSinceLastBlock = ACCUMULATION_TICKS; // Force processing on next tick
-            }
-            
-            // Reset for new batch
-            rewards.totalMoney = finalMoney;
-            rewards.totalXP = finalXP;
-            rewards.blocksBroken = 1;
-            rewards.lastBlockType = block;
-            rewards.lastBlockPos = pos;
-            rewards.ticksSinceLastBlock = 0;
-        }
+        System.out.println("§a[SHOP] Added to batch: total " + rewards.blocksBroken + " blocks, $" + rewards.totalMoney);
     }
     
     /**
@@ -196,7 +287,7 @@ public class BlockEarningsHandler {
         if (block == Blocks.SUGAR_CANE) return 1;
         if (block == Blocks.CACTUS) return 1;
         
-        return 0; // No reward
+        return 0;
     }
     
     /**
@@ -216,9 +307,6 @@ public class BlockEarningsHandler {
         // Wood gives minimal XP
         if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.LOGS)) return 1;
         
-        // Most blocks don't give XP
         return 0;
     }
 }
-
-
