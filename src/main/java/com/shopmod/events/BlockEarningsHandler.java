@@ -27,7 +27,7 @@ public class BlockEarningsHandler {
     
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
     private static final int ACCUMULATION_TICKS = 20;
-    private static final double RADIUS = 3.0; // Small radius to avoid counting distant trees
+    private static final double RADIUS = 8.0; // Enough for tall trees but not entire forests
     private static final int MAX_BLOCKS_PER_SCAN = 64; // Maximum blocks to count in one scan
     private static final int MAX_BLOCKS_PER_TICK = 128; // Cap scan operations per tick
     private static final boolean DEBUG_LOGGING = false; // Set to true for verbose logs
