@@ -28,11 +28,12 @@ public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int BATCH_DELAY_TICKS = 10; // Wait 10 ticks (0.5s) to catch all blocks
+    private static final int BATCH_DELAY_TICKS = 20; // Wait 20 ticks (1s) to catch chained breaks
     
     private static class PendingRewards {
         long totalMoney = 0;
         int totalXP = 0;
+        int blocksBroken = 0;
         int ticksRemaining = BATCH_DELAY_TICKS;
     }
     
@@ -60,6 +61,9 @@ public class BlockEarningsHandler {
                         // Show combined earnings in action bar only
                         if (rewards.totalMoney > 0 || rewards.totalXP > 0) {
                             String message = "§6+$" + String.format("%,d", rewards.totalMoney);
+                            if (rewards.blocksBroken > 0) {
+                                message += " §7(§e" + rewards.blocksBroken + " blocks§7)";
+                            }
                             if (rewards.totalXP > 0) {
                                 message += " §a+" + rewards.totalXP + " XP";
                             }
@@ -99,6 +103,7 @@ public class BlockEarningsHandler {
         PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> new PendingRewards());
         rewards.totalMoney += finalMoney;
         rewards.totalXP += finalXP;
+        rewards.blocksBroken++;
         rewards.ticksRemaining = BATCH_DELAY_TICKS; // Reset timer
     }
     

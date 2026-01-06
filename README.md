@@ -35,7 +35,7 @@ A comprehensive economy mod for Minecraft 1.21.11 (Fabric) featuring a dynamic s
 - Money and rare item prizes
 
 ### 💰 Universal Earnings
-- **Block Breaking**: Ores, crops, and more give money + XP
+- **Block Breaking**: Ores, crops, and more give money + XP (batched for timber/vein-miner)
 - **Mob Kills**: Combat rewards scale with difficulty
   - Bosses: $10K - $50K | Regular mobs: $60 - $200
 - **Upgrade Integration**: Multiply all earnings
@@ -139,7 +139,7 @@ cd shop
 gradlew build
 ```
 
-The compiled JAR will be in `build/libs/shop-1.0.0.jar`
+The compiled JAR will be in `build/libs/shop-1.0.3.jar`
 
 ### Development Setup
 
@@ -180,6 +180,10 @@ None currently! If you find bugs, please [open an issue](https://github.com/Uipg
 - [ ] Quest/achievement integration
 
 ## 📝 Changelog
+
+### v1.0.3 (January 2026)
+- Batch block earnings over 20 ticks for timber/vein-miner compatibility
+- Action-bar-only earnings with block counts
 
 ### v1.0.0 (January 2026)
 - 🎉 Initial release with complete economy system
