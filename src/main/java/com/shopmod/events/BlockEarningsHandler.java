@@ -28,7 +28,7 @@ public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int BATCH_DELAY_TICKS = 2; // Wait 2 ticks before displaying
+    private static final int BATCH_DELAY_TICKS = 10; // Wait 10 ticks (0.5s) to catch all blocks
     
     private static class PendingRewards {
         long totalMoney = 0;
