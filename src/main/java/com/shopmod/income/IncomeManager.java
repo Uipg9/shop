@@ -68,12 +68,12 @@ public class IncomeManager {
             
             ShopMod.dataManager.addMoney(serverPlayer.getUUID(), finalReward);
             
-            // Simple money notification with multiplier indicator
-            String message = "§a+$" + finalReward;
+            // Show money notification in action bar only
+            String message = "§6+$" + String.format("%,d", finalReward);
             if (multiplier > 1.0) {
-                message += " §7(§6" + String.format("%.0f", multiplier * 100) + "%§7)";
+                message += " §7(§e" + String.format("%.0f", multiplier * 100) + "%§7)";
             }
-            serverPlayer.sendSystemMessage(Component.literal(message));
+            serverPlayer.displayClientMessage(Component.literal(message), true);
         }
     }
     
