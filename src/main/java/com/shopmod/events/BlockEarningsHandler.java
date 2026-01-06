@@ -23,18 +23,22 @@ import java.util.UUID;
  * Universal earnings system for all block breaking activities
  * Players earn money and XP for breaking blocks
  * Batches rewards for compatibility with timber/vein miner mods
+ * Uses spatial/temporal detection: tracks similar blocks within radius and time
  */
 public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int BATCH_DELAY_TICKS = 30; // Wait after no new blocks for 30 ticks (1.5s)
+    private static final int ACCUMULATION_TICKS = 60; // Accumulate for 60 ticks (3 seconds)
+    private static final double RADIUS = 50.0; // Detect blocks within 50 block radius
     
     private static class PendingRewards {
         long totalMoney = 0;
         int totalXP = 0;
         int blocksBroken = 0;
-        int ticksSinceLastBlock = 0; // Ticks since last block break
+        int ticksSinceLastBlock = 0;
+        Block lastBlockType = null;
+        BlockPos lastBlockPos = null;
     }
     
     public static void register() {
@@ -46,10 +50,10 @@ public class BlockEarningsHandler {
                 PendingRewards rewards = entry.getValue();
                 rewards.ticksSinceLastBlock++;
                 
-                // Process when we haven't seen a new block for BATCH_DELAY_TICKS
-                if (rewards.ticksSinceLastBlock >= BATCH_DELAY_TICKS) {
+                // Process when we haven't seen a similar block for ACCUMULATION_TICKS
+                if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS) {
                     ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
-                    if (player != null) {
+                    if (player != null && rewards.blocksBroken > 0) {
                         // Award money and XP
                         if (rewards.totalMoney > 0) {
                             CurrencyManager.addMoney(player, rewards.totalMoney);
@@ -59,16 +63,12 @@ public class BlockEarningsHandler {
                         }
                         
                         // Show combined earnings in action bar only
-                        if (rewards.totalMoney > 0 || rewards.totalXP > 0) {
-                            String message = "§6+$" + String.format("%,d", rewards.totalMoney);
-                            if (rewards.blocksBroken > 0) {
-                                message += " §7(§e" + rewards.blocksBroken + " blocks§7)";
-                            }
-                            if (rewards.totalXP > 0) {
-                                message += " §a+" + rewards.totalXP + " XP";
-                            }
-                            player.displayClientMessage(Component.literal(message), true);
+                        String message = "§6+$" + String.format("%,d", rewards.totalMoney);
+                        message += " §7(§e" + rewards.blocksBroken + " blocks§7)";
+                        if (rewards.totalXP > 0) {
+                            message += " §a+" + rewards.totalXP + " XP";
                         }
+                        player.displayClientMessage(Component.literal(message), true);
                     }
                     return true; // Remove from map
                 }
@@ -98,14 +98,36 @@ public class BlockEarningsHandler {
         long finalMoney = (long)(baseMoneyReward * incomeMultiplier);
         int finalXP = (int)(baseXpReward * xpMultiplier);
         
-        // Add to pending rewards (batch for timber/vein miner)
         UUID playerUUID = serverPlayer.getUUID();
         PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> new PendingRewards());
-        rewards.totalMoney += finalMoney;
-        rewards.totalXP += finalXP;
-        rewards.blocksBroken++;
-        // Reset countdown on each new block - wait for gap in breaks
-        rewards.ticksSinceLastBlock = 0;
+        
+        // Check if this is a continuation of the same block type (timber/vein miner detection)
+        boolean isSameType = rewards.lastBlockType == block && 
+                           rewards.lastBlockPos != null && 
+                           pos.distSqr(rewards.lastBlockPos) <= (RADIUS * RADIUS);
+        
+        if (isSameType) {
+            // Part of timber/vein-miner chain
+            rewards.totalMoney += finalMoney;
+            rewards.totalXP += finalXP;
+            rewards.blocksBroken++;
+            rewards.lastBlockPos = pos;
+            rewards.ticksSinceLastBlock = 0; // Reset counter on each similar block
+        } else {
+            // Different block type or too far away - start fresh batch
+            // But only if we had accumulated rewards, process them first
+            if (rewards.blocksBroken > 0) {
+                rewards.ticksSinceLastBlock = ACCUMULATION_TICKS; // Force processing on next tick
+            }
+            
+            // Reset for new batch
+            rewards.totalMoney = finalMoney;
+            rewards.totalXP = finalXP;
+            rewards.blocksBroken = 1;
+            rewards.lastBlockType = block;
+            rewards.lastBlockPos = pos;
+            rewards.ticksSinceLastBlock = 0;
+        }
     }
     
     /**
