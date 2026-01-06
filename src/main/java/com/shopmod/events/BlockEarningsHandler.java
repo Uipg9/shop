@@ -28,13 +28,13 @@ public class BlockEarningsHandler {
     
     // Batch rewards for timber/vein miner compatibility
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int BATCH_DELAY_TICKS = 20; // Wait 20 ticks (1s) to catch chained breaks
+    private static final int BATCH_DELAY_TICKS = 30; // Wait after no new blocks for 30 ticks (1.5s)
     
     private static class PendingRewards {
         long totalMoney = 0;
         int totalXP = 0;
         int blocksBroken = 0;
-        int ticksRemaining = BATCH_DELAY_TICKS;
+        int ticksSinceLastBlock = 0; // Ticks since last block break
     }
     
     public static void register() {
@@ -43,13 +43,13 @@ public class BlockEarningsHandler {
         // Process batched rewards
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             pendingRewards.entrySet().removeIf(entry -> {
-                entry.getValue().ticksRemaining--;
+                PendingRewards rewards = entry.getValue();
+                rewards.ticksSinceLastBlock++;
                 
-                if (entry.getValue().ticksRemaining <= 0) {
+                // Process when we haven't seen a new block for BATCH_DELAY_TICKS
+                if (rewards.ticksSinceLastBlock >= BATCH_DELAY_TICKS) {
                     ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
                     if (player != null) {
-                        PendingRewards rewards = entry.getValue();
-                        
                         // Award money and XP
                         if (rewards.totalMoney > 0) {
                             CurrencyManager.addMoney(player, rewards.totalMoney);
@@ -104,10 +104,8 @@ public class BlockEarningsHandler {
         rewards.totalMoney += finalMoney;
         rewards.totalXP += finalXP;
         rewards.blocksBroken++;
-        // Only set timer on first block (blocksBroken was 0 before increment)
-        if (rewards.blocksBroken == 1) {
-            rewards.ticksRemaining = BATCH_DELAY_TICKS;
-        }
+        // Reset countdown on each new block - wait for gap in breaks
+        rewards.ticksSinceLastBlock = 0;
     }
     
     /**
