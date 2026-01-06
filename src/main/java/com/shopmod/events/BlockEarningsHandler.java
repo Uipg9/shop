@@ -104,7 +104,10 @@ public class BlockEarningsHandler {
         rewards.totalMoney += finalMoney;
         rewards.totalXP += finalXP;
         rewards.blocksBroken++;
-        rewards.ticksRemaining = BATCH_DELAY_TICKS; // Reset timer
+        // Only set timer on first block (blocksBroken was 0 before increment)
+        if (rewards.blocksBroken == 1) {
+            rewards.ticksRemaining = BATCH_DELAY_TICKS;
+        }
     }
     
     /**
