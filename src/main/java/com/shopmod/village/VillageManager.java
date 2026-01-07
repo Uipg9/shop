@@ -211,17 +211,22 @@ public class VillageManager {
         
         // Hire worker
         CurrencyManager.removeMoney(player, hireCost);
-        WorkerData data = village.getWorkers().computeIfAbsent(workerType, k -> new WorkerData());
-        if (data.getCount() == 0) {
-            data.setCount(1);
+        WorkerData data = village.getWorkers().get(workerType);
+        
+        if (data == null) {
+            // New worker type
+            data = new WorkerData();
+            data.setCount(1); // New WorkerData defaults to count = 1
+            village.getWorkers().put(workerType, data);
         } else {
+            // Existing worker type - add one more
             data.setCount(data.getCount() + 1);
         }
-        
+
         player.sendSystemMessage(Component.literal(
             String.format("§a§l[VILLAGE] Hired %s! (Workers: %d/%d)",
                 workerType.getDisplayName(), village.getTotalWorkerCount(), village.getTotalWorkerSlots())));
-        
+
         return true;
     }
     

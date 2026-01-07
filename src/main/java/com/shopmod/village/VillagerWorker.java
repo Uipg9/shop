@@ -78,6 +78,14 @@ public enum VillagerWorker {
         Map.of(ResourceType.WOOD, 1, ResourceType.ORE, 2), // Books + magic
         Map.of(ResourceType.ENCHANTED, 1), // Produces enchanted items
         false, 1.5
+    ),
+    
+    SLAYER(
+        "Slayer", "§4Hunts monsters for rare materials", Items.NETHERITE_SWORD,
+        300L, 1200L, 4,
+        Map.of(ResourceType.FOOD, 2), // Needs food for strength
+        Map.of(ResourceType.ORE, 1, ResourceType.RARE, 1), // Iron, mob drops, occasional rare items
+        false, 1.4
     );
     
     private final String displayName;
