@@ -1,55 +1,53 @@
-# 🏪 Shop Mod v1.0.43 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.44 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.43-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.44-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **comprehensive systems**: Games for Starter Income, Enhanced Free Teleports, Sell Wands, Mining Operations, Pet Collection, Property Empire, Auction House, Stock Market, and MORE!
-
----
-
-## 🆕 What's New in v1.0.43
-
-### 🎮 Game Center ⭐ **NEW!**
-- **Play Games for Money**: FREE mini-games with guaranteed rewards!
-- **5 Exciting Games**:
-  - 🔢 **Number Guess**: Guess 1-10 ($500-$5,000)
-  - 🪙 **Coin Flip**: Heads or tails ($500-$3,000)
-  - 🎲 **Dice Roll**: Roll for jackpot ($1,000-$10,000)
-  - 📊 **High-Low**: Higher or lower ($750-$8,000)
-  - 🎰 **Lucky Slots**: Spin for MEGA JACKPOT ($1,000-$50,000!)
-- **Completely FREE**: No cost to play, ALWAYS win money!
-- **Perfect for Starters**: Earn money quickly for villages & properties
-- **Commands**: `/game`, `/games`, `/play`
-
-### 🌟 Enhanced Teleport System ⭐ **NEW!**
-- **FREE Waypoint Teleportation**: No currency cost, unlimited use!
-- **Up to 20 Waypoints**: Save your favorite locations
-- **Beautiful GUI**: Easy waypoint management with pagination
-- **Quick Commands**:
-  - `/teleport`, `/tp` - Open teleport GUI
-  - `/setwaypoint <name>` - Create waypoint
-  - `/waypoint <name>` - Teleport to waypoint
-  - `/tp <x> <y> <z>` - Teleport to coordinates
-  - `/sethome` - Set home waypoint
-  - `/home` - Teleport home
-- **Statistics**: Track waypoints and total teleports
-- **User-Friendly**: LEFT CLICK teleport, RIGHT CLICK delete
-
-### 🏠 Hub Navigation ⭐ **NEW!**
-- **Every GUI has a Hub button**: Never get lost in menus!
-- **Consistent Navigation**: Return to Shop Hub from anywhere
-- **13 GUIs Updated**: Shop, Bank, Farm, Enchanting, Properties, Auctions, Stocks, Black Market, Wand, Mining, Pets, Research, plus new Teleport & Games
-
-### 💰 Beginner Income Boost
-- **Games** provide $500-$50,000 per play
-- **Free Teleportation** saves money
-- **Quick starter cash** for early purchases
-- **User-friendly income** right from the start
+Transform your Minecraft world into a thriving economy with **17 COMPLETE SYSTEMS**: All features now have beautiful GUIs and are fully integrated into the Hub! Villages, Loans, Games, Teleports, Properties, Auctions, Mining, Pets, and MORE!
 
 ---
 
-## 🚀 Previous Updates (v1.0.42)
+## 🆕 What's New in v1.0.44
+
+### 🏘️ Village Management System ⭐ **NEW GUI!**
+- **Complete Village Interface**: Full management system with 4 tabs!
+- **9 Worker Types**:
+  - Tier 1: Farmer, Lumberjack, Fisherman (always available)
+  - Tier 2: Miner, Rancher (Village Level 2+)
+  - Tier 3: Blacksmith, Merchant (Village Level 3+)
+  - Tier 4: Enchanter, Slayer (Village Level 4+)
+- **Resource Production**: 9 resource types with supply chains
+- **Buildings**: Construct houses and structures for more workers
+- **Auto-Manage Mode**: Toggle between manual and automatic management
+- **Commands**: `/village`, `/villagers`
+
+### 💰 Loans Management System ⭐ **NEW GUI!**
+- **Complete Banking Interface**: Professional loan management!
+- **Credit Score System**: 20-100 score based on bank investments
+- **Dynamic Interest Rates**: 5%-30% depending on credit
+- **Flexible Loan Amounts**: Small, Medium, Large (up to $2M)
+- **Payment Options**:
+  - Daily payments with tracking
+  - Delay payment (10% fee, once per day)
+  - Pay off entire loan anytime
+- **30-Day Terms**: Manageable repayment periods
+- **Commands**: `/loan`, `/loan gui`
+
+### 🌟 Complete Hub Integration ⭐ **ALL 17 SYSTEMS!**
+- **100% Feature Coverage**: Every single system accessible from `/hub`!
+- Added: Teleport, Games, Loans, Village to hub menu
+- All GUIs have hub navigation buttons
+- No more hidden features!
+- One central command for everything: `/hub`
+
+### ✅ Verified Upgrade Systems
+- **Sell Wand**: Upgrades working (Level 1-20, +5% per level)
+- **Mining Operations**: Income multipliers functional
+- **Properties**: Upgrade levels provide bonuses
+- **Farms**: Production increases with upgrades
+- **Villages**: Worker efficiency scales properly
+- All upgrade bonuses confirmed and applied correctly!
 
 ### ⚡ Sell Wand System ⭐ **NEW!**
 - **Right-Click Chests**: Instantly sell all contents with one click!
