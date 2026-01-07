@@ -1,5 +1,29 @@
 # Changelog
 
+## [Unreleased] - v1.0.26
+### Added
+- **🌐 Village Web Dashboard**: Revolutionary localhost web interface for village management
+  - Access villages at `http://localhost:8080` from any web browser
+  - Real-time village overview with level, worker count, daily profit, total value
+  - Complete worker management: hire, fire, upgrade all worker types
+  - Resource management: view stocks, transfer to trade center, bulk selling
+  - Building control: construct buildings directly from web interface
+  - Auto-manage toggle with live efficiency display (100% manual, 70% auto)
+  - Responsive design works on desktop and mobile devices
+  - Auto-refresh every 30 seconds + manual refresh button
+  - Similar to minecraft-web-chat but specifically for village system
+  - Comprehensive API endpoints for potential integrations
+  - Full documentation in `Information/VILLAGE_WEB_DASHBOARD_GUIDE.txt`
+
+### Technical
+- Added Javalin 5.6.3 web server framework
+- Added Java-WebSocket 1.5.4 for future real-time updates
+- Added Jackson 2.15.2 for JSON processing
+- Added SLF4J 2.0.7 for proper logging
+- Integrated web server lifecycle with Minecraft server start/stop
+- CORS configuration for local development
+- RESTful API design following best practices
+
 All notable changes to the Shop Mod will be documented in this file.
 
 ## [1.0.25] - 2025-01-06

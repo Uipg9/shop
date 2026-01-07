@@ -1,0 +1,130 @@
+# Village Web Dashboard
+
+**🌐 Access your village from anywhere at `http://localhost:8080`**
+
+## Overview
+
+The Village Web Dashboard provides a modern web interface to manage your Minecraft villages remotely, similar to the minecraft-web-chat mod but specifically designed for the Shop Mod's village system.
+
+## Features
+
+### 🏡 Village Status Dashboard
+- **Real-time village overview**: Level, worker count, daily profit, total value
+- **Auto-manage toggle**: Switch between manual (100% efficiency) and auto (70% efficiency) modes
+- **Live updates**: Dashboard refreshes every 30 seconds automatically
+
+### 👥 Worker Management
+- **Hire workers**: Instantly hire new workers for your village
+- **Upgrade workers**: Improve worker levels to increase production
+- **Fire workers**: Remove workers to reduce costs
+- **Worker status**: View count, level, and status for all worker types
+  - FARMER, LUMBERJACK, FISHERMAN, MINER, RANCHER
+  - BLACKSMITH, MERCHANT, ENCHANTER
+
+### 📦 Resource Overview
+- **Resource amounts**: View current stock of all 10 resource types
+- **Quick transfer**: Transfer resources to Trade Center in batches of 10
+- **Bulk selling**: Sell all resources of a specific type instantly
+- **Resource types**: FOOD, WOOD, FISH, ORE, LEATHER, WOOL, TOOLS, ARMOR, ENCHANTED, RARE
+
+### 🏗️ Building Control
+- **Construction**: Build new buildings directly from the web interface
+- **Building status**: View owned count for all building types
+- **Building types**: HOUSE, GRANARY, WAREHOUSE, WORKSHOP, MARKET, FARM_EXPANSION, MINE_SHAFT, TRADING_POST, LIBRARY, BARRACKS
+
+## Getting Started
+
+1. **Start your Minecraft server** with the Shop Mod v1.0.26+
+2. **Look for the startup message** in console:
+   ```
+   =================================
+   🌐 Village Web Dashboard Started!
+   📍 URL: http://localhost:8080
+   🏘️ Manage your villages from your browser!
+   =================================
+   ```
+3. **Open your web browser** and go to `http://localhost:8080`
+4. **Select your player** from the dropdown menu
+5. **Click "Load Village"** to access your village dashboard
+
+## Interface Guide
+
+### Player Selection
+- Choose from currently online players
+- Click "Refresh Players" to update the list
+- Only players with active villages can be managed
+
+### Dashboard Cards
+- **Village Status**: Shows key metrics and auto-manage toggle
+- **Workers**: Manage all worker types with hire/upgrade/fire buttons
+- **Resources**: View amounts and perform transfers/sales
+- **Buildings**: Construct new buildings to improve your village
+
+### Controls
+- **🔄 Refresh Button**: Manually refresh all data (bottom-right)
+- **Auto-refresh**: Data updates automatically every 30 seconds
+- **Auto-manage toggle**: Click the status card to toggle between modes
+
+## API Endpoints
+
+For developers who want to integrate with the system:
+
+### Player Information
+- `GET /api/players` - List online players
+
+### Village Data
+- `GET /api/village/{playerName}` - Get complete village data
+
+### Worker Management
+- `POST /api/village/{playerName}/worker/{workerType}/hire` - Hire worker
+- `POST /api/village/{playerName}/worker/{workerType}/fire` - Fire worker
+- `POST /api/village/{playerName}/worker/{workerType}/upgrade` - Upgrade worker
+
+### Building Management
+- `POST /api/village/{playerName}/building/{buildingType}/build` - Build structure
+
+### Trade Center
+- `POST /api/village/{playerName}/trade/{resourceType}/transfer` - Transfer resources
+- `POST /api/village/{playerName}/trade/{resourceType}/sell` - Sell resources
+
+### Settings
+- `POST /api/village/{playerName}/auto-manage/toggle` - Toggle auto-manage
+
+## Technical Details
+
+- **Port**: 8080 (configurable in code)
+- **Framework**: Javalin web server
+- **Frontend**: Pure HTML/CSS/JavaScript
+- **Real-time**: Auto-refresh every 30 seconds
+- **Responsive**: Mobile-friendly design
+- **Security**: Local access only (localhost)
+
+## Troubleshooting
+
+### Web Dashboard Not Starting
+1. Check console for error messages
+2. Ensure port 8080 is not in use by another application
+3. Verify all web dependencies are properly installed
+
+### Cannot Load Village Data
+1. Make sure the player is online in Minecraft
+2. Verify the player has an active village
+3. Check server console for error messages
+
+### Dashboard Shows Offline Data
+1. Click the refresh button (🔄)
+2. Check if the Minecraft server is running
+3. Verify the player is still online
+
+## Security Note
+
+The web dashboard is designed for local development and testing. It only accepts connections from localhost (127.0.0.1) for security. Do not expose this interface to the public internet without proper authentication and security measures.
+
+## Future Enhancements
+
+- Real-time WebSocket updates for instant data refresh
+- Multi-player village comparison
+- Historical charts for village performance
+- Mobile app support
+- Advanced analytics dashboard
+- Export village data to CSV/JSON
