@@ -1,35 +1,54 @@
-# 🏪 Shop Mod v1.0.41 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.42 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.41-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.42-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **comprehensive systems**: Property Empire, Auction House, Stock Market, Research Trees, Black Market, Automated Farms, and MORE!
+Transform your Minecraft world into a thriving economy with **comprehensive systems**: Sell Wands, Mining Operations, Pet Collection, Property Empire, Auction House, Stock Market, and MORE!
 
 ---
 
-## 🆕 What's New in v1.0.41
+## 🆕 What's New in v1.0.42
 
-### 🏠 Property Rental System ⭐ **NEW!**
+### ⚡ Sell Wand System ⭐ **NEW!**
+- **Right-Click Chests**: Instantly sell all contents with one click!
+- **Level Up**: Upgrade your wand from Level 1 → 20
+- **Bonus Income**: +5% per level (up to +100% at max level!)
+- **Requirements**: Unlock upgrades with total sales milestones
+- **Statistics Tracking**: View total sold and items processed
+- **Commands**: `/wand`, `/sellwand`
+
+### ⛏ Mining Operations ⭐ **NEW!**
+- **5 Mine Types**: Coal → Iron → Gold → Diamond → Netherite
+- **Passive Income**: $300/day → $10,000/day at base level
+- **Upgradeable**: Each mine has multiple levels for increased production
+- **Exponential Growth**: Income scales at 1.2x per level
+- **Daily Payouts**: Automatic income processing
+- **Commands**: `/mining`, `/mines`
+
+### 🐾 Pet Collection System ⭐ **NEW!**
+- **10 Unique Pets**: Dog, Cat, Parrot, Horse, Panda, Fox, Axolotl, Bee, Dolphin, Dragon
+- **Passive Bonuses**: Mining speed, mob loot, XP gain, shop discounts, and more!
+- **Legendary Dragon**: +50% all income (costs $1M)
+- **Equip System**: Only one pet active at a time
+- **Collection Progress**: Track your pet collection
+- **Commands**: `/pets`, `/pet`
+
+### 🚀 Quality of Life Improvements ⭐
+- **Welcome Message**: New players see `/hub` and quick commands on join
+- **Command Tooltips**: Hub GUI shows commands (e.g., `/shop`) for each feature
+- **Fixed Item Names**: Auction house and GUIs now show proper names instead of "minecraft.block.X"
+- **Faster Hoppers**: 8x speed increase! (1 tick cooldown instead of 8)
+
+### 🏠 Property Rental System (v1.0.41)
 - **Rent to Digital Villagers**: Properties can now be rented out for +50% income!
 - **24 Unique Villager Names**: Bob, Alice, Charlie, and 21 more renters
 - **Repair Costs**: Every 7-14 days, renters cause damage requiring repairs (15% of property cost)
-- **Auto-Eviction**: Can't afford repairs? Renters leave automatically
-- **Middle-Click**: Rent out or evict tenants directly from Property GUI
 
-### 🎯 Central Hub System **NEW!**
+### 🎯 Central Hub System (v1.0.41)
 - **`/hub` Command**: Access all shop features from one central GUI!
-- **Navigation Buttons**: Every GUI now has a "Hub" button (bottom-right) for easy navigation
-- **12 Feature Buttons**: Quick access to Shop, Bank, Properties, Auctions, Stocks, Research, Farms, and more
-- **"Coming Soon" Placeholders**: See what features are planned for future updates
-
-### 🔧 Previous Major Updates (v1.0.40)
-- **Property/Real Estate**: 15 property types, passive income, 5-level upgrades
-- **Auction House**: 40 daily items, NPC bidding, instant buy
-- **Stock Options**: Call/Put trading with 10x multiplier
-- **Research System**: 25 upgrades across 5 tech trees
-- **Black Market**: Risky deals with 15% scam chance
-- **3x Farm Boost**: All farm types produce 3x more
+- **Navigation Buttons**: Every GUI now has a "Hub" button (bottom-right)
+- **14 Features**: Shop, Bank, Properties, Auctions, Stocks, Research, Farms, Wand, Mining, Pets, and more
 
 ---
 
