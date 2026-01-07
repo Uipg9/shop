@@ -1,16 +1,37 @@
-# 🏪 Shop Mod v1.0.44 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.46 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.44-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.46-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
 Transform your Minecraft world into a thriving economy with **17 COMPLETE SYSTEMS**: All features now have beautiful GUIs and are fully integrated into the Hub! Villages, Loans, Games, Teleports, Properties, Auctions, Mining, Pets, and MORE!
 
 ---
 
-## 🆕 What's New in v1.0.44
+## 🆕 What's New in v1.0.46
 
-### 🏘️ Village Management System ⭐ **NEW GUI!**
+### 🎮 Games Economy Rebalance ⭐
+- **Entry Costs Added**: All games now require an upfront fee to play!
+  - 🔢 Number Guess: $200 entry
+  - 📊 High-Low: $300 entry
+  - 🪙 Coin Flip: $500 entry
+  - 🎲 Dice Roll: $1,000 entry
+  - 🎰 Lucky Slots: $2,000 entry
+- **Balanced Profits**: Games still profitable but require investment
+- **No More Exploits**: Can't spam free money anymore
+- **Risk/Reward**: Higher entry costs = higher potential rewards
+
+### 💵 Upgrade Costs Visible ⭐
+- **Property Level**: Shows upgrade cost ($50K-$5M)
+- **Farm Level**: Shows upgrade cost ($10K per level)
+- **Village Level**: Shows upgrade cost ($100K-$2M)
+- **Color Coded**: Green if affordable, red if not
+
+---
+
+## 📋 Previous Updates (v1.0.44)
+
+### 🏘️ Village Management System
 - **Complete Village Interface**: Full management system with 4 tabs!
 - **9 Worker Types**:
   - Tier 1: Farmer, Lumberjack, Fisherman (always available)
