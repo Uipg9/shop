@@ -174,5 +174,14 @@ public class StocksGui extends SimpleGui {
             setSlot(slot, builder);
             slot++;
         }
+        
+        // Hub button
+        setSlot(53, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§6§l✦ Shop Hub"))
+            .addLoreLine(Component.literal("§7Return to main menu"))
+            .setCallback((index, type, action) -> {
+                new HubGui(player).open();
+            })
+        );
     }
 }

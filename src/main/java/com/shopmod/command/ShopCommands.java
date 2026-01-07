@@ -516,7 +516,7 @@ public class ShopCommands {
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) return 0;
         
-        com.shopmod.teleport.TeleportManager.setHome(player);
+        com.shopmod.teleport.TeleportManager.createWaypoint(player, "home");
         return 1;
     }
     
@@ -524,7 +524,7 @@ public class ShopCommands {
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player == null) return 0;
         
-        com.shopmod.teleport.TeleportManager.teleportHome(player);
+        com.shopmod.teleport.TeleportManager.teleportToWaypoint(player, "home");
         return 1;
     }
     

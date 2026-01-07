@@ -124,8 +124,15 @@ public class EnchantingGui extends SimpleGui {
         setSlot(22, new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE)
             .setName(Component.literal("§cClose"))
             .setCallback((index, type, action) -> this.close())
-        );
-    }
+        );        
+        // Hub button
+        setSlot(26, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§6§l✦ Shop Hub"))
+            .addLoreLine(Component.literal("§7Return to main menu"))
+            .setCallback((index, type, action) -> {
+                new HubGui(player).open();
+            })
+        );    }
     
     private void enchantItem() {
         if (targetItem.isEmpty() || enchantBook.isEmpty()) {

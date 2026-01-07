@@ -154,6 +154,15 @@ public class ShopGui extends SimpleGui {
             .addLoreLine(Component.literal("§7Your current money"))
         );
         
+        // Hub button (bottom row, second to right) - always show
+        setSlot(48, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§6§l✦ Shop Hub"))
+            .addLoreLine(Component.literal("§7Return to main menu"))
+            .setCallback((index, type, action) -> {
+                new HubGui(player).open();
+            })
+        );
+        
         // Sell box (bottom left) - show when viewing items
         if (!viewingCategories) {
             setupSellBox();

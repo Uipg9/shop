@@ -82,5 +82,14 @@ public class BlackMarketGui extends SimpleGui {
             setSlot(slot, builder);
             slot++;
         }
+        
+        // Hub button
+        setSlot(26, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§6§l✦ Shop Hub"))
+            .addLoreLine(Component.literal("§7Return to main menu"))
+            .setCallback((index, type, action) -> {
+                new HubGui(player).open();
+            })
+        );
     }
 }
