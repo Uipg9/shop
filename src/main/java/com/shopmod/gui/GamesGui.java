@@ -43,14 +43,16 @@ public class GamesGui extends SimpleGui {
             .addLoreLine(Component.literal("§7Games Played: §e" + data.getGamesPlayed()))
             .addLoreLine(Component.literal("§7Total Earned: §6$" + CurrencyManager.format(data.getTotalEarned())))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§a§lAll games are FREE to play!"))
-            .addLoreLine(Component.literal("§7You ALWAYS win money!"))
+            .addLoreLine(Component.literal("§e⚠ All games require entry fees"))
+            .addLoreLine(Component.literal("§7Higher risks = bigger rewards!"))
         );
         
         // Number Guess Game
         setSlot(19, new GuiElementBuilder(Items.PAPER)
             .setName(Component.literal("§b§l🔢 Number Guess"))
             .addLoreLine(Component.literal("§7Guess a number 1-10!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$200"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§a§lRewards:"))
             .addLoreLine(Component.literal("§7  Exact: §6$5,000"))
@@ -70,6 +72,8 @@ public class GamesGui extends SimpleGui {
             .setName(Component.literal("§6§l🪙 Coin Flip"))
             .addLoreLine(Component.literal("§7Flip a coin!"))
             .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$500"))
+            .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§a§lRewards:"))
             .addLoreLine(Component.literal("§7  Win: §6$3,000"))
             .addLoreLine(Component.literal("§7  Lose: §6$500"))
@@ -87,6 +91,8 @@ public class GamesGui extends SimpleGui {
             .setName(Component.literal("§f§l🎲 Dice Roll"))
             .addLoreLine(Component.literal("§7Roll the dice!"))
             .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$1,000"))
+            .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§a§lRewards:"))
             .addLoreLine(Component.literal("§7  Roll 6: §6$10,000 §d★"))
             .addLoreLine(Component.literal("§7  Roll 4-5: §6$4,000"))
@@ -103,6 +109,8 @@ public class GamesGui extends SimpleGui {
         setSlot(22, new GuiElementBuilder(Items.COMPARATOR)
             .setName(Component.literal("§c§l📊 High-Low"))
             .addLoreLine(Component.literal("§7Guess higher or lower!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$300"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§a§lRewards:"))
             .addLoreLine(Component.literal("§7  Same: §6$8,000 §d★"))
@@ -122,6 +130,8 @@ public class GamesGui extends SimpleGui {
         setSlot(23, new GuiElementBuilder(Items.NETHER_STAR)
             .setName(Component.literal("§d§l🎰 Lucky Slots"))
             .addLoreLine(Component.literal("§7Spin the slots!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$2,000"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§a§lRewards:"))
             .addLoreLine(Component.literal("§7  7️⃣7️⃣7️⃣: §6$50,000 §d§l★★★"))
@@ -149,15 +159,17 @@ public class GamesGui extends SimpleGui {
         // Info
         setSlot(31, new GuiElementBuilder(Items.BOOK)
             .setName(Component.literal("§6§lℹ Game Info"))
-            .addLoreLine(Component.literal("§7All games are §aCOMPLETELY FREE!"))
-            .addLoreLine(Component.literal("§7You §aALWAYS§7 win money!"))
+            .addLoreLine(Component.literal("§7All games require entry fees"))
+            .addLoreLine(Component.literal("§7Win or lose, you get rewards!"))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§7Perfect for:"))
-            .addLoreLine(Component.literal("§7  • Getting started"))
-            .addLoreLine(Component.literal("§7  • Quick cash boost"))
-            .addLoreLine(Component.literal("§7  • Having fun!"))
+            .addLoreLine(Component.literal("§7Entry Costs:"))
+            .addLoreLine(Component.literal("§7  Number Guess: §6$200"))
+            .addLoreLine(Component.literal("§7  High-Low: §6$300"))
+            .addLoreLine(Component.literal("§7  Coin Flip: §6$500"))
+            .addLoreLine(Component.literal("§7  Dice Roll: §6$1,000"))
+            .addLoreLine(Component.literal("§7  Lucky Slots: §6$2,000"))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§e§lPlay as much as you want!"))
+            .addLoreLine(Component.literal("§e§lHigher risk = Higher reward!"))
         );
         
         // Hub button

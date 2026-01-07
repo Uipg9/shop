@@ -36,6 +36,16 @@ public class GamesManager {
      */
     public static void playNumberGuess(ServerPlayer player, int guess) {
         GameData data = getGameData(player.getUUID());
+        long entryCost = 200;
+        
+        // Check if player can afford
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        // Charge entry fee
+        CurrencyManager.removeMoney(player, entryCost);
         
         int number = RANDOM.nextInt(10) + 1;
         long reward = 0;
@@ -64,6 +74,16 @@ public class GamesManager {
      */
     public static void playCoinFlip(ServerPlayer player, boolean headsChoice) {
         GameData data = getGameData(player.getUUID());
+        long entryCost = 500;
+        
+        // Check if player can afford
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        // Charge entry fee
+        CurrencyManager.removeMoney(player, entryCost);
         
         boolean result = RANDOM.nextBoolean(); // true = heads, false = tails
         String resultStr = result ? "Heads" : "Tails";
@@ -91,6 +111,16 @@ public class GamesManager {
      */
     public static void playDiceRoll(ServerPlayer player) {
         GameData data = getGameData(player.getUUID());
+        long entryCost = 1000;
+        
+        // Check if player can afford
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        // Charge entry fee
+        CurrencyManager.removeMoney(player, entryCost);
         
         int roll = RANDOM.nextInt(6) + 1;
         long reward;
@@ -119,6 +149,16 @@ public class GamesManager {
      */
     public static void playHighLow(ServerPlayer player, int currentNumber, boolean guessHigher) {
         GameData data = getGameData(player.getUUID());
+        long entryCost = 300;
+        
+        // Check if player can afford
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        // Charge entry fee
+        CurrencyManager.removeMoney(player, entryCost);
         
         int nextNumber = RANDOM.nextInt(10) + 1;
         boolean correct = (guessHigher && nextNumber > currentNumber) || (!guessHigher && nextNumber < currentNumber);
@@ -149,6 +189,16 @@ public class GamesManager {
      */
     public static void playLuckySlots(ServerPlayer player) {
         GameData data = getGameData(player.getUUID());
+        long entryCost = 2000;
+        
+        // Check if player can afford
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        // Charge entry fee
+        CurrencyManager.removeMoney(player, entryCost);
         
         String[] symbols = {"🍒", "🍋", "🍊", "⭐", "💎", "7️⃣"};
         int s1 = RANDOM.nextInt(symbols.length);
