@@ -62,6 +62,11 @@ dependencies {
 	modImplementation include("org.eclipse.jetty:jetty-util:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-http:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-io:11.0.25")
+	
+	// WebSocket dependencies for Jetty 11.x - matching Javalin's internal dependencies
+	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-server:11.0.25")
+	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-api:11.0.25")
+	modImplementation include("org.eclipse.jetty.websocket:websocket-servlet:11.0.25")
 }
 
 processResources {
