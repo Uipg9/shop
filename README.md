@@ -6,9 +6,26 @@
 
 A comprehensive economy mod for Minecraft 1.21.11 (Fabric) featuring a dynamic shop system, banking with investments, **massive village system with resource economy**, teleportation, loans, and universal earnings from all gameplay activities.
 
-## ⭐ What's New in v1.0.25
+## ⭐ What's New in v1.0.27
 
-### 🏘️ MASSIVE VILLAGE SYSTEM OVERHAUL
+### 🌐 VILLAGE WEB DASHBOARD
+- **Complete web interface** for village management at `localhost:8080`
+- **Real-time village overview** with responsive design
+- **Manage workers** - hire, fire, upgrade from your browser
+- **Resource management** - transfer and sell resources remotely
+- **Building construction** - build and upgrade from the web
+- **Auto-manage toggle** - switch modes from anywhere
+- **Mobile-friendly** responsive design
+- **Welcome system** - players get notified about the web dashboard
+- **Cross-platform access** - manage your village from any device on your network
+
+### 🐛 Critical Bug Fixes
+- **Fixed missing dependencies** causing `NoClassDefFoundError`
+- **Properly bundled web server libraries** (Jackson, Javalin, WebSocket)
+- **Increased stability** for the web dashboard system
+- **JAR now includes all required dependencies** (~3.1MB vs previous 300KB)
+
+### Previous Features (v1.0.26)
 - **Complete resource economy** with 10 resource types
 - **Worker supply chains** - 8 workers with input/output mechanics
 - **Building system** with 10 buildings and daily upkeep
@@ -23,7 +40,16 @@ A comprehensive economy mod for Minecraft 1.21.11 (Fabric) featuring a dynamic s
 
 ## ✨ Key Features
 
-### 🏘️ Village & Resource Economy System
+### � Village Web Dashboard (NEW!)
+- **Complete web interface** at `localhost:8080` for village management
+- **Real-time updates** with auto-refresh every 5 seconds
+- **Mobile-friendly** responsive design for phones and tablets
+- **Remote management** - hire workers, transfer resources, build from browser
+- **Cross-platform** - manage your village from any device on your network
+- **Live village overview** with workers, resources, and building status
+- **Auto-manage toggle** and settings management from web interface
+
+### �🏘️ Village & Resource Economy System
 - **10 Resource Types**: Food, Wood, Fish, Ore, Leather, Wool, Tools, Armor, Enchanted, Rare
 - **8 Workers** with supply chain mechanics across 4 tiers:
   - **Tier 1** (Hamlet): Farmer, Lumberjack, Fisherman (basic producers)
@@ -84,6 +110,30 @@ A comprehensive economy mod for Minecraft 1.21.11 (Fabric) featuring a dynamic s
 | `/sethome` | Set your home location |
 | `/home` | Teleport to your home |
 | `/loan` | Manage loans (if applicable) |
+
+## 🌐 Web Dashboard
+
+The mod includes a **complete web interface** for village management!
+
+### Features
+- **Real-time village overview** with all your workers, resources, and buildings
+- **Remote management** - hire workers, transfer resources, build structures
+- **Mobile-friendly** responsive design that works on phones and tablets
+- **Auto-refresh** every 5 seconds for live updates
+- **Cross-platform access** - manage your village from any device on your network
+
+### How to Access
+1. **Start your Minecraft world** with the mod installed
+2. **Look for the message**: "Village Web Dashboard Started!"
+3. **Open your browser** and go to `http://localhost:8080`
+4. **Manage your village** from the web interface!
+
+### Web Interface Tabs
+- **Overview**: Village status, workers, resources at a glance
+- **Workers**: Hire, fire, upgrade workers with detailed stats
+- **Resources**: View and transfer resources between village and trade center
+- **Buildings**: Construct and upgrade buildings from your browser
+- **Settings**: Toggle auto-manage mode and adjust preferences
 
 ## 🏘️ Village Strategy Guide
 
