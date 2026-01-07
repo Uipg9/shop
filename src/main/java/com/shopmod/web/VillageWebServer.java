@@ -40,6 +40,7 @@ public class VillageWebServer {
         try {
             app = Javalin.create(config -> {
                 config.addStaticFiles("/web", Location.CLASSPATH);
+                // Simple configuration without WebSocket issues
             }).start(port);
             
             // Add CORS headers manually

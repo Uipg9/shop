@@ -55,18 +55,17 @@ dependencies {
 	// Servlet API required by Jetty and Javalin
 	modImplementation include("javax.servlet:javax.servlet-api:4.0.1")
 	
-	// Jetty dependencies required by Javalin 4.6.8
-	modImplementation include("org.eclipse.jetty:jetty-server:11.0.25")
-	modImplementation include("org.eclipse.jetty:jetty-servlet:11.0.25")
-	modImplementation include("org.eclipse.jetty:jetty-security:11.0.25")
-	modImplementation include("org.eclipse.jetty:jetty-util:11.0.25")
-	modImplementation include("org.eclipse.jetty:jetty-http:11.0.25")
-	modImplementation include("org.eclipse.jetty:jetty-io:11.0.25")
+	// Jetty 9.x dependencies matching what Javalin 4.6.8 expects
+	modImplementation include("org.eclipse.jetty:jetty-server:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty:jetty-servlet:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty:jetty-security:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty:jetty-util:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty:jetty-io:9.4.51.v20230217")
 	
-	// WebSocket dependencies for Jetty 11.x - matching Javalin's internal dependencies
-	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-server:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-api:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-servlet:11.0.25")
+	// WebSocket dependencies for Jetty 9.x - matching Javalin's expectations  
+	modImplementation include("org.eclipse.jetty.websocket:websocket-servlet:9.4.51.v20230217")
+	modImplementation include("org.eclipse.jetty.websocket:websocket-server:9.4.51.v20230217")
 }
 
 processResources {
