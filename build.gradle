@@ -45,10 +45,12 @@ dependencies {
 	modImplementation include("eu.pb4:sgui:1.12.0+1.21.11")
 	
 	// Web server dependencies for village dashboard
-	implementation "io.javalin:javalin:5.6.3"
-	implementation "org.slf4j:slf4j-simple:2.0.7"
-	implementation "com.fasterxml.jackson.core:jackson-databind:2.15.2"
-	implementation "org.java-websocket:Java-WebSocket:1.5.4"
+	modImplementation include("io.javalin:javalin:5.6.3")
+	modImplementation include("org.slf4j:slf4j-simple:2.0.7")
+	modImplementation include("com.fasterxml.jackson.core:jackson-core:2.15.2")
+	modImplementation include("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+	modImplementation include("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
+	modImplementation include("org.java-websocket:Java-WebSocket:1.5.4")
 }
 
 processResources {
