@@ -7,66 +7,67 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 /**
- * v1.0.10: Detects timber/vein miner harvesting by scanning for disappearing blocks
+ * v1.0.18: Detects timber/vein miner harvesting by tracking inventory changes
  */
 public class BlockEarningsHandler {
     
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int ACCUMULATION_TICKS = 20;
-    private static final double RADIUS = 8.0; // Enough for tall trees but not entire forests
-    private static final int MAX_BLOCKS_PER_SCAN = 64; // Maximum blocks to count in one scan
-    private static final int MAX_BLOCKS_PER_TICK = 128; // Cap scan operations per tick
+    private static final int ACCUMULATION_TICKS = 3; // Wait 3 ticks after break to check inventory
     private static final boolean DEBUG_LOGGING = false; // Set to true for verbose logs
-    private static final Set<UUID> recentBreakers = new HashSet<>();
-    private static final Map<UUID, Map<BlockPos, Block>> previousBlockStates = new HashMap<>();
-    private static final Set<UUID> processedDropEntities = new HashSet<>();
-    private static final int DROP_AGE_WINDOW = 40; // Only count drops spawned in last 2 seconds
     
     private static class PendingRewards {
         long totalMoney = 0;
         int totalXP = 0;
         int blocksBroken = 0;
         int ticksSinceLastBlock = 0;
-        BlockPos lastBlockCenterPos = null;
         ServerPlayer player = null;
-        Block lastBrokenBlockType = null; // Track what type was broken
+        Block brokenBlockType = null;
+        Map<Item, Integer> inventoryBefore = new HashMap<>();
+        boolean inventoryCaptured = false;
     }
     
     public static void register() {
-        // Catch normal player block breaks
+        // Capture inventory BEFORE block break
         PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, entity) -> {
-            onBlockBreak(level, player, pos, state, entity);
+            if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                Block block = state.getBlock();
+                if (getBlockValue(block) > 0 || getBlockXP(block) > 0) {
+                    captureInventoryBefore(serverPlayer, block);
+                }
+            }
             return true;
         });
         
+        // Process AFTER block break
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
         
-        // Scan for destroyed blocks each tick
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            server.getPlayerList().getPlayers().forEach(BlockEarningsHandler::scanForDestroyedBlocks);
-        });
-        
-        // Process payouts
+        // Check inventory changes each tick and process payouts
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             pendingRewards.entrySet().removeIf(entry -> {
                 UUID playerId = entry.getKey();
                 PendingRewards rewards = entry.getValue();
                 rewards.ticksSinceLastBlock++;
                 
+                // Check inventory after a short delay to let harvester finish
+                if (rewards.ticksSinceLastBlock == ACCUMULATION_TICKS && rewards.inventoryCaptured) {
+                    checkInventoryChanges(rewards);
+                }
+                
+                // Payout after accumulation window
                 if (rewards.ticksSinceLastBlock >= ACCUMULATION_TICKS && rewards.blocksBroken > 0) {
                     if (rewards.player != null) {
                         if (rewards.totalMoney > 0) {
@@ -83,8 +84,6 @@ public class BlockEarningsHandler {
                         }
                         rewards.player.displayClientMessage(Component.literal(message), true);
                     }
-                    recentBreakers.remove(playerId);
-                    previousBlockStates.remove(playerId);
                     return true;
                 }
                 return false;
@@ -92,91 +91,98 @@ public class BlockEarningsHandler {
         });
     }
     
-    private static void scanForDestroyedBlocks(ServerPlayer player) {
-        Level level = player.level();
+    /**
+     * Captures player inventory BEFORE breaking a block
+     * This lets us compare what items were added by the harvester
+     */
+    private static void captureInventoryBefore(ServerPlayer player, Block blockType) {
         UUID playerId = player.getUUID();
-        BlockPos playerPos = player.blockPosition();
+        PendingRewards rewards = pendingRewards.computeIfAbsent(playerId, k -> {
+            PendingRewards r = new PendingRewards();
+            r.player = player;
+            return r;
+        });
         
-        if (!recentBreakers.contains(playerId)) {
-            previousBlockStates.remove(playerId);
+        // Capture current inventory counts for relevant items only
+        rewards.inventoryBefore.clear();
+        rewards.brokenBlockType = blockType;
+        rewards.inventoryCaptured = true;
+        
+        Container inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty()) {
+                Item item = stack.getItem();
+                rewards.inventoryBefore.merge(item, stack.getCount(), Integer::sum);
+            }
+        }
+        
+        if (DEBUG_LOGGING) {
+            System.out.println("[SHOP] Captured inventory before break: " + rewards.inventoryBefore.size() + " item types");
+        }
+    }
+    
+    /**
+     * Checks what items were added to inventory and calculates rewards
+     */
+    private static void checkInventoryChanges(PendingRewards rewards) {
+        if (rewards.player == null || !rewards.inventoryCaptured) {
             return;
         }
         
-        PendingRewards rewards = pendingRewards.get(playerId);
-        if (rewards == null) {
-            previousBlockStates.remove(playerId);
-            return;
+        Map<Item, Integer> inventoryAfter = new HashMap<>();
+        Container inventory = rewards.player.getInventory();
+        
+        // Count current inventory
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty()) {
+                Item item = stack.getItem();
+                inventoryAfter.merge(item, stack.getCount(), Integer::sum);
+            }
         }
         
-        Map<BlockPos, Block> previous = previousBlockStates.computeIfAbsent(playerId, k -> new HashMap<>());
-        Map<BlockPos, Block> current = new HashMap<>();
+        // Calculate what was ADDED (after - before)
+        Map<Item, Integer> itemsAdded = new HashMap<>();
+        for (Map.Entry<Item, Integer> entry : inventoryAfter.entrySet()) {
+            Item item = entry.getKey();
+            int afterCount = entry.getValue();
+            int beforeCount = rewards.inventoryBefore.getOrDefault(item, 0);
+            int added = afterCount - beforeCount;
+            
+            if (added > 0) {
+                itemsAdded.put(item, added);
+            }
+        }
         
-        BlockPos scanCenter = rewards.lastBlockCenterPos != null ? rewards.lastBlockCenterPos : playerPos;
-        Block targetType = rewards.lastBrokenBlockType; // Only scan for blocks of this type
-        int range = (int) RADIUS;
+        // Calculate rewards based on items actually added
+        double incomeMultiplier = UpgradeManager.getIncomeMultiplier(rewards.player.getUUID());
+        double xpMultiplier = UpgradeManager.getXPMultiplier(rewards.player.getUUID());
         
-        // Only scan for blocks of the same type as what was broken
-        if (targetType != null) {
-            int scannedBlocks = 0;
-            outerLoop:
-            for (int x = -range; x <= range; x++) {
-                for (int y = -range; y <= range; y++) {
-                    for (int z = -range; z <= range; z++) {
-                        if (++scannedBlocks > MAX_BLOCKS_PER_TICK) {
-                            break outerLoop;
-                        }
-                        BlockPos checkPos = scanCenter.offset(x, y, z);
-                        BlockState state = level.getBlockState(checkPos);
-                        Block block = state.getBlock();
-                        
-                        // ONLY check blocks of the same type
-                        if (block == targetType) {
-                            current.put(checkPos, block);
-                        }
+        for (Map.Entry<Item, Integer> entry : itemsAdded.entrySet()) {
+            Item item = entry.getKey();
+            int count = entry.getValue();
+            
+            Block block = Block.byItem(item);
+            if (block != Blocks.AIR) {
+                long baseValue = getBlockValue(block);
+                int baseXP = getBlockXP(block);
+                
+                if (baseValue > 0 || baseXP > 0) {
+                    rewards.totalMoney += (long)(baseValue * count * incomeMultiplier);
+                    rewards.totalXP += (int)(baseXP * count * xpMultiplier);
+                    rewards.blocksBroken += count;
+                    
+                    if (DEBUG_LOGGING) {
+                        System.out.println("[SHOP] Added: " + count + "x " + item.getName(ItemStack.EMPTY).getString());
                     }
                 }
             }
         }
         
-        // Find blocks that disappeared (with maximum limit per scan)
-        int processedDestroyedBlocks = 0;
-        int totalBlocksThisScan = 0;
-        for (BlockPos pos : previous.keySet()) {
-            if (!current.containsKey(pos)) {
-                if (++processedDestroyedBlocks > MAX_BLOCKS_PER_TICK) {
-                    break; // Cap processing to avoid lag
-                }
-                if (++totalBlocksThisScan > MAX_BLOCKS_PER_SCAN) {
-                    break; // Cap total blocks counted per scan to prevent exploits
-                }
-                
-                Block block = previous.get(pos);
-                long money = getBlockValue(block);
-                int xp = getBlockXP(block);
-                
-                double multiplier = UpgradeManager.getIncomeMultiplier(playerId);
-                double xpMult = UpgradeManager.getXPMultiplier(playerId);
-                
-                long finalMoney = (long)(money * multiplier);
-                int finalXP = (int)(xp * xpMult);
-                
-                if (DEBUG_LOGGING) {
-                    System.out.println("[SHOP] Destroyed: " + block.getName().getString() + " = $" + finalMoney);
-                }
-                
-                rewards.totalMoney += finalMoney;
-                rewards.totalXP += finalXP;
-                rewards.blocksBroken++;
-                rewards.lastBlockCenterPos = pos;
-                rewards.ticksSinceLastBlock = 0;
-            }
-        }
-
-        // Drop counting disabled - block state comparison is more accurate
-        // (Previously this caused double-counting with vein/tree miners)
-        
-        previousBlockStates.put(playerId, current);
+        rewards.inventoryCaptured = false; // Done processing
     }
+
     
     private static void onBlockBreak(Level world, Player player, BlockPos pos, 
                                     BlockState state, @Nullable BlockEntity blockEntity) {
@@ -184,73 +190,16 @@ public class BlockEarningsHandler {
             return;
         }
         
-        Block block = state.getBlock();
-        long baseMoneyReward = getBlockValue(block);
-        int baseXpReward = getBlockXP(block);
-        
-        if (baseMoneyReward <= 0 && baseXpReward <= 0) {
-            return;
-        }
-        
-        double incomeMultiplier = UpgradeManager.getIncomeMultiplier(serverPlayer.getUUID());
-        double xpMultiplier = UpgradeManager.getXPMultiplier(serverPlayer.getUUID());
-        
-        long finalMoney = (long)(baseMoneyReward * incomeMultiplier);
-        int finalXP = (int)(baseXpReward * xpMultiplier);
-        
         UUID playerUUID = serverPlayer.getUUID();
-        recentBreakers.add(playerUUID);
-        PendingRewards rewards = pendingRewards.computeIfAbsent(playerUUID, k -> {
-            PendingRewards r = new PendingRewards();
-            r.player = serverPlayer;
-            return r;
-        });
+        PendingRewards rewards = pendingRewards.get(playerUUID);
         
-        rewards.totalMoney += finalMoney;
-        rewards.totalXP += finalXP;
-        rewards.blocksBroken++;
-        rewards.lastBlockCenterPos = pos;
-        rewards.lastBrokenBlockType = block; // Remember what type was broken
-        rewards.ticksSinceLastBlock = 0;
-        
-        // CRITICAL: Capture ONLY blocks of the same type around the break position
-        if (!previousBlockStates.containsKey(playerUUID)) {
-            captureBlockStateOfType(world, serverPlayer, pos, block);
-        }
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("[SHOP] Batch: " + rewards.blocksBroken + " blocks, $" + rewards.totalMoney);
-        }
-    }
-    
-    /**
-     * Immediately capture blocks of the SAME TYPE around a position
-     * This prevents counting unrelated blocks like stone or other trees
-     */
-    private static void captureBlockStateOfType(Level level, ServerPlayer player, BlockPos centerPos, Block targetType) {
-        UUID playerId = player.getUUID();
-        Map<BlockPos, Block> captured = new HashMap<>();
-        int range = (int) RADIUS;
-        
-        for (int x = -range; x <= range; x++) {
-            for (int y = -range; y <= range; y++) {
-                for (int z = -range; z <= range; z++) {
-                    BlockPos checkPos = centerPos.offset(x, y, z);
-                    BlockState state = level.getBlockState(checkPos);
-                    Block block = state.getBlock();
-                    
-                    // ONLY capture blocks of the exact same type as what was broken
-                    if (block == targetType) {
-                        captured.put(checkPos, block);
-                    }
-                }
+        if (rewards != null) {
+            // Reset timer so we keep waiting for more items
+            rewards.ticksSinceLastBlock = 0;
+            
+            if (DEBUG_LOGGING) {
+                System.out.println("[SHOP] Block broken, waiting for inventory changes...");
             }
-        }
-        
-        previousBlockStates.put(playerId, captured);
-        
-        if (DEBUG_LOGGING) {
-            System.out.println("[SHOP] Captured " + captured.size() + " blocks of type " + targetType.getName().getString());
         }
     }
     
@@ -329,30 +278,5 @@ public class BlockEarningsHandler {
         if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.LOGS)) return 1;
         
         return 0;
-    }
-    
-    /**
-     * Check if a block should be excluded from scanning/rewards
-     * Excludes leaves, flowers, grass, and other decorative blocks
-     */
-    private static boolean isExcludedBlock(Block block) {
-        // Exclude all leaves
-        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.LEAVES)) return true;
-        
-        // Exclude flowers and plants
-        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.FLOWERS)) return true;
-        if (block.defaultBlockState().is(net.minecraft.tags.BlockTags.SAPLINGS)) return true;
-        
-        // Exclude grass, ferns, etc.
-        if (block == Blocks.SHORT_GRASS || block == Blocks.TALL_GRASS) return true;
-        if (block == Blocks.FERN || block == Blocks.LARGE_FERN) return true;
-        if (block == Blocks.DEAD_BUSH) return true;
-        if (block == Blocks.VINE || block == Blocks.GLOW_LICHEN) return true;
-        
-        // Exclude air and water
-        if (block == Blocks.AIR || block == Blocks.CAVE_AIR || block == Blocks.VOID_AIR) return true;
-        if (block == Blocks.WATER || block == Blocks.LAVA) return true;
-        
-        return false;
     }
 }
