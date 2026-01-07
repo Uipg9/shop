@@ -43,16 +43,32 @@ public class PropertyGui extends SimpleGui {
     
     private void setupInfoBar(PropertyManager.PlayerProperties props) {
         // Property level
-        setSlot(2, new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
+        GuiElementBuilder levelBuilder = new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
             .setName(Component.literal("§e§lProperty Level " + props.getPropertyLevel()))
-            .addLoreLine(Component.literal("§7Unlocks higher tier properties"))
-            .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§a§lCLICK §7to upgrade!"))
-            .setCallback((index, type, action) -> {
-                PropertyManager.upgradePropertyLevel(player);
-                updateDisplay();
-            })
-        );
+            .addLoreLine(Component.literal("§7Unlocks higher tier properties"));
+        
+        // Add upgrade cost if not max level
+        if (props.getPropertyLevel() < 5) {
+            long[] costs = {50000L, 200000L, 500000L, 1000000L, 5000000L};
+            long upgradeCost = costs[props.getPropertyLevel() - 1];
+            boolean canAfford = CurrencyManager.canAfford(player, upgradeCost);
+            
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§7Upgrade Cost: " + 
+                    (canAfford ? "§a" : "§c") + "$" + CurrencyManager.format(upgradeCost)))
+                .addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal(canAfford ? "§a§lCLICK §7to upgrade!" : "§c§lInsufficient funds!"));
+        } else {
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§d§l⭐ MAX LEVEL ⭐"));
+        }
+        
+        levelBuilder.setCallback((index, type, action) -> {
+            PropertyManager.upgradePropertyLevel(player);
+            updateDisplay();
+        });
+        
+        setSlot(2, levelBuilder);
         
         // Total properties
         setSlot(4, new GuiElementBuilder(Items.MAP)

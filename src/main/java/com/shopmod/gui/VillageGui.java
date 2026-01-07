@@ -52,17 +52,33 @@ public class VillageGui extends SimpleGui {
     
     private void setupInfoBar(VillageManager.Village village) {
         // Village level
-        setSlot(2, new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
+        GuiElementBuilder levelBuilder = new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
             .setName(Component.literal("§e§lVillage Level " + village.getVillageLevel()))
             .addLoreLine(Component.literal("§71=Hamlet, 2=Village"))
-            .addLoreLine(Component.literal("§73=Town, 4=City"))
-            .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§a§lCLICK §7to upgrade"))
-            .setCallback((index, type, action) -> {
-                player.sendSystemMessage(Component.literal("§c§l[VILLAGE] Upgrade feature coming soon!"));
-                updateDisplay();
-            })
-        );
+            .addLoreLine(Component.literal("§73=Town, 4=City"));
+        
+        // Add upgrade cost if not max level
+        if (village.getVillageLevel() < 4) {
+            long[] costs = {100000L, 500000L, 2000000L};
+            long upgradeCost = costs[village.getVillageLevel() - 1];
+            boolean canAfford = CurrencyManager.canAfford(player, upgradeCost);
+            
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§7Upgrade Cost: " + 
+                    (canAfford ? "§a" : "§c") + "$" + CurrencyManager.format(upgradeCost)))
+                .addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal(canAfford ? "§a§lCLICK §7to upgrade (Coming Soon)" : "§c§lInsufficient funds!"));
+        } else {
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§d§l⭐ MAX LEVEL ⭐"));
+        }
+        
+        levelBuilder.setCallback((index, type, action) -> {
+            player.sendSystemMessage(Component.literal("§c§l[VILLAGE] Upgrade feature coming soon!"));
+            updateDisplay();
+        });
+        
+        setSlot(2, levelBuilder);
         
         // Worker count
         int workerCount = village.getTotalWorkerCount();

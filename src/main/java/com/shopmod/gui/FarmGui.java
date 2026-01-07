@@ -55,17 +55,32 @@ public class FarmGui extends SimpleGui {
     
     private void setupInfoBar(FarmManager.PlayerFarms farms) {
         // Farm level
-        setSlot(4, new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
+        GuiElementBuilder levelBuilder = new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
             .setName(Component.literal("§e§lFarm Level " + farms.getFarmLevel()))
             .addLoreLine(Component.literal("§7Technology level determines"))
-            .addLoreLine(Component.literal("§7available farm types"))
-            .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§a§lCLICK §7to upgrade!"))
-            .setCallback((index, type, action) -> {
-                FarmManager.upgradeFarmLevel(player);
-                updateDisplay();
-            })
-        );
+            .addLoreLine(Component.literal("§7available farm types"));
+        
+        // Add upgrade cost if not max level
+        if (farms.getFarmLevel() < 5) {
+            long upgradeCost = farms.getFarmLevel() * 10000L;
+            boolean canAfford = CurrencyManager.canAfford(player, upgradeCost);
+            
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§7Upgrade Cost: " + 
+                    (canAfford ? "§a" : "§c") + "$" + CurrencyManager.format(upgradeCost)))
+                .addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal(canAfford ? "§a§lCLICK §7to upgrade!" : "§c§lInsufficient funds!"));
+        } else {
+            levelBuilder.addLoreLine(Component.literal(""))
+                .addLoreLine(Component.literal("§d§l⭐ MAX LEVEL ⭐"));
+        }
+        
+        levelBuilder.setCallback((index, type, action) -> {
+            FarmManager.upgradeFarmLevel(player);
+            updateDisplay();
+        });
+        
+        setSlot(4, levelBuilder);
         
         // Total active farms
         int activeFarms = (int) farms.getFarms().values().stream()
