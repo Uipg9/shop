@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VillageWebServer {
     private static VillageWebServer instance;
     private Javalin app;
-    private final int port = 8080;
+    private final int port = 8081;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private MinecraftServer server;
     private final Map<String, Long> lastUpdateTimes = new ConcurrentHashMap<>();

@@ -52,9 +52,10 @@ dependencies {
 	modImplementation include("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
 	modImplementation include("org.java-websocket:Java-WebSocket:1.5.4")
 	
-	// Jetty dependencies required by Javalin for WebSocket support
+	// Jetty dependencies required by Javalin for WebSocket support and security
 	modImplementation include("org.eclipse.jetty:jetty-server:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-servlet:11.0.25")
+	modImplementation include("org.eclipse.jetty:jetty-security:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-util:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-http:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-io:11.0.25")

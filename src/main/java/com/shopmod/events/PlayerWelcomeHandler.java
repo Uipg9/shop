@@ -40,7 +40,7 @@ public class PlayerWelcomeHandler {
         // Link line  
         Component link = Component.literal("🌐 Open in browser: ")
             .withStyle(ChatFormatting.AQUA)
-            .append(Component.literal("http://localhost:8080").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
+            .append(Component.literal("http://localhost:8081").withStyle(ChatFormatting.BLUE, ChatFormatting.UNDERLINE));
         
         // Features line
         Component features = Component.literal("✨ Hire workers, manage resources, build structures & more!")
