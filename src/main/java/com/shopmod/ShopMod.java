@@ -3,8 +3,20 @@ package com.shopmod;
 import com.shopmod.command.BankCommand;
 import com.shopmod.command.ShopCommands;
 import com.shopmod.commands.FarmCommand;
+import com.shopmod.commands.PropertyCommand;
+import com.shopmod.commands.AuctionCommand;
+import com.shopmod.commands.StocksCommand;
+import com.shopmod.commands.ResearchCommand;
+import com.shopmod.commands.BlackMarketCommand;
+import com.shopmod.commands.HubCommand;
 import com.shopmod.data.ShopDataManager;
 import com.shopmod.farm.FarmManager;
+import com.shopmod.property.PropertyManager;
+import com.shopmod.auction.AuctionManager;
+import com.shopmod.auction.AuctionItem;
+import com.shopmod.stocks.StockOptionsManager;
+import com.shopmod.research.ResearchManager;
+import com.shopmod.blackmarket.BlackMarketManager;
 import com.shopmod.income.IncomeManager;
 import com.shopmod.spawner.SpawnerPickupHandler;
 import com.shopmod.upgrades.UpgradeManager;
@@ -84,6 +96,13 @@ public class ShopMod implements ModInitializer {
 		// Register server tick event for price updates (based on Minecraft time) and daily resets
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			long dayTime = server.overworld().getDayTime();
+			
+			// Process auction endings
+			AuctionManager.processAuctionEndings(dayTime);
+			
+			// Process expired stock options
+			StockOptionsManager.processExpiredOptions(dayTime, server);
+			
 			long timeOfDay = dayTime % 24000; // Time within current day (0-23999)
 			long currentDay = dayTime / 24000;
 			
@@ -117,6 +136,11 @@ public class ShopMod implements ModInitializer {
 			// Update crates and process investments at dawn (new day)
 			if (currentDay > lastDailyUpdate) {
 				LuckyCrateManager.updateDailyCrates(currentDay);
+				
+				// Generate new daily auctions and black market deals
+				AuctionItem.generateDailyAuctions(dayTime);
+				BlackMarketManager.generateDailyDeals();
+				
 				LOGGER.info("Lucky crates updated for day " + currentDay);
 				
 				// Process daily returns for all online players
@@ -140,7 +164,13 @@ public class ShopMod implements ModInitializer {
 				// Process digital farm production (for all players)
 				FarmManager.processDailyProduction(currentDay);
 				
-				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, trade center, and farm production processed!");
+				// Process property passive income
+				PropertyManager.processDailyIncome(currentDay, server);
+				
+				// Process research bonuses (Money Printer, etc.)
+				ResearchManager.applyDailyIncome(server);
+				
+				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, trade center, farm production, and property income processed!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -152,6 +182,12 @@ public class ShopMod implements ModInitializer {
 			BankCommand.register(dispatcher);
 			com.shopmod.command.LoanCommand.register(dispatcher);
 			FarmCommand.register(dispatcher);
+			PropertyCommand.register(dispatcher);
+			AuctionCommand.register(dispatcher);
+			StocksCommand.register(dispatcher);
+			ResearchCommand.register(dispatcher);
+			BlackMarketCommand.register(dispatcher);
+			HubCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");
