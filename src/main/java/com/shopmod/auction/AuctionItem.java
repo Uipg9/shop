@@ -1,5 +1,6 @@
 package com.shopmod.auction;
 
+import com.shopmod.util.ItemNameHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -79,7 +80,7 @@ public class AuctionItem {
             ItemStack stack = new ItemStack(item, amount);
             auctions.add(new AuctionItem(
                 stack,
-                amount + "x " + item.toString(),
+                ItemNameHelper.getFormattedName(stack),
                 baseValue,
                 (long)(baseValue * 1.3), // 30% markup for instant buy
                 auctionEndTime,
@@ -95,7 +96,7 @@ public class AuctionItem {
             
             auctions.add(new AuctionItem(
                 stack,
-                stack.getHoverName().getString(),
+                ItemNameHelper.getItemName(stack),
                 baseValue,
                 (long)(baseValue * 1.4),
                 auctionEndTime,
@@ -111,7 +112,7 @@ public class AuctionItem {
             
             auctions.add(new AuctionItem(
                 stack,
-                stack.getHoverName().getString(),
+                ItemNameHelper.getItemName(stack),
                 baseValue,
                 (long)(baseValue * 1.5),
                 auctionEndTime,
@@ -127,7 +128,7 @@ public class AuctionItem {
             
             auctions.add(new AuctionItem(
                 stack,
-                stack.getHoverName().getString(),
+                ItemNameHelper.getItemName(stack),
                 baseValue,
                 (long)(baseValue * 1.6),
                 auctionEndTime,
@@ -143,7 +144,7 @@ public class AuctionItem {
             
             auctions.add(new AuctionItem(
                 stack,
-                stack.getHoverName().getString(),
+                ItemNameHelper.getItemName(stack),
                 baseValue,
                 (long)(baseValue * 1.8),
                 auctionEndTime,

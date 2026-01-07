@@ -9,6 +9,9 @@ import com.shopmod.commands.StocksCommand;
 import com.shopmod.commands.ResearchCommand;
 import com.shopmod.commands.BlackMarketCommand;
 import com.shopmod.commands.HubCommand;
+import com.shopmod.commands.WandCommand;
+import com.shopmod.commands.MiningCommand;
+import com.shopmod.commands.PetsCommand;
 import com.shopmod.data.ShopDataManager;
 import com.shopmod.farm.FarmManager;
 import com.shopmod.property.PropertyManager;
@@ -17,6 +20,7 @@ import com.shopmod.auction.AuctionItem;
 import com.shopmod.stocks.StockOptionsManager;
 import com.shopmod.research.ResearchManager;
 import com.shopmod.blackmarket.BlackMarketManager;
+import com.shopmod.mining.MiningManager;
 import com.shopmod.income.IncomeManager;
 import com.shopmod.spawner.SpawnerPickupHandler;
 import com.shopmod.upgrades.UpgradeManager;
@@ -25,6 +29,8 @@ import com.shopmod.economy.PriceFluctuation;
 import com.shopmod.crates.LuckyCrateManager;
 import com.shopmod.events.BlockEarningsHandler;
 import com.shopmod.events.MobEarningsHandler;
+import com.shopmod.events.PlayerJoinHandler;
+import com.shopmod.events.WandUseHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -56,6 +62,14 @@ public class ShopMod implements ModInitializer {
 		
 		MobEarningsHandler.register();
 		LOGGER.info("Mob earnings system initialized!");
+		
+		// Initialize player join handler (welcome message)
+		PlayerJoinHandler.register();
+		LOGGER.info("Player join handler initialized!");
+		
+		// Initialize sell wand system
+		WandUseHandler.register();
+		LOGGER.info("Sell wand system initialized!");
 		
 
 		// Initialize spawner pickup with Silk Touch
@@ -170,7 +184,10 @@ public class ShopMod implements ModInitializer {
 				// Process research bonuses (Money Printer, etc.)
 				ResearchManager.applyDailyIncome(server);
 				
-				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, trade center, farm production, and property income processed!");
+				// Process mining operations income
+				MiningManager.processDailyIncome(currentDay, server);
+				
+				LOGGER.info("Daily processing complete: interest, investments, loans, village, farms, properties, research, and mining!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -186,8 +203,11 @@ public class ShopMod implements ModInitializer {
 			AuctionCommand.register(dispatcher);
 			StocksCommand.register(dispatcher);
 			ResearchCommand.register(dispatcher);
+			MiningCommand.register(dispatcher);
+			PetsCommand.register(dispatcher);
 			BlackMarketCommand.register(dispatcher);
 			HubCommand.register(dispatcher);
+			WandCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

@@ -3,6 +3,7 @@
 	"package": "com.shopmod.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"HopperSpeedMixin"
 	],
 	"client": [
 	],
