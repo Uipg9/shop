@@ -1,14 +1,55 @@
-# 🏪 Shop Mod v1.0.42 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.43 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.42-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.43-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **comprehensive systems**: Sell Wands, Mining Operations, Pet Collection, Property Empire, Auction House, Stock Market, and MORE!
+Transform your Minecraft world into a thriving economy with **comprehensive systems**: Games for Starter Income, Enhanced Free Teleports, Sell Wands, Mining Operations, Pet Collection, Property Empire, Auction House, Stock Market, and MORE!
 
 ---
 
-## 🆕 What's New in v1.0.42
+## 🆕 What's New in v1.0.43
+
+### 🎮 Game Center ⭐ **NEW!**
+- **Play Games for Money**: FREE mini-games with guaranteed rewards!
+- **5 Exciting Games**:
+  - 🔢 **Number Guess**: Guess 1-10 ($500-$5,000)
+  - 🪙 **Coin Flip**: Heads or tails ($500-$3,000)
+  - 🎲 **Dice Roll**: Roll for jackpot ($1,000-$10,000)
+  - 📊 **High-Low**: Higher or lower ($750-$8,000)
+  - 🎰 **Lucky Slots**: Spin for MEGA JACKPOT ($1,000-$50,000!)
+- **Completely FREE**: No cost to play, ALWAYS win money!
+- **Perfect for Starters**: Earn money quickly for villages & properties
+- **Commands**: `/game`, `/games`, `/play`
+
+### 🌟 Enhanced Teleport System ⭐ **NEW!**
+- **FREE Waypoint Teleportation**: No currency cost, unlimited use!
+- **Up to 20 Waypoints**: Save your favorite locations
+- **Beautiful GUI**: Easy waypoint management with pagination
+- **Quick Commands**:
+  - `/teleport`, `/tp` - Open teleport GUI
+  - `/setwaypoint <name>` - Create waypoint
+  - `/waypoint <name>` - Teleport to waypoint
+  - `/tp <x> <y> <z>` - Teleport to coordinates
+  - `/sethome` - Set home waypoint
+  - `/home` - Teleport home
+- **Statistics**: Track waypoints and total teleports
+- **User-Friendly**: LEFT CLICK teleport, RIGHT CLICK delete
+
+### 🏠 Hub Navigation ⭐ **NEW!**
+- **Every GUI has a Hub button**: Never get lost in menus!
+- **Consistent Navigation**: Return to Shop Hub from anywhere
+- **13 GUIs Updated**: Shop, Bank, Farm, Enchanting, Properties, Auctions, Stocks, Black Market, Wand, Mining, Pets, Research, plus new Teleport & Games
+
+### 💰 Beginner Income Boost
+- **Games** provide $500-$50,000 per play
+- **Free Teleportation** saves money
+- **Quick starter cash** for early purchases
+- **User-friendly income** right from the start
+
+---
+
+## 🚀 Previous Updates (v1.0.42)
 
 ### ⚡ Sell Wand System ⭐ **NEW!**
 - **Right-Click Chests**: Instantly sell all contents with one click!
