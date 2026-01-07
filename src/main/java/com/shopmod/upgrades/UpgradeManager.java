@@ -26,6 +26,9 @@ public class UpgradeManager {
     // Player UUID -> Upgrade Type -> Level
     private static final Map<UUID, Map<UpgradeType, Integer>> playerUpgrades = new HashMap<>();
     
+    // Player UUID -> whether night vision is toggled ON
+    private static final Map<UUID, Boolean> nightVisionToggle = new HashMap<>();
+    
     public static void initialize() {
         loadData();
     }
@@ -99,6 +102,69 @@ public class UpgradeManager {
                 false  // Show particles
             ));
         }
+    }
+    
+    public static void applyHealthBoost(ServerPlayer player) {
+        int level = getUpgradeLevel(player.getUUID(), UpgradeType.HEALTH_BOOST);
+        if (level > 0) {
+            int healthLevel = Math.min(20, level); // Max +40 hearts
+            player.addEffect(new MobEffectInstance(MobEffects.HEALTH_BOOST, 20 * 20, healthLevel, true, false));
+        }
+    }
+    
+    public static void applyLuck(ServerPlayer player) {
+        int level = getUpgradeLevel(player.getUUID(), UpgradeType.LUCK_BOOST);
+        if (level > 0) {
+            int luckLevel = Math.min(9, level - 1);
+            player.addEffect(new MobEffectInstance(MobEffects.LUCK, 20 * 20, luckLevel, true, false));
+        }
+    }
+    
+    public static void applyRegeneration(ServerPlayer player) {
+        int level = getUpgradeLevel(player.getUUID(), UpgradeType.REGENERATION);
+        if (level > 0) {
+            // Low level regen only (max Regen III at level 3)
+            int regenLevel = Math.min(2, level - 1); // 0-2 for Regen I-III
+            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 20, regenLevel, true, false));
+        }
+    }
+    
+    public static void applyFireResistance(ServerPlayer player) {
+        if (getUpgradeLevel(player.getUUID(), UpgradeType.FIRE_RESISTANCE) > 0) {
+            player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 20, 0, true, false));
+        }
+    }
+    
+    public static void applyWaterBreathing(ServerPlayer player) {
+        if (getUpgradeLevel(player.getUUID(), UpgradeType.WATER_BREATHING) > 0) {
+            player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 20 * 20, 0, true, false));
+        }
+    }
+    
+    public static void applyNightVision(ServerPlayer player) {
+        if (getUpgradeLevel(player.getUUID(), UpgradeType.NIGHT_VISION) > 0) {
+            // Check if night vision is toggled on (default true)
+            boolean isEnabled = nightVisionToggle.getOrDefault(player.getUUID(), true);
+            if (isEnabled) {
+                player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 20, 0, true, false));
+            }
+        }
+    }
+    
+    /**
+     * Toggle night vision on/off for a player
+     */
+    public static boolean toggleNightVision(UUID playerUUID) {
+        boolean current = nightVisionToggle.getOrDefault(playerUUID, true);
+        nightVisionToggle.put(playerUUID, !current);
+        return !current; // Return new state
+    }
+    
+    /**
+     * Check if night vision is enabled for a player
+     */
+    public static boolean isNightVisionEnabled(UUID playerUUID) {
+        return nightVisionToggle.getOrDefault(playerUUID, true);
     }
     
     private static void loadData() {

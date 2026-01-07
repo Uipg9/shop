@@ -18,14 +18,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * Manages player bank storage and investments
  * Features:
  * - Item storage (like ender chest)
- * - Money investment with daily gains/losses
+ * - Money investment with risky daily gains/losses
  * - Difficulty-scaled risk/reward
+ * - NOTE: Regular wallet balance (not invested) earns 10% per night - see CurrencyManager
  */
 public class BankManager {
     private static final Map<UUID, BankData> bankDataMap = new ConcurrentHashMap<>();
     private static final Random random = new Random();
     
-    // Investment parameters
+    // Investment parameters - risky returns
     private static final double EASY_MAX_GAIN = 0.10;   // 10% max gain
     private static final double EASY_MAX_LOSS = 0.05;   // 5% max loss
     
@@ -39,6 +40,7 @@ public class BankManager {
         private final List<ItemStack> storage = new ArrayList<>();
         private long investedMoney = 0;
         private long lastProcessedDay = -1;
+        private int storageLevel = 0; // 0 = base 27 slots, 1 = 36, 2 = 45, 3 = 54
         
         public BankData() {
             // Initialize with 27 slots (like chest)
@@ -49,6 +51,23 @@ public class BankManager {
         
         public List<ItemStack> getStorage() {
             return storage;
+        }
+        
+        public int getStorageSize() {
+            return 27 + (storageLevel * 9);
+        }
+        
+        public int getStorageLevel() {
+            return storageLevel;
+        }
+        
+        public void setStorageLevel(int level) {
+            this.storageLevel = level;
+            // Expand storage if needed
+            int targetSize = 27 + (level * 9);
+            while (storage.size() < targetSize) {
+                storage.add(ItemStack.EMPTY);
+            }
         }
         
         public long getInvestedMoney() {
@@ -104,6 +123,61 @@ public class BankManager {
         CurrencyManager.addMoney(player, amount);
         
         return true;
+    }
+    
+    /**
+     * Upgrade bank storage space
+     * Costs: Level 1 ($5k), Level 2 ($15k), Level 3 ($50k)
+     * Slots: 27 -> 36 -> 45 -> 54
+     */
+    public static boolean upgradeStorage(ServerPlayer player) {
+        BankData data = getBankData(player.getUUID());
+        int currentLevel = data.getStorageLevel();
+        
+        if (currentLevel >= 3) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                "§c§l[BANK] Maximum storage level reached!"));
+            return false;
+        }
+        
+        // Calculate upgrade cost
+        long cost = switch (currentLevel) {
+            case 0 -> 5_000;   // 27 -> 36 slots
+            case 1 -> 15_000;  // 36 -> 45 slots
+            case 2 -> 50_000;  // 45 -> 54 slots
+            default -> 0;
+        };
+        
+        long balance = CurrencyManager.getBalance(player);
+        if (balance < cost) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                String.format("§c§l[BANK] Insufficient funds! Need §6$%,d§c, have §6$%,d§c", 
+                    cost, balance)));
+            return false;
+        }
+        
+        // Process upgrade
+        CurrencyManager.removeMoney(player, cost);
+        data.setStorageLevel(currentLevel + 1);
+        
+        int newSlots = data.getStorageSize();
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+            String.format("§a§l[BANK] Storage upgraded to §6Level %d§a! (%d slots)", 
+                currentLevel + 1, newSlots)));
+        
+        return true;
+    }
+    
+    /**
+     * Get upgrade cost for next level
+     */
+    public static long getUpgradeCost(int currentLevel) {
+        return switch (currentLevel) {
+            case 0 -> 5_000;
+            case 1 -> 15_000;
+            case 2 -> 50_000;
+            default -> 0;
+        };
     }
     
     /**

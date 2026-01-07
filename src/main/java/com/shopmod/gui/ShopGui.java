@@ -916,15 +916,33 @@ public class ShopGui extends SimpleGui {
                 long balance = CurrencyManager.getBalance(player);
                 buyAmount = (int) Math.min(balance / buyPrice, 2304); // Cap at 36 stacks
             }
-            long totalCost = buyPrice * buyAmount;
+            
+            // Apply bulk discounts
+            double discountRate = 0.0;
+            if (buyAmount >= 64) {
+                discountRate = 0.10; // 10% discount for 64+
+            } else if (buyAmount >= 16) {
+                discountRate = 0.05; // 5% discount for 16+
+            }
+            
+            long totalCost = (long)(buyPrice * buyAmount * (1.0 - discountRate));
             boolean canAffordBulk = CurrencyManager.canAfford(player, totalCost);
             
             builder.addLoreLine(Component.literal(""))
                 .addLoreLine(Component.literal(canAffordBulk ? "§a§lLEFT CLICK TO BUY" : "§c§lCAN'T AFFORD!"))
                 .addLoreLine(Component.literal("§7Buy Mode: §b" + buyQuantity.display))
-                .addLoreLine(Component.literal("§7Amount: §f" + buyAmount + " §7items"))
-                .addLoreLine(Component.literal("§7Total Cost: §6" + CurrencyManager.format(totalCost)))
-                .addLoreLine(Component.literal(""));
+                .addLoreLine(Component.literal("§7Amount: §f" + buyAmount + " §7items"));
+            
+            if (discountRate > 0) {
+                long originalCost = buyPrice * buyAmount;
+                builder.addLoreLine(Component.literal("§7Original: §f" + CurrencyManager.format(originalCost) + " §8(strikethrough)"))
+                    .addLoreLine(Component.literal("§a§lDISCOUNT: " + (int)(discountRate * 100) + "% OFF!"))
+                    .addLoreLine(Component.literal("§7Total Cost: §6" + CurrencyManager.format(totalCost)));
+            } else {
+                builder.addLoreLine(Component.literal("§7Total Cost: §6" + CurrencyManager.format(totalCost)));
+            }
+            
+            builder.addLoreLine(Component.literal(""));
             
             if (playerHas > 0) {
                 // Calculate sell amount and earnings
@@ -969,7 +987,16 @@ public class ShopGui extends SimpleGui {
                     long balance = CurrencyManager.getBalance(player);
                     buyAmount = (int) Math.min(balance / buyPrice, 2304); // Cap at 36 stacks
                 }
-                buyItem(item, buyPrice, buyAmount);
+                
+                // Apply bulk discounts
+                double discountRate = 0.0;
+                if (buyAmount >= 64) {
+                    discountRate = 0.10; // 10% discount for 64+
+                } else if (buyAmount >= 16) {
+                    discountRate = 0.05; // 5% discount for 16+
+                }
+                
+                buyItem(item, buyPrice, buyAmount, discountRate);
             } else if (!tierUnlocked) {
                 // Locked item clicked
                 player.sendSystemMessage(Component.literal("§c✗ Unlock " + tier.getColor() + tier.getName() + " §cfirst!"));
@@ -979,8 +1006,8 @@ public class ShopGui extends SimpleGui {
         setSlot(slot, builder);
     }
     
-    private void buyItem(Item item, long priceEach, int amount) {
-        long totalPrice = priceEach * amount;
+    private void buyItem(Item item, long priceEach, int amount, double discountRate) {
+        long totalPrice = (long)(priceEach * amount * (1.0 - discountRate));
         
         if (!CurrencyManager.canAfford(player, totalPrice)) {
             CurrencyManager.sendInsufficientFundsMessage(player, totalPrice);
@@ -989,7 +1016,11 @@ public class ShopGui extends SimpleGui {
         
         if (CurrencyManager.removeMoney(player, totalPrice)) {
             player.addItem(new ItemStack(item, amount));
-            CurrencyManager.sendMoneySpentMessage(player, totalPrice, "Purchased " + amount + "x " + item.getName(item.getDefaultInstance()).getString());
+            String message = "Purchased " + amount + "x " + item.getName(item.getDefaultInstance()).getString();
+            if (discountRate > 0) {
+                message += " §a(§l" + (int)(discountRate * 100) + "% BULK DISCOUNT!§a)";
+            }
+            CurrencyManager.sendMoneySpentMessage(player, totalPrice, message);
             updateDisplay();
         }
     }

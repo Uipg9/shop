@@ -118,9 +118,22 @@ public class ShopMod implements ModInitializer {
 				
 				// Process daily returns for all online players
 				server.getPlayerList().getPlayers().forEach(player -> {
+					// Process wallet interest (10% guaranteed)
+					com.shopmod.currency.CurrencyManager.processDailyInterest(player);
+					
+					// Process bank investments (risky returns)
 					com.shopmod.bank.BankManager.processDailyReturns(player);
+					
+					// Process loan payments
+					com.shopmod.loan.LoanManager.processDailyPayments(player, currentDay);
+					
+					// Process village resource economy (V2)
+					com.shopmod.village.VillageManager.processDailyVillage(player, currentDay);
+					
+					// Process trade center auto-selling
+					com.shopmod.village.TradeCenterManager.processAutoSell(player);
 				});
-				LOGGER.info("Daily bank returns processed!");
+				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, and trade center processed!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -130,6 +143,7 @@ public class ShopMod implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			ShopCommands.register(dispatcher);
 			BankCommand.register(dispatcher);
+			com.shopmod.command.LoanCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

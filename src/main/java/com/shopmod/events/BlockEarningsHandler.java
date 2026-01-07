@@ -4,6 +4,7 @@ import com.shopmod.currency.CurrencyManager;
 import com.shopmod.upgrades.UpgradeManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +27,7 @@ import java.util.*;
 public class BlockEarningsHandler {
     
     private static final Map<UUID, PendingRewards> pendingRewards = new HashMap<>();
-    private static final int ACCUMULATION_TICKS = 3; // Wait 3 ticks after break to check inventory
+    private static final int ACCUMULATION_TICKS = 40; // Wait 40 ticks (2 seconds) for items to be collected
     private static final boolean DEBUG_LOGGING = false; // Set to true for verbose logs
     
     private static class PendingRewards {
@@ -54,6 +55,11 @@ public class BlockEarningsHandler {
         
         // Process AFTER block break
         PlayerBlockBreakEvents.AFTER.register(BlockEarningsHandler::onBlockBreak);
+        
+        // Clean up on player disconnect to prevent crashes
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            pendingRewards.remove(handler.getPlayer().getUUID());
+        });
         
         // Check inventory changes each tick and process payouts
         ServerTickEvents.END_SERVER_TICK.register(server -> {
@@ -155,6 +161,13 @@ public class BlockEarningsHandler {
             }
         }
         
+        if (DEBUG_LOGGING) {
+            System.out.println("[SHOP] Inventory check - items added: " + itemsAdded.size());
+            for (Map.Entry<Item, Integer> entry : itemsAdded.entrySet()) {
+                System.out.println("  - " + entry.getValue() + "x " + entry.getKey().toString());
+            }
+        }
+        
         // Calculate rewards based on items actually added
         double incomeMultiplier = UpgradeManager.getIncomeMultiplier(rewards.player.getUUID());
         double xpMultiplier = UpgradeManager.getXPMultiplier(rewards.player.getUUID());
@@ -164,9 +177,18 @@ public class BlockEarningsHandler {
             int count = entry.getValue();
             
             Block block = Block.byItem(item);
+            
+            if (DEBUG_LOGGING) {
+                System.out.println("[SHOP] Item " + item.toString() + " -> Block " + block.getName().getString());
+            }
+            
             if (block != Blocks.AIR) {
                 long baseValue = getBlockValue(block);
                 int baseXP = getBlockXP(block);
+                
+                if (DEBUG_LOGGING) {
+                    System.out.println("[SHOP]   Value: $" + baseValue + ", XP: " + baseXP);
+                }
                 
                 if (baseValue > 0 || baseXP > 0) {
                     rewards.totalMoney += (long)(baseValue * count * incomeMultiplier);
@@ -174,7 +196,7 @@ public class BlockEarningsHandler {
                     rewards.blocksBroken += count;
                     
                     if (DEBUG_LOGGING) {
-                        System.out.println("[SHOP] Added: " + count + "x " + item.getName(ItemStack.EMPTY).getString());
+                        System.out.println("[SHOP]   Rewarding: " + count + "x " + item.getName(ItemStack.EMPTY).getString() + " = $" + (baseValue * count));
                     }
                 }
             }

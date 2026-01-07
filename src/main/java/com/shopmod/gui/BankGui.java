@@ -18,7 +18,7 @@ public class BankGui extends SimpleGui {
     private final ServerPlayer player;
     private final BankManager.BankData bankData;
     private static final int STORAGE_START = 0;
-    private static final int STORAGE_END = 26;  // 27 slots (0-26)
+    private int storageEnd;  // Dynamic based on storage level
     
     // Control slots - redesigned layout
     private static final int DEPOSIT_100 = 36;
@@ -35,36 +35,47 @@ public class BankGui extends SimpleGui {
     
     private static final int INFO_SLOT = 49;
     private static final int BALANCE_SLOT = 53;
+    private static final int UPGRADE_SLOT = 41;
     
     public BankGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
         this.player = player;
         this.bankData = BankManager.getBankData(player.getUUID());
+        this.storageEnd = Math.min(bankData.getStorageSize() - 1, 26);  // Max 27 slots in first 3 rows
         
         this.setTitle(Component.literal("§6§lBank"));
         setupGui();
     }
     
     private void setupGui() {
-        // Setup storage slots (0-26)
-        for (int i = STORAGE_START; i <= STORAGE_END; i++) {
-            ItemStack storedItem = bankData.getStorage().get(i);
-            if (!storedItem.isEmpty()) {
-                setSlot(i, storedItem, (index, type, action) -> {
-                    handleStorageClick(index, type);
-                });
-            } else {
-                setSlot(i, ItemStack.EMPTY, (index, type, action) -> {
-                    handleStorageClick(index, type);
-                });
+        // Setup storage slots (0 to storageEnd)
+        for (int i = STORAGE_START; i <= storageEnd; i++) {
+            if (i < bankData.getStorage().size()) {
+                ItemStack storedItem = bankData.getStorage().get(i);
+                if (!storedItem.isEmpty()) {
+                    setSlot(i, storedItem, (index, type, action) -> {
+                        handleStorageClick(index, type);
+                    });
+                } else {
+                    setSlot(i, ItemStack.EMPTY, (index, type, action) -> {
+                        handleStorageClick(index, type);
+                    });
+                }
             }
+        }
+        
+        // Grey out locked storage slots
+        for (int i = storageEnd + 1; i <= 26; i++) {
+            setSlot(i, new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
+                .setName(Component.literal("§c§lLocked"))
+                .addLoreLine(Component.literal("§7Upgrade storage to unlock")));
         }
         
         // Fill decorative slots (skip button areas)
         for (int i = 27; i < 54; i++) {
             if (i >= DEPOSIT_100 && i <= DEPOSIT_ALL) continue;
             if (i >= WITHDRAW_100 && i <= WITHDRAW_ALL) continue;
-            if (i == INFO_SLOT || i == BALANCE_SLOT || i == 41) continue;  // Skip control slots
+            if (i == INFO_SLOT || i == BALANCE_SLOT || i == UPGRADE_SLOT) continue;  // Skip control slots
             
             setSlot(i, new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
                 .setName(Component.literal("")));
@@ -75,6 +86,7 @@ public class BankGui extends SimpleGui {
         setupWithdrawButtons();
         setupInfoDisplay();
         setupBalanceDisplay();
+        setupUpgradeButton();
     }
     
     private void setupDepositButtons() {
@@ -198,6 +210,12 @@ public class BankGui extends SimpleGui {
     }
     
     private void handleStorageClick(int slot, ClickType clickType) {
+        // Check if slot is unlocked
+        if (slot > storageEnd) {
+            player.sendSystemMessage(Component.literal("§c§lThis slot is locked! Upgrade storage to unlock."));
+            return;
+        }
+        
         ItemStack cursorStack = player.containerMenu.getCarried();
         ItemStack slotStack = bankData.getStorage().get(slot);
         
@@ -269,5 +287,34 @@ public class BankGui extends SimpleGui {
             .addLoreLine(Component.literal("§6$" + String.format("%,d", balance)))
             .hideFlags()
         );
+    }
+    
+    private void setupUpgradeButton() {
+        int level = bankData.getStorageLevel();
+        int slots = bankData.getStorageSize();
+        
+        GuiElementBuilder builder = new GuiElementBuilder(Items.CHEST);
+        builder.setName(Component.literal("§b§lUpgrade Storage"));
+        builder.addLoreLine(Component.literal("§7Current: §eLevel " + level + " §8(" + slots + " slots)"));
+        
+        if (level < 3) {
+            long cost = BankManager.getUpgradeCost(level);
+            int nextSlots = 27 + ((level + 1) * 9);
+            builder.addLoreLine(Component.literal("§7Next: §eLevel " + (level + 1) + " §8(" + nextSlots + " slots)"));
+            builder.addLoreLine(Component.literal(""));
+            builder.addLoreLine(Component.literal("§7Cost: §6" + CurrencyManager.format(cost)));
+            builder.addLoreLine(Component.literal(""));
+            builder.addLoreLine(Component.literal("§e§lCLICK TO UPGRADE"));
+            builder.glow();
+        } else {
+            builder.addLoreLine(Component.literal(""));
+            builder.addLoreLine(Component.literal("§a§lMaximum level reached!"));
+        }
+        
+        setSlot(UPGRADE_SLOT, builder.setCallback((index, type, action) -> {
+            if (BankManager.upgradeStorage(player)) {
+                setupGui(); // Refresh
+            }
+        }));
     }
 }

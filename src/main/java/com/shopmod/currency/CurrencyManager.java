@@ -13,11 +13,17 @@ import java.util.UUID;
 /**
  * Helper class for currency operations.
  * Provides convenient methods for managing player money.
+ * 
+ * Wallet balance earns 10% interest per Minecraft night.
+ * Bank investments are risky (see BankManager).
  */
 public class CurrencyManager {
     private static final String CURRENCY_SYMBOL = "$";
     private static final String CURRENCY_NAME = "Dollar";
     private static final String CURRENCY_NAME_PLURAL = "Dollars";
+    
+    // Interest rate for wallet balance (not bank investments)
+    private static final double WALLET_INTEREST_RATE = 0.10;  // 10% per night
     
     /**
      * Gets a player's current balance
@@ -125,5 +131,30 @@ public class CurrencyManager {
                 .append(Component.literal(" more."))
                 .withStyle(style -> style.withColor(0xFF5555))
         );
+    }
+    
+    /**
+     * Process daily wallet interest (10% per night)
+     * Called by ShopMod daily event system
+     */
+    public static void processDailyInterest(ServerPlayer player) {
+        long balance = getBalance(player);
+        
+        if (balance <= 0) {
+            return;
+        }
+        
+        long interest = (long)(balance * WALLET_INTEREST_RATE);
+        
+        if (interest > 0) {
+            addMoney(player, interest);
+            player.displayClientMessage(
+                net.minecraft.network.chat.Component.literal(
+                    String.format("§a§l[WALLET] Earned §6$%,d§a interest! (10%% on $%,d)", 
+                                interest, balance)
+                ), 
+                true
+            );
+        }
     }
 }

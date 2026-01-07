@@ -516,6 +516,286 @@ public class ItemPricing {
         addItem(Items.MUSIC_DISC_OTHERSIDE, 1000, ShopTier.ELITE);
         addItem(Items.MUSIC_DISC_5, 1000, ShopTier.ELITE);
         addItem(Items.MUSIC_DISC_PIGSTEP, 2000, ShopTier.ELITE);
+        
+        
+        // ===== ADDITIONAL ITEMS - More variety across all tiers =====
+        
+        // More STARTER tier items (food, basic materials)
+        addItem(Items.APPLE, 8, ShopTier.STARTER);
+        addItem(Items.COOKIE, 5, ShopTier.STARTER);
+        addItem(Items.MELON_SLICE, 3, ShopTier.STARTER);
+        addItem(Items.SWEET_BERRIES, 4, ShopTier.STARTER);
+        addItem(Items.GLOW_BERRIES, 6, ShopTier.STARTER);
+        addItem(Items.DRIED_KELP, 3, ShopTier.STARTER);
+        addItem(Items.KELP, 2, ShopTier.STARTER);
+        addItem(Items.SEAGRASS, 1, ShopTier.STARTER);
+        addItem(Items.SEA_PICKLE, 5, ShopTier.STARTER);
+        addItem(Items.MUSHROOM_STEW, 12, ShopTier.STARTER);
+        addItem(Items.SUSPICIOUS_STEW, 20, ShopTier.STARTER);
+        addItem(Items.RABBIT_STEW, 18, ShopTier.STARTER);
+        addItem(Items.BEETROOT_SOUP, 15, ShopTier.STARTER);
+        addItem(Items.COOKED_CHICKEN, 12, ShopTier.STARTER);
+        addItem(Items.COOKED_PORKCHOP, 12, ShopTier.STARTER);
+        addItem(Items.COOKED_MUTTON, 12, ShopTier.STARTER);
+        addItem(Items.COOKED_RABBIT, 12, ShopTier.STARTER);
+        addItem(Items.COOKED_COD, 10, ShopTier.STARTER);
+        addItem(Items.COOKED_SALMON, 12, ShopTier.STARTER);
+        addItem(Items.BAKED_POTATO, 8, ShopTier.STARTER);
+        addItem(Items.PUMPKIN_PIE, 15, ShopTier.STARTER);
+        addItem(Items.CAKE, 25, ShopTier.STARTER);
+        addItem(Items.POISONOUS_POTATO, 1, ShopTier.STARTER);
+        addItem(Items.ROTTEN_FLESH, 2, ShopTier.STARTER);
+        
+        // More building blocks (STARTER/FARMER)
+        addItem(Items.ANDESITE, 2, ShopTier.STARTER);
+        addItem(Items.DIORITE, 2, ShopTier.STARTER);
+        addItem(Items.GRANITE, 2, ShopTier.STARTER);
+        addItem(Items.POLISHED_ANDESITE, 4, ShopTier.STARTER);
+        addItem(Items.POLISHED_DIORITE, 4, ShopTier.STARTER);
+        addItem(Items.POLISHED_GRANITE, 4, ShopTier.STARTER);
+        addItem(Items.CALCITE, 3, ShopTier.STARTER);
+        addItem(Items.TUFF, 3, ShopTier.STARTER);
+        addItem(Items.DRIPSTONE_BLOCK, 5, ShopTier.STARTER);
+        addItem(Items.POINTED_DRIPSTONE, 4, ShopTier.STARTER);
+        addItem(Items.MOSS_BLOCK, 8, ShopTier.FARMER);
+        addItem(Items.MOSS_CARPET, 3, ShopTier.FARMER);
+        addItem(Items.AZALEA, 10, ShopTier.FARMER);
+        addItem(Items.FLOWERING_AZALEA, 15, ShopTier.FARMER);
+        addItem(Items.SPORE_BLOSSOM, 25, ShopTier.FARMER);
+        addItem(Items.BIG_DRIPLEAF, 12, ShopTier.FARMER);
+        addItem(Items.SMALL_DRIPLEAF, 8, ShopTier.FARMER);
+        addItem(Items.GLOW_LICHEN, 6, ShopTier.FARMER);
+        addItem(Items.ROOTED_DIRT, 3, ShopTier.FARMER);
+        addItem(Items.MUD, 3, ShopTier.FARMER);
+        addItem(Items.MUDDY_MANGROVE_ROOTS, 8, ShopTier.FARMER);
+        addItem(Items.MANGROVE_LOG, 8, ShopTier.FARMER);
+        addItem(Items.MANGROVE_PROPAGULE, 15, ShopTier.FARMER);
+        addItem(Items.PACKED_MUD, 5, ShopTier.FARMER);
+        addItem(Items.MUD_BRICKS, 10, ShopTier.FARMER);
+        
+        // Concrete & concrete powder (FARMER)
+        addItem(Items.WHITE_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.ORANGE_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.MAGENTA_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.YELLOW_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.LIME_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.PINK_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.GRAY_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.CYAN_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.PURPLE_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.BLUE_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.BROWN_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.GREEN_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.RED_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.BLACK_CONCRETE, 12, ShopTier.FARMER);
+        addItem(Items.WHITE_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.ORANGE_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.MAGENTA_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.YELLOW_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.LIME_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.PINK_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.GRAY_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.CYAN_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.PURPLE_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.BLUE_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.BROWN_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.GREEN_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.RED_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        addItem(Items.BLACK_CONCRETE_POWDER, 10, ShopTier.FARMER);
+        
+        // Glazed terracotta (FARMER)
+        addItem(Items.WHITE_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.ORANGE_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.MAGENTA_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.YELLOW_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.LIME_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.PINK_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.GRAY_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.CYAN_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.PURPLE_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.BLUE_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.BROWN_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.GREEN_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.RED_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        addItem(Items.BLACK_GLAZED_TERRACOTTA, 20, ShopTier.FARMER);
+        
+        // Stained glass (ENGINEER)
+        addItem(Items.WHITE_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.ORANGE_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.MAGENTA_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.LIGHT_BLUE_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.YELLOW_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.LIME_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.PINK_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.GRAY_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.LIGHT_GRAY_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.CYAN_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.PURPLE_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.BLUE_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.BROWN_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.GREEN_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.RED_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        addItem(Items.BLACK_STAINED_GLASS, 8, ShopTier.ENGINEER);
+        
+        // Banners (MERCHANT)
+        addItem(Items.WHITE_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.ORANGE_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.MAGENTA_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.LIGHT_BLUE_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.YELLOW_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.LIME_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.PINK_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.GRAY_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.LIGHT_GRAY_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.CYAN_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.PURPLE_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.BLUE_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.BROWN_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.GREEN_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.RED_BANNER, 50, ShopTier.MERCHANT);
+        addItem(Items.BLACK_BANNER, 50, ShopTier.MERCHANT);
+        
+        // Ocean items (MERCHANT/NETHER_MASTER)
+        addItem(Items.PRISMARINE, 30, ShopTier.MERCHANT);
+        addItem(Items.PRISMARINE_BRICKS, 40, ShopTier.MERCHANT);
+        addItem(Items.DARK_PRISMARINE, 45, ShopTier.MERCHANT);
+        addItem(Items.SEA_LANTERN, 60, ShopTier.MERCHANT);
+        addItem(Items.PRISMARINE_SHARD, 15, ShopTier.MERCHANT);
+        addItem(Items.PRISMARINE_CRYSTALS, 20, ShopTier.MERCHANT);
+        addItem(Items.SPONGE, 150, ShopTier.MERCHANT);
+        addItem(Items.WET_SPONGE, 100, ShopTier.MERCHANT);
+        addItem(Items.TUBE_CORAL, 20, ShopTier.MERCHANT);
+        addItem(Items.BRAIN_CORAL, 20, ShopTier.MERCHANT);
+        addItem(Items.BUBBLE_CORAL, 20, ShopTier.MERCHANT);
+        addItem(Items.FIRE_CORAL, 20, ShopTier.MERCHANT);
+        addItem(Items.HORN_CORAL, 20, ShopTier.MERCHANT);
+        addItem(Items.TUBE_CORAL_BLOCK, 35, ShopTier.MERCHANT);
+        addItem(Items.BRAIN_CORAL_BLOCK, 35, ShopTier.MERCHANT);
+        addItem(Items.BUBBLE_CORAL_BLOCK, 35, ShopTier.MERCHANT);
+        addItem(Items.FIRE_CORAL_BLOCK, 35, ShopTier.MERCHANT);
+        addItem(Items.HORN_CORAL_BLOCK, 35, ShopTier.MERCHANT);
+        addItem(Items.TUBE_CORAL_FAN, 15, ShopTier.MERCHANT);
+        addItem(Items.BRAIN_CORAL_FAN, 15, ShopTier.MERCHANT);
+        addItem(Items.BUBBLE_CORAL_FAN, 15, ShopTier.MERCHANT);
+        addItem(Items.FIRE_CORAL_FAN, 15, ShopTier.MERCHANT);
+        addItem(Items.HORN_CORAL_FAN, 15, ShopTier.MERCHANT);
+        
+        // Brewing ingredients (NETHER_MASTER)
+        addItem(Items.DRAGON_BREATH, 500, ShopTier.NETHER_MASTER);
+        
+        // Fireworks (ELITE)
+        addItem(Items.FIREWORK_ROCKET, 25, ShopTier.ELITE);
+        addItem(Items.FIREWORK_STAR, 20, ShopTier.ELITE);
+        addItem(Items.FIRE_CHARGE, 15, ShopTier.ELITE);
+        
+        // Skulls & heads (ELITE)
+        addItem(Items.SKELETON_SKULL, 300, ShopTier.ELITE);
+        addItem(Items.ZOMBIE_HEAD, 300, ShopTier.ELITE);
+        addItem(Items.CREEPER_HEAD, 400, ShopTier.ELITE);
+        addItem(Items.PLAYER_HEAD, 1000, ShopTier.ELITE);
+        addItem(Items.PIGLIN_HEAD, 500, ShopTier.ELITE);
+        
+        // More decorative (MERCHANT/ENGINEER)
+        addItem(Items.PAINTING, 30, ShopTier.ENGINEER);
+        addItem(Items.ITEM_FRAME, 25, ShopTier.ENGINEER);
+        addItem(Items.GLOW_ITEM_FRAME, 40, ShopTier.ENGINEER);
+        addItem(Items.ARMOR_STAND, 80, ShopTier.ENGINEER);
+        addItem(Items.DECORATED_POT, 50, ShopTier.MERCHANT);
+        
+        // Candles (FARMER)
+        addItem(Items.CANDLE, 10, ShopTier.FARMER);
+        addItem(Items.WHITE_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.ORANGE_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.MAGENTA_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.YELLOW_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.LIME_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.PINK_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.GRAY_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.CYAN_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.PURPLE_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.BLUE_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.BROWN_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.GREEN_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.RED_CANDLE, 12, ShopTier.FARMER);
+        addItem(Items.BLACK_CANDLE, 12, ShopTier.FARMER);
+        
+        // Copper blocks (MERCHANT)
+        addItem(Items.COPPER_BLOCK, 280, ShopTier.MERCHANT);
+        addItem(Items.EXPOSED_COPPER, 280, ShopTier.MERCHANT);
+        addItem(Items.WEATHERED_COPPER, 280, ShopTier.MERCHANT);
+        addItem(Items.OXIDIZED_COPPER, 280, ShopTier.MERCHANT);
+        addItem(Items.CUT_COPPER, 300, ShopTier.MERCHANT);
+        addItem(Items.EXPOSED_CUT_COPPER, 300, ShopTier.MERCHANT);
+        addItem(Items.WEATHERED_CUT_COPPER, 300, ShopTier.MERCHANT);
+        addItem(Items.OXIDIZED_CUT_COPPER, 300, ShopTier.MERCHANT);
+        
+        // Scaffolding & bamboo (ENGINEER)
+        addItem(Items.BAMBOO, 5, ShopTier.ENGINEER);
+        addItem(Items.SCAFFOLDING, 15, ShopTier.ENGINEER);
+        addItem(Items.BAMBOO_BLOCK, 10, ShopTier.ENGINEER);
+        
+        // More mob drops (MERCHANT)
+        addItem(Items.STRING, 5, ShopTier.MERCHANT);
+        addItem(Items.SLIME_BALL, 40, ShopTier.MERCHANT);
+        addItem(Items.ENDER_PEARL, 150, ShopTier.MERCHANT);
+        addItem(Items.INK_SAC, 8, ShopTier.MERCHANT);
+        addItem(Items.GLOW_INK_SAC, 15, ShopTier.MERCHANT);
+        addItem(Items.FEATHER, 5, ShopTier.MERCHANT);
+        addItem(Items.HONEYCOMB, 30, ShopTier.MERCHANT);
+        addItem(Items.HONEY_BOTTLE, 25, ShopTier.MERCHANT);
+        
+        // Beds (FARMER)
+        addItem(Items.WHITE_BED, 30, ShopTier.FARMER);
+        addItem(Items.ORANGE_BED, 30, ShopTier.FARMER);
+        addItem(Items.MAGENTA_BED, 30, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_BED, 30, ShopTier.FARMER);
+        addItem(Items.YELLOW_BED, 30, ShopTier.FARMER);
+        addItem(Items.LIME_BED, 30, ShopTier.FARMER);
+        addItem(Items.PINK_BED, 30, ShopTier.FARMER);
+        addItem(Items.GRAY_BED, 30, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_BED, 30, ShopTier.FARMER);
+        addItem(Items.CYAN_BED, 30, ShopTier.FARMER);
+        addItem(Items.PURPLE_BED, 30, ShopTier.FARMER);
+        addItem(Items.BLUE_BED, 30, ShopTier.FARMER);
+        addItem(Items.BROWN_BED, 30, ShopTier.FARMER);
+        addItem(Items.GREEN_BED, 30, ShopTier.FARMER);
+        addItem(Items.RED_BED, 30, ShopTier.FARMER);
+        addItem(Items.BLACK_BED, 30, ShopTier.FARMER);
+        
+        // Carpets (FARMER)
+        addItem(Items.WHITE_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.ORANGE_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.MAGENTA_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.LIGHT_BLUE_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.YELLOW_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.LIME_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.PINK_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.GRAY_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.LIGHT_GRAY_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.CYAN_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.PURPLE_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.BLUE_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.BROWN_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.GREEN_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.RED_CARPET, 5, ShopTier.FARMER);
+        addItem(Items.BLACK_CARPET, 5, ShopTier.FARMER);
+        
+        // Misc useful items
+        addItem(Items.LEAD, 40, ShopTier.MERCHANT);
+        addItem(Items.NAME_TAG, 100, ShopTier.MERCHANT);
+        addItem(Items.SADDLE, 150, ShopTier.MERCHANT);
+        addItem(Items.CHAINMAIL_HELMET, 300, ShopTier.MERCHANT);
+        addItem(Items.CHAINMAIL_CHESTPLATE, 450, ShopTier.MERCHANT);
+        addItem(Items.CHAINMAIL_LEGGINGS, 400, ShopTier.MERCHANT);
+        addItem(Items.CHAINMAIL_BOOTS, 250, ShopTier.MERCHANT);
     }
     
     private static void addItem(Item item, long buyPrice, ShopTier tier) {

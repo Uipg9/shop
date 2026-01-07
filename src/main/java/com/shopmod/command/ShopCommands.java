@@ -71,16 +71,39 @@ public class ShopCommands {
                         .executes(ShopCommands::addMoney))))
         );
 
-        // Cleaner /sell command - sell item in hand (user requested!)
+        // Cleaner /sell command - defaults to ALL in hand (user requested!)
         dispatcher.register(Commands.literal("sell")
-            .executes(ctx -> sellInHand(ctx, 1))
-            .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64))
+            .executes(ctx -> sellInHand(ctx, -1)) // -1 means ALL
+            .then(Commands.literal("all")
+                .executes(ctx -> sellAllItems(ctx)))
+            .then(Commands.argument("amount", IntegerArgumentType.integer(1))
                 .executes(ctx -> sellInHand(ctx, IntegerArgumentType.getInteger(ctx, "amount"))))
         );
         
         // /anvil command - opens anvil GUI for enchanting
         dispatcher.register(Commands.literal("anvil")
             .executes(ShopCommands::openAnvil)
+        );
+        
+        // /nightvision toggle command
+        dispatcher.register(Commands.literal("nightvision")
+            .executes(ShopCommands::toggleNightVision)
+        );
+        dispatcher.register(Commands.literal("nv")
+            .executes(ShopCommands::toggleNightVision)
+        );
+        
+        // Teleportation commands
+        dispatcher.register(Commands.literal("sethome")
+            .executes(ShopCommands::setHome)
+        );
+        dispatcher.register(Commands.literal("home")
+            .executes(ShopCommands::teleportHome)
+        );
+        
+        // Village command
+        dispatcher.register(Commands.literal("village")
+            .executes(ShopCommands::openVillage)
         );
     }
 
@@ -103,7 +126,48 @@ public class ShopCommands {
     private static int showBalance(CommandContext<CommandSourceStack> ctx) {
         ServerPlayer player = ctx.getSource().getPlayer();
         if (player != null) {
-            CurrencyManager.sendBalanceMessage(player);
+            // Get wallet balance
+            long balance = CurrencyManager.getBalance(player);
+            
+            // Get village financial info
+            com.shopmod.village.VillageManager.Village village = 
+                com.shopmod.village.VillageManager.getVillage(player.getUUID());
+            
+            long totalDailySalaries = 0;
+            long estimatedDailyIncome = 0;
+            
+            for (var entry : village.getWorkers().entrySet()) {
+                com.shopmod.village.VillagerWorker workerType = entry.getKey();
+                com.shopmod.village.VillageManager.WorkerData data = entry.getValue();
+                
+                // Calculate daily salaries
+                totalDailySalaries += workerType.getDailySalary() * data.getCount();
+                
+                // Estimate daily income from resource production
+                estimatedDailyIncome += workerType.getEstimatedDailyValue() * data.getCount();
+            }
+            
+            long netDailyProfit = estimatedDailyIncome - totalDailySalaries;
+            
+            // Send enhanced balance message
+            player.sendSystemMessage(Component.literal("§6§l========== FINANCES =========="));
+            player.sendSystemMessage(Component.literal("§7Wallet Balance: §6" + 
+                CurrencyManager.format(balance)));
+            
+            if (village.getTotalWorkerCount() > 0) {
+                player.sendSystemMessage(Component.literal(""));
+                player.sendSystemMessage(Component.literal("§e§lVillage Economics:"));
+                player.sendSystemMessage(Component.literal("§7Daily Salaries: §c-" + 
+                    CurrencyManager.format(totalDailySalaries)));
+                player.sendSystemMessage(Component.literal("§7Estimated Income: §a+" + 
+                    CurrencyManager.format(estimatedDailyIncome)));
+                player.sendSystemMessage(Component.literal("§7Net Daily Profit: " + 
+                    (netDailyProfit >= 0 ? "§a+" : "§c") + 
+                    CurrencyManager.format(netDailyProfit)));
+                player.sendSystemMessage(Component.literal("§8(Income varies by efficiency & resources)"));
+            }
+            
+            player.sendSystemMessage(Component.literal("§6§l=============================="));
         }
         return 1;
     }
@@ -217,7 +281,7 @@ public class ShopCommands {
 
     /**
      * NEW: Sell item in hand command (like popular servers)
-     * User requested this feature!
+     * User requested this feature! Defaults to entire stack.
      */
     private static int sellInHand(CommandContext<CommandSourceStack> ctx, int amount) {
         ServerPlayer player = ctx.getSource().getPlayer();
@@ -238,9 +302,11 @@ public class ShopCommands {
 
         long sellPrice = ItemPricing.getSellPrice(item);
         
-        // Count how many they have
+        // Count how many they have in hand
         int available = heldItem.getCount();
-        int toSell = Math.min(amount, available);
+        
+        // If amount is -1, sell entire stack
+        int toSell = (amount == -1) ? available : Math.min(amount, available);
         
         if (toSell == 0) {
             player.sendSystemMessage(Component.literal("§cYou don't have any to sell!"));
@@ -254,6 +320,45 @@ public class ShopCommands {
         CurrencyManager.addMoney(player, totalEarned);
         CurrencyManager.sendMoneyReceivedMessage(player, totalEarned, 
             "Sold " + toSell + "x " + item.getName(item.getDefaultInstance()).getString());
+        return 1;
+    }
+    
+    /**
+     * Sell ALL sellable items in inventory
+     */
+    private static int sellAllItems(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+
+        long totalEarned = 0;
+        int totalItemsSold = 0;
+        
+        // Scan entire inventory
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (stack.isEmpty()) continue;
+            
+            Item item = stack.getItem();
+            if (!ItemPricing.canSell(item)) continue;
+            
+            long sellPrice = ItemPricing.getSellPrice(item);
+            int count = stack.getCount();
+            
+            totalEarned += sellPrice * count;
+            totalItemsSold += count;
+            
+            player.getInventory().setItem(i, ItemStack.EMPTY);
+        }
+        
+        if (totalItemsSold == 0) {
+            player.sendSystemMessage(Component.literal("§cYou don't have any sellable items!"));
+            return 0;
+        }
+        
+        CurrencyManager.addMoney(player, totalEarned);
+        player.sendSystemMessage(Component.literal("§a§lSOLD ALL ITEMS!"));
+        CurrencyManager.sendMoneyReceivedMessage(player, totalEarned, 
+            "Sold " + totalItemsSold + " items from inventory");
         return 1;
     }
 
@@ -380,6 +485,55 @@ public class ShopCommands {
             " to " + playerName + "'s balance"), true);
         targetPlayer.sendSystemMessage(Component.literal("§aReceived " + CurrencyManager.format(amount)));
         
+        return 1;
+    }
+    
+    private static int toggleNightVision(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        // Check if player has night vision upgrade
+        if (com.shopmod.upgrades.UpgradeManager.getUpgradeLevel(player.getUUID(), 
+                com.shopmod.upgrades.UpgradeType.NIGHT_VISION) == 0) {
+            player.sendSystemMessage(Component.literal("§cYou haven't purchased the Night Vision upgrade yet!"));
+            return 0;
+        }
+        
+        boolean newState = com.shopmod.upgrades.UpgradeManager.toggleNightVision(player.getUUID());
+        
+        if (newState) {
+            player.sendSystemMessage(Component.literal("§a§lNight Vision: §aENABLED"));
+        } else {
+            player.sendSystemMessage(Component.literal("§c§lNight Vision: §cDISABLED"));
+            // Remove the effect immediately
+            player.removeEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+        }
+        
+        return 1;
+    }
+    
+    private static int setHome(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        com.shopmod.teleport.TeleportManager.setHome(player);
+        return 1;
+    }
+    
+    private static int teleportHome(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        com.shopmod.teleport.TeleportManager.teleportHome(player);
+        return 1;
+    }
+    
+    private static int openVillage(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        com.shopmod.gui.VillageGuiV2 gui = new com.shopmod.gui.VillageGuiV2(player);
+        gui.open();
         return 1;
     }
 

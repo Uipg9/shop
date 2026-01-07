@@ -1,0 +1,303 @@
+======================================================================================
+                       SHOP MOD v1.0.25 - RELEASE NOTES
+                          MASSIVE VILLAGE SYSTEM OVERHAUL
+======================================================================================
+
+RELEASE DATE: January 6, 2025
+MOD VERSION: 1.0.25
+MINECRAFT VERSION: 1.21.11
+FABRIC LOADER: 0.18.4
+
+======================================================================================
+                               WHAT'S NEW
+======================================================================================
+
+This update completely overhauls the village system with an interconnected resource
+economy, supply chain mechanics, building construction, housing system, and much more!
+
+--------------------------------------------------------------------------------------
+                            RESOURCE ECONOMY SYSTEM
+--------------------------------------------------------------------------------------
+
+10 Resource Types with Monetary Values:
+  • Tier 1: Food ($10), Wood ($15), Fish ($12)
+  • Tier 2: Ore ($50), Leather ($30), Wool ($25)
+  • Tier 3: Tools ($150), Armor ($200)
+  • Tier 4: Enchanted ($500), Rare ($1000)
+
+Resources are stored in your village warehouse with upgradeable capacity (base: 200 per type).
+
+--------------------------------------------------------------------------------------
+                         WORKER SUPPLY CHAINS (8 WORKERS)
+--------------------------------------------------------------------------------------
+
+TIER 1 - HAMLET (Level 1):
+  • Farmer: Produces 3 Food/day ($100 salary, $250 hire)
+  • Lumberjack: Produces 3 Wood/day ($80 salary, $200 hire)
+  • Fisherman: Produces 2 Fish/day ($70 salary, $180 hire)
+
+TIER 2 - VILLAGE (Level 2):
+  • Miner: 2 Food + 1 Wood → 2 Ore ($200 salary, $500 hire)
+  • Rancher: 3 Food → 2 Leather + 2 Wool ($120 salary, $300 hire)
+
+TIER 3 - TOWN (Level 3):
+  • Blacksmith: 2 Ore + 1 Wood → 1 Tool + 1 Armor ($150 salary, $400 hire)
+  • Merchant: Any 3 resources → Direct money (sells resources, $180 salary, $600 hire)
+
+TIER 4 - CITY (Level 4):
+  • Enchanter: 1 Wood + 2 Ore → 1 Enchanted item ($250 salary, $1000 hire)
+
+Workers can be upgraded up to level 50! Each level increases production.
+
+--------------------------------------------------------------------------------------
+                           BUILDING SYSTEM (10 BUILDINGS)
+--------------------------------------------------------------------------------------
+
+Buildings provide bonuses but have daily upkeep costs:
+
+  • House: +1 worker slot (50 Wood, 2 Wood/day upkeep)
+  • Granary: 2x food storage capacity (100 Wood + 50 Food, 1 Wood/day)
+  • Warehouse: 2x resource storage capacity (150 Wood + 50 Ore, 2 Wood/day)
+  • Farm Expansion: Farmers +1 food production (200 Wood, 3 Wood/day)
+  • Mine Shaft: +20% ore production (300 Wood + 50 Ore, 5 Wood + 1 Ore/day)
+  • Workshop: +10% ALL production! (250 Wood + 30 Ore, 5 Wood + 1 Tool/day)
+  • Market: 2x sell value for resources (200 Wood + 100 Ore, 3 Wood + 1 Tool/day)
+  • Trading Post: Merchant +50% money (300 Wood + 50 Ore, 4 Wood + 1 Tool/day)
+  • Library: Better enchanted books (400 Wood + 100 Ore, 6 Wood + 1 Tool/day)
+  • Barracks: Workers never strike (500 Wood + 200 Ore, 8 Wood + 2 Tools/day)
+
+NOTE: Upkeep costs are only charged in Manual Mode, not in Auto-Manage Mode!
+
+--------------------------------------------------------------------------------------
+                            FOOD & WORKER STATUS
+--------------------------------------------------------------------------------------
+
+Each worker needs 1 Food/day (Food or Fish counts):
+  • Active: 100% production efficiency
+  • Hungry (1 day without food): 50% efficiency
+  • On Strike (2+ days without food): 0% efficiency
+
+KEY INSIGHT: 1 Farmer produces 3 Food/day and can feed 3 workers!
+
+Build a Barracks to prevent strikes entirely.
+
+--------------------------------------------------------------------------------------
+                          VILLAGE LEVEL PROGRESSION
+--------------------------------------------------------------------------------------
+
+4 Levels with Requirements:
+
+LEVEL 1 - HAMLET:
+  • Start: 3 worker slots
+  • Workers: Tier 1 only (Farmer, Lumberjack, Fisherman)
+
+LEVEL 2 - VILLAGE:
+  • Requirement: 50 Food + 30 Wood + 3 days operated
+  • Unlocks: 6 worker slots, Tier 2 workers (Miner, Rancher)
+
+LEVEL 3 - TOWN:
+  • Requirement: 200 Food + 100 Wood + 50 Ore + 5 workers + 1 house
+  • Unlocks: 9 worker slots, Tier 3 workers (Blacksmith, Merchant)
+
+LEVEL 4 - CITY:
+  • Requirement: Hire Blacksmith + Merchant + 10 workers + 3 houses
+  • Unlocks: 12+ worker slots, Tier 4 workers (Enchanter)
+
+Village levels upgrade automatically when requirements are met!
+
+--------------------------------------------------------------------------------------
+                              AUTO-MANAGE MODE
+--------------------------------------------------------------------------------------
+
+Toggle between Manual and Auto-Manage modes in the village GUI:
+
+MANUAL MODE:
+  • 100% production efficiency
+  • Must provide input resources for workers
+  • Pay building upkeep costs daily
+  • Full control and maximum output
+
+AUTO-MANAGE MODE:
+  • 70% production efficiency
+  • NO input resources needed (workers produce from nothing)
+  • NO building upkeep costs
+  • Zero micromanagement - just collect profits!
+
+Perfect for players who want passive income without resource management complexity.
+
+--------------------------------------------------------------------------------------
+                               TRADE CENTER
+--------------------------------------------------------------------------------------
+
+Separate storage system for exporting and selling village resources:
+
+  • Transfer resources from village warehouse to trade center
+  • Sell resources for money at their value-per-unit rates
+  • Enable auto-sell to automatically sell resources daily
+  • Upgrade storage capacity per resource type
+  • Base capacity: 200 per resource type
+
+Great for converting surplus production into passive daily income!
+
+--------------------------------------------------------------------------------------
+                          ENHANCED VILLAGE GUI (5 TABS)
+--------------------------------------------------------------------------------------
+
+1. WORKERS TAB:
+   - View all 8 workers with status (Active/Hungry/Strike)
+   - See inputs/outputs for each worker type
+   - Hire workers (LEFT CLICK)
+   - Upgrade workers (SHIFT+LEFT CLICK)
+   - Fire workers (RIGHT CLICK)
+   - Workers locked until village level requirement met
+
+2. RESOURCES TAB:
+   - View all 10 resources in village warehouse
+   - See current amount / storage capacity
+   - Value per unit displayed
+   - Color-coded availability
+
+3. BUILDINGS TAB:
+   - View all 10 buildings
+   - Build costs shown (green = have resources, red = need more)
+   - Daily upkeep costs displayed
+   - Current owned count
+   - Click to build (consumes resources from warehouse)
+
+4. TRADE CENTER TAB:
+   - Transfer resources between village and trade center
+   - Sell resources (LEFT = sell 1, SHIFT+LEFT = sell all)
+   - Toggle auto-sell per resource (RIGHT CLICK)
+   - Glowing icons show auto-sell enabled
+   - Total value displayed
+
+5. GUIDE TAB (NEW!):
+   - Comprehensive in-game tutorial
+   - 9 pages covering all systems
+   - Getting started guide
+   - Resource types and values
+   - Worker supply chains
+   - Building benefits
+   - Village progression
+   - Auto-manage mode explanation
+   - Trade center usage
+   - Strategy tips (early/mid/late game)
+   - Financial overview
+
+--------------------------------------------------------------------------------------
+                          ENHANCED /BAL COMMAND
+--------------------------------------------------------------------------------------
+
+The /bal (or /balance) command now shows village economics:
+
+  • Wallet Balance: Your current money
+  • Daily Salaries: Total you're paying workers (in red)
+  • Estimated Daily Income: Estimated value of worker production (in green)
+  • Net Daily Profit: Income minus salaries (green if positive, red if negative)
+
+NOTE: "(Income varies by efficiency & resources)" - actual income depends on:
+  - Worker efficiency (Auto-Manage 70%, Manual 100%, Hungry 50%, Strike 0%)
+  - Resource availability (Manual Mode needs inputs)
+  - Building bonuses (Workshop +10%, Market 2x sell value, etc.)
+
+--------------------------------------------------------------------------------------
+                              DAILY PROCESSING
+--------------------------------------------------------------------------------------
+
+Every Minecraft day at sunrise (or on first login after a day passes):
+
+1. Wallet Interest: +10% on wallet balance
+2. Bank Returns: Risky investments pay out
+3. Loan Payments: Auto-deducted if you have loans
+4. Village Production: NEW!
+   - Building upkeep deducted (Manual Mode only)
+   - Workers consume food (1 per worker)
+   - Workers consume inputs and produce outputs (based on efficiency)
+   - Merchants sell resources for money (with Market/Trading Post bonuses)
+   - Daily summary message sent
+   - Village level auto-upgraded if requirements met
+5. Trade Center Auto-Sell: NEW!
+   - Auto-sells marked resources
+   - Money added to wallet
+
+--------------------------------------------------------------------------------------
+                             STRATEGY TIPS
+--------------------------------------------------------------------------------------
+
+EARLY GAME (Hamlet):
+  • Hire 1-2 Farmers FIRST (they produce food for other workers)
+  • Then hire Lumberjack (wood is needed for everything)
+  • Build Houses to expand worker slots
+  • Save resources to upgrade to Village level (50 Food + 30 Wood)
+
+MID GAME (Village → Town):
+  • Hire Miners for ore production (needed for advanced items)
+  • Build Workshop for +10% ALL production (very important!)
+  • Build Warehouse/Granary for more storage
+  • Upgrade key workers to increase production
+  • Work toward Town level (200 Food + 100 Wood + 50 Ore)
+
+LATE GAME (Town → City):
+  • Hire Blacksmith for high-value Tools and Armor
+  • Hire Merchants for direct money production
+  • Build Market for 2x sell value (huge profit boost!)
+  • Build Trading Post for +50% Merchant income
+  • Consider Auto-Manage Mode if you want passive income with less effort
+
+FOOD MANAGEMENT:
+  • 1 Farmer = 3 Food/day = feeds 3 workers
+  • Fishermen also produce food (2 Fish/day)
+  • Build Granary for 2x food storage
+  • Build Farm Expansion for +1 food per Farmer
+  • Build Barracks if workers keep going on strike
+
+--------------------------------------------------------------------------------------
+                              COMMANDS
+--------------------------------------------------------------------------------------
+
+  • /village (or /v) - Open village GUI
+  • /balance (or /bal) - View wallet balance + village economics
+  • /shop - Open shop to buy items and upgrades
+  • /sethome - Set home location
+  • /home - Teleport home
+  • /bank - Access bank storage and investments
+  • /loan - Manage loans (if you have any)
+
+--------------------------------------------------------------------------------------
+                            KNOWN ISSUES
+--------------------------------------------------------------------------------------
+
+None currently! This is a stable release.
+
+If you encounter any bugs, please report them on GitHub:
+https://github.com/Uipg9/shop/issues
+
+--------------------------------------------------------------------------------------
+                          UPGRADE NOTES
+--------------------------------------------------------------------------------------
+
+If upgrading from v1.0.24:
+  • Your old village data will be preserved
+  • Workers will be converted to the new system
+  • You'll start at Hamlet level with resources reset
+  • Buildings will need to be constructed from scratch
+  • Auto-Manage Mode is OFF by default (Manual Mode = 100% efficiency)
+
+If you want the old simple passive income style:
+  • Enable Auto-Manage Mode in the village GUI (top bar, comparator icon)
+  • This removes resource requirements and gives you passive income at 70% efficiency
+
+--------------------------------------------------------------------------------------
+                             CREDITS
+--------------------------------------------------------------------------------------
+
+Mod Author: Uipg9
+GitHub: https://github.com/Uipg9/shop
+Minecraft Version: 1.21.11
+Fabric Loader: 0.18.4
+
+Special thanks to the Fabric community for their excellent modding tools!
+
+======================================================================================
+                            ENJOY THE VILLAGE!
+======================================================================================

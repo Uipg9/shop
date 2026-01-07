@@ -45,6 +45,96 @@ public enum UpgradeType {
         110,
         1.17,
         0.005    // 0.5% per level
+    ),
+    
+    HEALTH_BOOST(
+        "Health Boost",
+        "§c+2 max health (1 heart)",
+        Items.GOLDEN_APPLE,
+        50,      // +100 hearts max
+        250,
+        1.25,
+        2.0      // 2 health points = 1 heart
+    ),
+    
+    FLIGHT_TIME(
+        "Flight Duration",
+        "§e+5 seconds of flight",
+        Items.ELYTRA,
+        20,      // 100 seconds max
+        1500,
+        1.35,
+        5.0      // 5 seconds per level
+    ),
+    
+    LUCK_BOOST(
+        "Luck",
+        "§aGrants Luck effect",
+        Items.RABBIT_FOOT,
+        10,      // Max level
+        500,
+        1.28,
+        1.0      // Luck level (rounded)
+    ),
+    
+    REGENERATION(
+        "Natural Regeneration",
+        "§dFaster health regeneration",
+        Items.GHAST_TEAR,
+        3,       // Max level 3 (low power)
+        600,
+        1.40,
+        1.0      // Regen level (rounded)
+    ),
+    
+    FIRE_RESISTANCE(
+        "Fire Resistance",
+        "§6Permanent fire immunity",
+        Items.MAGMA_CREAM,
+        1,       // On/off toggle
+        3000,
+        1.0,
+        1.0
+    ),
+    
+    WATER_BREATHING(
+        "Water Breathing",
+        "§bPermanent water breathing",
+        Items.PUFFERFISH,
+        1,       // On/off toggle
+        2000,
+        1.0,
+        1.0
+    ),
+    
+    NIGHT_VISION(
+        "Night Vision",
+        "§ePermanent night vision",
+        Items.GOLDEN_CARROT,
+        1,       // On/off toggle
+        1500,
+        1.0,
+        1.0
+    ),
+    
+    KEEP_INVENTORY(
+        "Keep Inventory",
+        "§cKeep items on death",
+        Items.TOTEM_OF_UNDYING,
+        1,       // On/off toggle
+        50000,   // Very expensive
+        1.0,
+        1.0
+    ),
+    
+    KEEP_XP(
+        "Keep XP",
+        "§aKeep XP on death",
+        Items.EXPERIENCE_BOTTLE,
+        1,       // On/off toggle
+        25000,
+        1.0,
+        1.0
     );
     
     private final String displayName;
@@ -111,6 +201,17 @@ public enum UpgradeType {
             }
             case XP_MULTIPLIER -> String.format("§a+%.0f%% XP", benefit * 100);
             case SELL_PRICE_BOOST -> String.format("§e+%.1f%% Sell Price", benefit * 100);
+            case HEALTH_BOOST -> String.format("§c+%.0f Hearts", benefit / 2.0);
+            case FLIGHT_TIME -> String.format("§e+%.0f seconds", benefit);
+            case LUCK_BOOST -> {
+                int luckLevel = Math.min(10, (int) benefit);
+                yield "§aLuck " + romanNumeral(luckLevel);
+            }
+            case REGENERATION -> {
+                int regenLevel = Math.min(3, (int) benefit);
+                yield "§dRegen " + romanNumeral(regenLevel);
+            }
+            case FIRE_RESISTANCE, WATER_BREATHING, NIGHT_VISION, KEEP_INVENTORY, KEEP_XP -> "§aActive";
         };
     }
     

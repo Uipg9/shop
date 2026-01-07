@@ -20,6 +20,12 @@ public class UpgradeEffectApplier {
                 // Apply effects to all online players
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                     UpgradeManager.applyMiningSpeed(player);
+                    UpgradeManager.applyHealthBoost(player);
+                    UpgradeManager.applyLuck(player);
+                    UpgradeManager.applyRegeneration(player);
+                    UpgradeManager.applyFireResistance(player);
+                    UpgradeManager.applyWaterBreathing(player);
+                    UpgradeManager.applyNightVision(player);
                 }
             }
         });

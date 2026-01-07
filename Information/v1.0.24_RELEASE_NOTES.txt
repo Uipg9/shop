@@ -1,0 +1,138 @@
+===========================================
+     SHOP MOD - VERSION 1.0.24
+     VILLAGE SYSTEM & BANK UPGRADES
+===========================================
+
+NEW FEATURES:
+==============
+
+1. DIGITAL VILLAGE SYSTEM (/village)
+   - Hire up to 10 digital villagers to generate passive income
+   - Each worker type has different costs, salaries, and income
+   - Workers can be upgraded to earn more (max level 50)
+   - Daily income minus salaries = your profit
+   - Fire workers anytime for 50% refund
+
+   WORKER TYPES:
+   -------------
+   FARMER
+   - Hire Cost: $250
+   - Daily Salary: $100
+   - Daily Income: $150
+   - Net Profit: $50/day
+   - Income Multiplier: 1.0x per level
+   
+   LUMBERJACK
+   - Hire Cost: $200
+   - Daily Salary: $80
+   - Daily Income: $120
+   - Net Profit: $40/day
+   - Income Multiplier: 1.0x per level
+   
+   FISHERMAN
+   - Hire Cost: $180
+   - Daily Salary: $70
+   - Daily Income: $110
+   - Net Profit: $40/day
+   - Income Multiplier: 0.9x per level
+   
+   RANCHER
+   - Hire Cost: $300
+   - Daily Salary: $120
+   - Daily Income: $180
+   - Net Profit: $60/day
+   - Income Multiplier: 1.1x per level
+   
+   BLACKSMITH
+   - Hire Cost: $400
+   - Daily Salary: $150
+   - Daily Income: $220
+   - Net Profit: $70/day
+   - Income Multiplier: 1.15x per level
+   
+   MINER
+   - Hire Cost: $500
+   - Daily Salary: $200
+   - Daily Income: $300
+   - Net Profit: $100/day
+   - Income Multiplier: 1.2x per level
+   
+   MERCHANT
+   - Hire Cost: $600
+   - Daily Salary: $180
+   - Daily Income: $280
+   - Net Profit: $100/day
+   - Income Multiplier: 1.3x per level
+   
+   ENCHANTER (Best profit!)
+   - Hire Cost: $1,000
+   - Daily Salary: $250
+   - Daily Income: $400
+   - Net Profit: $150/day
+   - Income Multiplier: 1.5x per level
+
+   HOW TO USE:
+   -----------
+   - Use /village to open village GUI
+   - LEFT CLICK worker icon to hire
+   - SHIFT+LEFT CLICK to upgrade worker level
+   - RIGHT CLICK to fire worker (50% refund)
+   - Upgrade cost = Hire cost × (current level + 1)
+   - Profits paid automatically every Minecraft day at dawn
+   - Max 10 workers total
+
+2. BANK STORAGE UPGRADES
+   - Expand bank storage from 27 to 54 slots
+   - 4 upgrade levels available
+   
+   UPGRADE COSTS:
+   --------------
+   Level 0 → 1: $5,000 (27 → 36 slots)
+   Level 1 → 2: $15,000 (36 → 45 slots)
+   Level 2 → 3: $50,000 (45 → 54 slots)
+   
+   HOW TO USE:
+   -----------
+   - Open /bank
+   - Click the chest icon in center
+   - Purchase upgrades to unlock more storage
+   - Locked slots shown as gray glass panes
+
+EXISTING FEATURES:
+==================
+- Loan System (/loan) - Credit score based loans with daily payments
+- Teleportation (/sethome, /home) - Set and teleport to home location
+- Night Vision Toggle (/nv) - Turn night vision on/off
+- Shop System (/shop) - 500+ items across 5 tiers
+- Bank Investment - Risky daily returns based on difficulty
+- Wallet Interest - 10% guaranteed daily interest
+- Upgrades (/upgrades) - Health, Flight, Luck, Regeneration, etc.
+
+COMMANDS:
+=========
+/village - Open digital village management
+/bank - Open bank for storage and investments
+/loan - Manage loans (status, calculator, take, delay)
+/shop - Open item shop
+/sethome - Set home location
+/home - Teleport home
+/nv - Toggle night vision
+/upgrades - View/purchase upgrades
+/balance - Check wallet balance
+/sell - Sell items in hand
+
+TIPS:
+=====
+- Start with cheap workers (Fisherman, Lumberjack, Farmer)
+- Upgrade workers to increase income via multipliers
+- Enchanter has best profit but highest cost
+- Upgrade bank storage early for more item storage
+- Use bank investments to build credit score for better loans
+- Set your home before exploring far from spawn
+
+VERSION HISTORY:
+================
+v1.0.24 - Added village system and bank storage upgrades
+v1.0.23 - Added loan system with credit scoring and teleportation
+v1.0.22 - Added 300+ items, bulk discounts, wallet interest, risky investments
+v1.0.21 - Fixed tree harvester inventory tracking
