@@ -11,8 +11,6 @@ import com.shopmod.economy.PriceFluctuation;
 import com.shopmod.crates.LuckyCrateManager;
 import com.shopmod.events.BlockEarningsHandler;
 import com.shopmod.events.MobEarningsHandler;
-import com.shopmod.events.PlayerWelcomeHandler;
-import com.shopmod.web.VillageWebServer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -45,10 +43,7 @@ public class ShopMod implements ModInitializer {
 		MobEarningsHandler.register();
 		LOGGER.info("Mob earnings system initialized!");
 		
-		// Initialize player welcome messages
-		PlayerWelcomeHandler.register();
-		LOGGER.info("Player welcome system initialized!");
-		
+
 		// Initialize spawner pickup with Silk Touch
 		SpawnerPickupHandler.initialize();
 		LOGGER.info("Spawner pickup system initialized!");
@@ -74,9 +69,6 @@ public class ShopMod implements ModInitializer {
 			long currentDay = server.overworld().getDayTime() / 24000;
 			LuckyCrateManager.updateDailyCrates(currentDay);
 			LOGGER.info("Lucky crates initialized for day " + currentDay);
-			
-			// Start Village Web Dashboard
-			VillageWebServer.getInstance().start(server);
 		});
 		
 		// Save data on server stop
@@ -85,9 +77,6 @@ public class ShopMod implements ModInitializer {
 				dataManager.save();
 				LOGGER.info("Shop data saved!");
 			}
-			
-			// Stop Village Web Dashboard
-			VillageWebServer.getInstance().stop();
 		});
 		
 		// Register server tick event for price updates (based on Minecraft time) and daily resets
