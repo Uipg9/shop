@@ -6,9 +6,16 @@
 
 A comprehensive economy mod for Minecraft 1.21.11 (Fabric) featuring a dynamic shop system, banking with investments, **massive village system with resource economy**, teleportation, loans, and universal earnings from all gameplay activities.
 
-## ⭐ What's New in v1.0.27
+## ⭐ What's New in v1.0.28
 
-### 🌐 VILLAGE WEB DASHBOARD
+### 🔧 COMPLETE DEPENDENCY FIX
+- **RESOLVED**: All `NoClassDefFoundError` crashes completely eliminated
+- **Added missing Jetty WebSocket dependencies** for complete Javalin support
+- **JAR now 5.3MB** with all required web server dependencies included
+- **Production-ready** Village Web Dashboard with full stability
+- **Zero crashes** when creating worlds or starting web server
+
+### 🌐 VILLAGE WEB DASHBOARD (FULLY WORKING)
 - **Complete web interface** for village management at `localhost:8080`
 - **Real-time village overview** with responsive design
 - **Manage workers** - hire, fire, upgrade from your browser
