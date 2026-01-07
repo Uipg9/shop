@@ -214,8 +214,9 @@ public class LoanManager {
         
         long balance = CurrencyManager.getBalance(player);
         
+        // Try to make payment from wallet first, then from bank investments if needed
         if (balance >= payment) {
-            // Make payment
+            // Make payment from wallet
             CurrencyManager.removeMoney(player, payment);
             loan.setRemainingBalance(loan.getRemainingBalance() - payment);
             loan.addTotalPaid(payment);
@@ -234,13 +235,45 @@ public class LoanManager {
                     "§7Remaining: §6" + CurrencyManager.format(loan.getRemainingBalance())));
             }
         } else {
-            // Missed payment
-            loan.setMissedPayments(loan.getMissedPayments() + 1);
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "§c§l[LOAN] PAYMENT MISSED! Penalties will apply tomorrow."));
-            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-                "§7You needed §6" + CurrencyManager.format(payment) + "§7 but only have §6" + 
-                CurrencyManager.format(balance)));
+            // Check if we can cover shortfall from bank investments
+            long shortfall = payment - balance;
+            long bankInvestment = BankManager.getBankData(player.getUUID()).getInvestedMoney();
+            
+            if (bankInvestment >= shortfall) {
+                // Auto-withdraw from bank to cover loan payment
+                CurrencyManager.removeMoney(player, balance); // Use all wallet money
+                BankManager.withdrawMoney(player, shortfall); // Withdraw remainder from bank
+                CurrencyManager.removeMoney(player, shortfall); // Take the withdrawn amount for payment
+                
+                loan.setRemainingBalance(loan.getRemainingBalance() - payment);
+                loan.addTotalPaid(payment);
+                loan.setLastPaymentDay(currentDay);
+                loan.setMissedPayments(0);
+                
+                if (loan.getRemainingBalance() <= 0) {
+                    // Loan paid off!
+                    activeLoanS.remove(player.getUUID());
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§a§l[LOAN] PAID OFF! You're debt-free!"));
+                } else {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§a§l[LOAN] Payment made: §6" + CurrencyManager.format(payment)));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§e§l[LOAN] Auto-withdrew §6" + CurrencyManager.format(shortfall) + " §efrom bank investments"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§7Remaining loan: §6" + CurrencyManager.format(loan.getRemainingBalance())));
+                }
+            } else {
+                // Still can't afford - missed payment
+                loan.setMissedPayments(loan.getMissedPayments() + 1);
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§c§l[LOAN] PAYMENT MISSED! Insufficient funds in wallet and bank."));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§7Needed: §6" + CurrencyManager.format(payment) + 
+                    " §7Available: §6" + CurrencyManager.format(balance + bankInvestment)));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§c§l[LOAN] Penalties will apply tomorrow."));
+            }
         }
     }
     
@@ -276,5 +309,89 @@ public class LoanManager {
             "§a§l[LOAN] Payment delayed! Fee: §6" + CurrencyManager.format(fee)));
         
         return true;
+    }
+    
+    /**
+     * Make manual loan payment with auto-withdrawal from bank if needed
+     */
+    public static void makeManualPayment(ServerPlayer player, long amount) {
+        LoanData loan = getLoan(player.getUUID());
+        if (loan == null) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                "§c§l[LOAN] You don't have an active loan!"));
+            return;
+        }
+        
+        if (amount <= 0) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                "§c§l[LOAN] Payment amount must be positive!"));
+            return;
+        }
+        
+        // Cap payment to remaining balance
+        long actualPayment = Math.min(amount, loan.getRemainingBalance());
+        long walletBalance = CurrencyManager.getBalance(player);
+        
+        // Try to make payment from wallet first, then from bank investments if needed
+        if (walletBalance >= actualPayment) {
+            // Pay from wallet
+            CurrencyManager.removeMoney(player, actualPayment);
+            loan.setRemainingBalance(loan.getRemainingBalance() - actualPayment);
+            loan.addTotalPaid(actualPayment);
+            
+            if (loan.getRemainingBalance() <= 0) {
+                // Loan paid off!
+                activeLoanS.remove(player.getUUID());
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§a§l[LOAN] CONGRATULATIONS! Loan fully paid off!"));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§7Total paid: §6" + CurrencyManager.format(loan.getTotalPaid())));
+            } else {
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§a§l[LOAN] Payment made: §6" + CurrencyManager.format(actualPayment)));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§7Remaining balance: §6" + CurrencyManager.format(loan.getRemainingBalance())));
+            }
+        } else {
+            // Check if we can cover shortfall from bank investments
+            long shortfall = actualPayment - walletBalance;
+            long bankInvestment = BankManager.getBankData(player.getUUID()).getInvestedMoney();
+            
+            if (bankInvestment >= shortfall) {
+                // Auto-withdraw from bank to cover payment
+                CurrencyManager.removeMoney(player, walletBalance); // Use all wallet money
+                BankManager.withdrawMoney(player, shortfall); // Withdraw remainder from bank
+                CurrencyManager.removeMoney(player, shortfall); // Take the withdrawn amount for payment
+                
+                loan.setRemainingBalance(loan.getRemainingBalance() - actualPayment);
+                loan.addTotalPaid(actualPayment);
+                
+                if (loan.getRemainingBalance() <= 0) {
+                    // Loan paid off!
+                    activeLoanS.remove(player.getUUID());
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§a§l[LOAN] CONGRATULATIONS! Loan fully paid off!"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§e§l[LOAN] Auto-withdrew §6" + CurrencyManager.format(shortfall) + " §efrom bank investments"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§7Total paid: §6" + CurrencyManager.format(loan.getTotalPaid())));
+                } else {
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§a§l[LOAN] Payment made: §6" + CurrencyManager.format(actualPayment)));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§e§l[LOAN] Auto-withdrew §6" + CurrencyManager.format(shortfall) + " §efrom bank investments"));
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "§7Remaining balance: §6" + CurrencyManager.format(loan.getRemainingBalance())));
+                }
+            } else {
+                // Can't afford payment
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§c§l[LOAN] Insufficient funds! Need §6" + CurrencyManager.format(actualPayment)));
+                player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                    "§7Available: §6" + CurrencyManager.format(walletBalance + bankInvestment) + 
+                    " §7(Wallet: §6" + CurrencyManager.format(walletBalance) + 
+                    " §7+ Bank: §6" + CurrencyManager.format(bankInvestment) + "§7)"));
+            }
+        }
     }
 }

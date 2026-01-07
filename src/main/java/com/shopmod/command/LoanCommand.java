@@ -29,6 +29,10 @@ public class LoanCommand {
                         .executes(LoanCommand::takeLoan))))
             .then(Commands.literal("delay")
                 .executes(LoanCommand::requestDelay))
+            .then(Commands.literal("pay")
+                .then(Commands.argument("amount", LongArgumentType.longArg(1))
+                    .executes(LoanCommand::makePayment))
+                .executes(LoanCommand::makeFullPayment))
             .then(Commands.literal("help")
                 .executes(LoanCommand::showHelp))
         );
@@ -151,18 +155,44 @@ public class LoanCommand {
         player.sendSystemMessage(Component.literal("§b/loan §7- View your loan status"));
         player.sendSystemMessage(Component.literal("§b/loan calculator §7- See loan rates and examples"));
         player.sendSystemMessage(Component.literal("§b/loan take <amount> <days> §7- Take out a loan"));
+        player.sendSystemMessage(Component.literal("§b/loan pay <amount> §7- Make manual payment"));
+        player.sendSystemMessage(Component.literal("§b/loan pay §7- Pay off entire loan"));
         player.sendSystemMessage(Component.literal("§b/loan delay §7- Delay today's payment (10% fee)"));
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§e§lHow It Works:"));
         player.sendSystemMessage(Component.literal("§7• Your credit score depends on bank investments"));
         player.sendSystemMessage(Component.literal("§7• Better credit = lower interest rates"));
         player.sendSystemMessage(Component.literal("§7• Payments are due every Minecraft day"));
+        player.sendSystemMessage(Component.literal("§7• Payments auto-withdraw from bank if wallet insufficient"));
         player.sendSystemMessage(Component.literal("§7• Miss 1 payment = double interest next day"));
         player.sendSystemMessage(Component.literal("§7• Miss 2+ payments = triple interest + penalty"));
         player.sendSystemMessage(Component.literal("§7• Can delay 1 day for 10% fee (request in advance)"));
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§7💡 Invest in §b/bank §7to improve your credit score!"));
         
+        return 1;
+    }
+    
+    private static int makePayment(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        long amount = LongArgumentType.getLong(ctx, "amount");
+        LoanManager.makeManualPayment(player, amount);
+        return 1;
+    }
+    
+    private static int makeFullPayment(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        if (!LoanManager.hasActiveLoan(player.getUUID())) {
+            player.sendSystemMessage(Component.literal("§c§l[LOAN] You don't have an active loan!"));
+            return 0;
+        }
+        
+        LoanManager.LoanData loan = LoanManager.getLoan(player.getUUID());
+        LoanManager.makeManualPayment(player, loan.getRemainingBalance());
         return 1;
     }
 }

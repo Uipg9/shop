@@ -15,7 +15,7 @@ public enum VillageBuilding {
         "Provides housing for workers",
         Map.of(ResourceType.WOOD, 50),
         Map.of(ResourceType.WOOD, 2), // 2 wood/day upkeep
-        1), // +1 worker slot
+        10), // +10 worker slots (increased from 1)
     
     // Storage buildings
     GRANARY("Granary", Items.HAY_BLOCK,

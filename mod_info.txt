@@ -1,0 +1,47 @@
+Shop Mod v1.0.40 - Digital Farm System + Enhanced Loan System
+
+NEW FEATURES:
+- Digital Farm System: Purchase and manage automated farms for continuous resource generation
+  * 7 Different farm types: Crop, Tree, Fish, Iron, Animal, Mob, and Enchant farms
+  * Purchase farms with money, pay daily salaries, collect produced resources
+  * Progressive farm levels unlock more advanced farm types
+  * Independent from village system - direct player ownership
+- Enhanced Housing: Houses now provide +10 worker slots (up from +1)
+- Quick Start: Base worker capacity increased from 3 to 10 slots
+- /farm command: Access the new Digital Farm System GUI
+- Smart Loan Payments: Loans now auto-withdraw from bank investments when wallet is insufficient
+  * Daily loan payments automatically draw from bank if needed
+  * Manual loan payments also support auto-withdrawal
+  * /loan pay <amount> and /loan pay (full) commands added
+
+FARM TYPES:
+Level 1 (Basic):
+- Crop Farm: $5,000 | $200/day salary | Produces 10 food daily
+- Tree Farm: $8,000 | $400/day salary | Produces 8 wood daily
+- Fish Farm: $12,000 | $600/day salary | Produces 6 food daily
+
+Level 2 (Advanced):
+- Iron Farm: $15,000 | $800/day salary | Produces 5 ore daily
+- Animal Farm: $18,000 | $1000/day salary | Produces 4 food daily
+
+Level 3 (Expert):
+- Mob Farm: $25,000 | $1200/day salary | Produces 3 rare items daily
+- Enchant Farm: $30,000 | $1500/day salary | Produces 2 rare items daily
+
+IMPROVEMENTS:
+- Village housing capacity dramatically increased (10x multiplier)
+- Players can now hire 10 villagers immediately without building houses
+- Faster early game progression with immediate access to large workforce
+- Separate automation system for players who prefer direct resource management
+
+TECHNICAL:
+- Added complete farm management system with purchase, toggle, and collection mechanics
+- Integrated daily production processing with automatic salary deduction
+- New farm GUI with tabbed interface for easy management
+- Farm progression system with level requirements for advanced farms
+
+Compatible with Minecraft 1.21.11 + Fabric Loader 0.18.4
+
+Previous versions:
+- v1.0.39: Fixed villager housing bugs, added Slayer worker
+- v1.0.38: Removed web dashboard for stability

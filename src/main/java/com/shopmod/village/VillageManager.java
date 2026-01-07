@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VillageManager {
     private static final Map<UUID, Village> villages = new ConcurrentHashMap<>();
     
-    // Base worker capacity (before houses)
-    private static final int BASE_WORKER_SLOTS = 3;
+    // Base worker capacity (before houses) - increased for quick start
+    private static final int BASE_WORKER_SLOTS = 10;
     
     // Auto-manage mode reduces efficiency
     private static final double AUTO_MANAGE_EFFICIENCY = 0.70; // 30% penalty

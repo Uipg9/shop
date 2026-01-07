@@ -2,7 +2,9 @@ package com.shopmod;
 
 import com.shopmod.command.BankCommand;
 import com.shopmod.command.ShopCommands;
+import com.shopmod.commands.FarmCommand;
 import com.shopmod.data.ShopDataManager;
+import com.shopmod.farm.FarmManager;
 import com.shopmod.income.IncomeManager;
 import com.shopmod.spawner.SpawnerPickupHandler;
 import com.shopmod.upgrades.UpgradeManager;
@@ -134,7 +136,11 @@ public class ShopMod implements ModInitializer {
 					// Process trade center auto-selling
 					com.shopmod.village.TradeCenterManager.processAutoSell(player);
 				});
-				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, and trade center processed!");
+				
+				// Process digital farm production (for all players)
+				FarmManager.processDailyProduction(currentDay);
+				
+				LOGGER.info("Daily wallet interest, bank returns, loan payments, village production, trade center, and farm production processed!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -145,6 +151,7 @@ public class ShopMod implements ModInitializer {
 			ShopCommands.register(dispatcher);
 			BankCommand.register(dispatcher);
 			com.shopmod.command.LoanCommand.register(dispatcher);
+			FarmCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");
