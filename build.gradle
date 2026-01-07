@@ -44,26 +44,21 @@ dependencies {
 	// Server-side GUI library
 	modImplementation include("eu.pb4:sgui:1.12.0+1.21.11")
 	
-	// Web server dependencies for village dashboard
-	modImplementation include("io.javalin:javalin:5.6.3")
+	// Web server dependencies for village dashboard (downgraded Javalin to avoid WebSocket issues)
+	modImplementation include("io.javalin:javalin:4.6.8")
 	modImplementation include("org.slf4j:slf4j-simple:2.0.7")
 	modImplementation include("com.fasterxml.jackson.core:jackson-core:2.15.2")
 	modImplementation include("com.fasterxml.jackson.core:jackson-databind:2.15.2")
 	modImplementation include("com.fasterxml.jackson.core:jackson-annotations:2.15.2")
 	modImplementation include("org.java-websocket:Java-WebSocket:1.5.4")
 	
-	// Jetty dependencies required by Javalin for WebSocket support and security
+	// Jetty dependencies required by Javalin 4.6.8
 	modImplementation include("org.eclipse.jetty:jetty-server:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-servlet:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-security:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-util:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-http:11.0.25")
 	modImplementation include("org.eclipse.jetty:jetty-io:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-server:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-jetty-api:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-core-server:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-core-common:11.0.25")
-	modImplementation include("org.eclipse.jetty.websocket:websocket-servlet:11.0.25")
 }
 
 processResources {
