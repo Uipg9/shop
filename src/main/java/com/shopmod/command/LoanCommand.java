@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.shopmod.currency.CurrencyManager;
 import com.shopmod.loan.LoanManager;
+import com.shopmod.gui.LoanGui;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -18,7 +19,11 @@ public class LoanCommand {
     
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("loan")
-            .executes(LoanCommand::showStatus)
+            .executes(LoanCommand::openGui)
+            .then(Commands.literal("gui")
+                .executes(LoanCommand::openGui))
+            .then(Commands.literal("status")
+                .executes(LoanCommand::showStatus))
             .then(Commands.literal("calculator")
                 .executes(LoanCommand::showCalculator))
             .then(Commands.literal("calc")
@@ -36,6 +41,14 @@ public class LoanCommand {
             .then(Commands.literal("help")
                 .executes(LoanCommand::showHelp))
         );
+    }
+    
+    private static int openGui(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = ctx.getSource().getPlayer();
+        if (player == null) return 0;
+        
+        new LoanGui(player).open();
+        return 1;
     }
     
     private static int showStatus(CommandContext<CommandSourceStack> ctx) {

@@ -211,11 +211,16 @@ public class HubGui extends SimpleGui {
         );
         
         setSlot(38, new GuiElementBuilder(Items.ENDER_PEARL)
-            .setName(Component.literal("§5§lTeleport"))
+            .setName(Component.literal("§5§l🌟 Teleport"))
             .addLoreLine(Component.literal("§7Set waypoints"))
             .addLoreLine(Component.literal("§7Fast travel"))
+            .addLoreLine(Component.literal("§7FREE teleportation!"))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§c§lComing Soon!"))
+            .addLoreLine(Component.literal("§8Command: §f/teleport"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new TeleportGui(player).open();
+            })
         );
         
         setSlot(39, new GuiElementBuilder(Items.WRITABLE_BOOK)
@@ -224,7 +229,37 @@ public class HubGui extends SimpleGui {
             .addLoreLine(Component.literal("§715% interest"))
             .addLoreLine(Component.literal("§77-day terms"))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§c§lComing Soon!"))
+            .addLoreLine(Component.literal("§8Command: §f/loan"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new LoanGui(player).open();
+            })
+        );
+        
+        setSlot(40, new GuiElementBuilder(Items.BELL)
+            .setName(Component.literal("§a§l🏘️ Village"))
+            .addLoreLine(Component.literal("§7Hire workers"))
+            .addLoreLine(Component.literal("§7Produce resources"))
+            .addLoreLine(Component.literal("§7Build structures"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/village"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new VillageGui(player).open();
+            })
+        );
+        
+        setSlot(41, new GuiElementBuilder(Items.GOLD_BLOCK)
+            .setName(Component.literal("§e§l🎮 Games"))
+            .addLoreLine(Component.literal("§7Play for money"))
+            .addLoreLine(Component.literal("§7FREE to play!"))
+            .addLoreLine(Component.literal("§7$500-$50,000 rewards"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/game"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new GamesGui(player).open();
+            })
         );
         
         // Close button

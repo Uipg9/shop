@@ -14,6 +14,7 @@ import com.shopmod.commands.MiningCommand;
 import com.shopmod.commands.PetsCommand;
 import com.shopmod.commands.TeleportCommand;
 import com.shopmod.commands.GamesCommand;
+import com.shopmod.commands.VillageCommand;
 import com.shopmod.data.ShopDataManager;
 import com.shopmod.farm.FarmManager;
 import com.shopmod.property.PropertyManager;
@@ -212,6 +213,7 @@ public class ShopMod implements ModInitializer {
 			WandCommand.register(dispatcher);
 			TeleportCommand.register(dispatcher);
 			GamesCommand.register(dispatcher);
+			VillageCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");
