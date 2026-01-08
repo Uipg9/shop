@@ -143,7 +143,21 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(23, new GuiElementBuilder(Items.NETHER_STAR)
+        setSlot(23, new GuiElementBuilder(Items.EMERALD)
+            .setName(Component.literal("§a§l⚡ Stock Market"))
+            .addLoreLine(Component.literal("§717 companies"))
+            .addLoreLine(Component.literal("§7Trade shares"))
+            .addLoreLine(Component.literal("§7Earn dividends"))
+            .addLoreLine(Component.literal("§7Build portfolio"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/stockmarket"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new StockMarketGui(player).open();
+            })
+        );
+        
+        setSlot(24, new GuiElementBuilder(Items.NETHER_STAR)
             .setName(Component.literal("§5§lBlack Market"))
             .addLoreLine(Component.literal("§7Risky deals"))
             .addLoreLine(Component.literal("§740-70% discounts"))
@@ -157,7 +171,7 @@ public class HubGui extends SimpleGui {
         );
         
         // Row 3: Upgrades & Systems
-        setSlot(28, new GuiElementBuilder(Items.WHEAT)
+        setSlot(27, new GuiElementBuilder(Items.WHEAT)
             .setName(Component.literal("§6§lFarms"))
             .addLoreLine(Component.literal("§7Buy automated farms"))
             .addLoreLine(Component.literal("§7Produce resources"))
@@ -170,7 +184,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(29, new GuiElementBuilder(Items.STICK)
+        setSlot(28, new GuiElementBuilder(Items.STICK)
             .setName(Component.literal("§6§l⚡ Sell Wand"))
             .addLoreLine(Component.literal("§7Right-click chests to sell"))
             .addLoreLine(Component.literal("§7Upgrade for bonuses"))
@@ -183,7 +197,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(30, new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
+        setSlot(29, new GuiElementBuilder(Items.EXPERIENCE_BOTTLE)
             .setName(Component.literal("§a§lResearch"))
             .addLoreLine(Component.literal("§725 upgrades"))
             .addLoreLine(Component.literal("§7Unlock bonuses"))
@@ -196,7 +210,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(31, new GuiElementBuilder(Items.DIAMOND_PICKAXE)
+        setSlot(30, new GuiElementBuilder(Items.DIAMOND_PICKAXE)
             .setName(Component.literal("§8§l⛏ Mining"))
             .addLoreLine(Component.literal("§7Automated mines"))
             .addLoreLine(Component.literal("§7Passive income"))
@@ -264,9 +278,19 @@ public class HubGui extends SimpleGui {
         
         setSlot(41, new GuiElementBuilder(Items.GOLD_BLOCK)
             .setName(Component.literal("§e§l🎮 Games"))
-            .addLoreLine(Component.literal("§7Play for money"))
-            .addLoreLine(Component.literal("§7FREE to play!"))
-            .addLoreLine(Component.literal("§7$500-$50,000 rewards"))
+            .addLoreLine(Component.literal("§7Interactive mini-games!"))
+            .addLoreLine(Component.literal("§7Real gameplay mechanics"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§l7 Games Available:"))
+            .addLoreLine(Component.literal("§7• Number Guess"))
+            .addLoreLine(Component.literal("§7• Coin Flip"))
+            .addLoreLine(Component.literal("§7• Dice Roll"))
+            .addLoreLine(Component.literal("§7• High-Low"))
+            .addLoreLine(Component.literal("§7• Lucky Slots"))
+            .addLoreLine(Component.literal("§d§l• Blackjack ★ NEW!"))
+            .addLoreLine(Component.literal("§d§l• Roulette ★ NEW!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§6Max Win: $50,000!"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§8Command: §f/game"))
             .addLoreLine(Component.literal("§e§lCLICK §7to open"))

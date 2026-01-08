@@ -4,13 +4,63 @@
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
 [![Version](https://img.shields.io/badge/Version-1.0.47-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **18 COMPLETE SYSTEMS** - NOW WITH TENANT MANAGEMENT! All features now have beautiful GUIs and are fully integrated into the Hub!
+Transform your Minecraft world into a thriving economy with **19 COMPLETE SYSTEMS** - NOW WITH STOCK MARKET TRADING! All features now have beautiful GUIs and are fully integrated into the Hub!
 
 ---
 
 ## 🆕 What's New in v1.0.47 - MASSIVE UPDATE
 
-### 🏘️ Tenant Management System ⭐ **BRAND NEW!**
+### ⚡ Stock Market Trading System ⭐ **BRAND NEW!**
+- **17 Companies Across 7 Industries**:
+  - 🖥️ Tech: TechCorp, CyberSystems, DataFlow Inc
+  - ⛏️ Mining: DeepDrill Co, Ore Extractors Ltd, Crystal Mining
+  - 🌾 Agriculture: MegaFarm Corp, Harvest Holdings, AgriTech
+  - 🏠 Real Estate: Property Masters, Land Empire Inc
+  - ⚡ Energy: PowerGrid LLC, Solar Dynamics
+  - 💰 Finance: Credit Union Corp, Investment Partners
+  - 🏬 Retail: MegaMart Chain, ShopWise Inc
+
+- **Realistic Price Fluctuations**:
+  - Daily price changes: -5% to +5% based on volatility
+  - Market trends: Bull market (+2%), Bear market (-2%), Neutral
+  - Random events: Company profits (+10%), scandals (-15%)
+  - Mean reversion: Prices return toward initial values over time
+
+- **Portfolio Management**:
+  - Track all your stock holdings in one place
+  - View cost basis, current value, gains/losses
+  - Sort by value, gains, or alphabetically
+  - Total portfolio statistics with returns percentage
+
+- **Dividend System**:
+  - Earn 0-5% quarterly dividends (every 7 in-game days)
+  - Automatic payment to your bank account
+  - Track total dividend earnings over time
+  - Passive income from long-term holdings
+
+- **Professional Trading GUI**:
+  - Market View: See all 17 companies with live prices
+  - Trading View: 7-day price history, buy/sell options
+  - Portfolio View: Your complete holdings dashboard
+  - News View: Market events and upcoming dividends
+  - Color-coded trends: Green (up), Red (down), Gray (unchanged)
+
+- **Fair Trading System**:
+  - 1% transaction fee on all trades (buy & sell)
+  - Buy: 1, 10, or 100 shares at a time
+  - Sell: 1, 10, or ALL shares instantly
+  - Real-time cost calculations before purchase
+
+- **Commands**: 
+  - `/stockmarket` - Opens main trading GUI
+  - `/market` - Alias for stock market
+  - `/stockmarket buy <ticker> <amount>` - Command-line trading
+  - `/stockmarket sell <ticker> <amount>` - Quick selling
+  - `/stockmarket info <ticker>` - Company details
+  - `/stockmarket portfolio` - View your holdings
+  - `/stockmarket list` - List all companies
+
+### 🏘️ Tenant Management System ⭐
 - **Complete Rental Tracking**: Manage all rented properties in one place
 - **Tenant Relationships**: 0-100 relationship scores affect behavior
 - **Random Events**:
@@ -97,9 +147,9 @@ Transform your Minecraft world into a thriving economy with **18 COMPLETE SYSTEM
 - **30-Day Terms**: Manageable repayment periods
 - **Commands**: `/loan`, `/loan gui`
 
-### 🌟 Complete Hub Integration ⭐ **ALL 17 SYSTEMS!**
+### 🌟 Complete Hub Integration ⭐ **ALL 19 SYSTEMS!**
 - **100% Feature Coverage**: Every single system accessible from `/hub`!
-- Added: Teleport, Games, Loans, Village to hub menu
+- Added: Stock Market, Teleport, Games, Loans, Village to hub menu
 - All GUIs have hub navigation buttons
 - No more hidden features!
 - One central command for everything: `/hub`
@@ -304,8 +354,10 @@ Earn by playing naturally!
 | Command | Aliases | Description |
 |---------|---------|-------------|
 | `/property` | `/realestate` | Buy/sell/rent properties |
+| `/tenant` | - | Manage property tenants |
 | `/auction` | `/ah` | Auction house with NPC bidding |
 | `/stocks` | `/options` | Trade call/put options |
+| `/stockmarket` | `/market` | Stock market trading (17 companies) |
 | `/blackmarket` | - | Risky deals (requires research) |
 
 ### 🌾 Production & Automation
@@ -382,6 +434,21 @@ Earn by playing naturally!
 3. **Diversify**: Buy multiple small options vs one big one
 4. **Exercise Early**: Take profits before expiration if in the money
 5. **Cut Losses**: Don't hold losing positions hoping for turnaround
+
+### 📈 Stock Market Strategy (NEW!)
+1. **Start Small**: Begin with low-volatility stocks (Agriculture, Retail)
+2. **Diversify Portfolio**: Own 5-10 different companies across industries
+3. **Buy the Dip**: Purchase when prices drop 10%+ from recent highs
+4. **Hold for Dividends**: Quarterly payouts (every 7 days) add up!
+5. **Market Timing**: 
+   - Bull market: Buy tech/high-volatility stocks for big gains
+   - Bear market: Focus on dividends (Agriculture, Real Estate)
+   - Neutral: Balanced portfolio across all industries
+6. **Take Profits**: Sell when gains reach 20-30% for consistent income
+7. **Dollar-Cost Average**: Buy same amount weekly regardless of price
+8. **Watch the News**: Market events can cause 10-15% swings instantly
+9. **Long-Term Wins**: Expected 10-15% annual returns if held patiently
+10. **1% Fee Rule**: Minimize trades to reduce transaction costs
 
 ### 🎪 Auction House Strategy
 1. **Bid Early**: NPCs less likely to counter early bids

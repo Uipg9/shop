@@ -6,6 +6,7 @@ import com.shopmod.commands.FarmCommand;
 import com.shopmod.commands.PropertyCommand;
 import com.shopmod.commands.AuctionCommand;
 import com.shopmod.commands.StocksCommand;
+import com.shopmod.commands.StockMarketCommand;
 import com.shopmod.commands.ResearchCommand;
 import com.shopmod.commands.BlackMarketCommand;
 import com.shopmod.commands.HubCommand;
@@ -22,6 +23,7 @@ import com.shopmod.property.PropertyManager;
 import com.shopmod.auction.AuctionManager;
 import com.shopmod.auction.AuctionItem;
 import com.shopmod.stocks.StockOptionsManager;
+import com.shopmod.stocks.StockMarketManager;
 import com.shopmod.research.ResearchManager;
 import com.shopmod.blackmarket.BlackMarketManager;
 import com.shopmod.mining.MiningManager;
@@ -88,8 +90,12 @@ public class ShopMod implements ModInitializer {
 		UpgradeEffectApplier.initialize();
 		LOGGER.info("Upgrade effect applier initialized!");
 		
-		// Initialize stock market
+		// Initialize stock market systems
 		PriceFluctuation.updatePrices();
+		LOGGER.info("Stock options market initialized!");
+		
+		// Initialize comprehensive stock market
+		StockMarketManager.initialize();
 		LOGGER.info("Stock market initialized!");
 		
 		// Initialize data manager on server start
@@ -182,10 +188,10 @@ public class ShopMod implements ModInitializer {
 					com.shopmod.tenant.TenantManager.processDailyTenants(player, currentDay);
 				});
 				
-				// Process digital farm production (for all players)
-				FarmManager.processDailyProduction(currentDay);
-				
-				// Process property passive income
+			// Process stock market daily updates
+			StockMarketManager.updateDailyPrices(currentDay);
+			StockMarketManager.processDividends(currentDay, server.getPlayerList().getPlayers());
+			
 				PropertyManager.processDailyIncome(currentDay, server);
 				
 				// Process research bonuses (Money Printer, etc.)
@@ -194,7 +200,7 @@ public class ShopMod implements ModInitializer {
 				// Process mining operations income
 				MiningManager.processDailyIncome(currentDay, server);
 				
-				LOGGER.info("Daily processing complete: interest, investments, loans, village, farms, properties, research, and mining!");
+LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, and mining!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -209,6 +215,7 @@ public class ShopMod implements ModInitializer {
 			PropertyCommand.register(dispatcher);
 			AuctionCommand.register(dispatcher);
 			StocksCommand.register(dispatcher);
+			StockMarketCommand.register(dispatcher);
 			ResearchCommand.register(dispatcher);
 			MiningCommand.register(dispatcher);
 			PetsCommand.register(dispatcher);
