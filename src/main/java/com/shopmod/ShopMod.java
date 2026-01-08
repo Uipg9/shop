@@ -206,6 +206,9 @@ public class ShopMod implements ModInitializer {
 				// Process mining operations income
 				MiningManager.processDailyIncome(currentDay, server);
 				
+				// Process worker salaries and loyalty
+				com.shopmod.worker.WorkerManager.processDailyPayments(currentDay, server);
+				
 				// Process insurance monthly billing (check if it's been 30 days)
 				server.getPlayerList().getPlayers().forEach(player -> {
 					com.shopmod.insurance.InsuranceManager.processMonthlyBilling(player, currentDay);
@@ -218,7 +221,12 @@ public class ShopMod implements ModInitializer {
 					});
 				}
 				
-LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, mining, automation, and insurance!");
+				// Process worker weekly loyalty updates and quit checks
+				if (currentDay % 7 == 0) {  // Every 7 days
+					com.shopmod.worker.WorkerManager.processWeeklyUpdates(currentDay, server);
+				}
+				
+LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, mining, automation, workers, and insurance!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -241,6 +249,7 @@ LOGGER.info("Daily processing complete: interest, investments, loans, village, s
 			HubCommand.register(dispatcher);
 			WandCommand.register(dispatcher);
 			TeleportCommand.register(dispatcher);
+			com.shopmod.worker.WorkerCommand.register(dispatcher);
 			GamesCommand.register(dispatcher);
 			VillageCommand.register(dispatcher);
 			TenantCommand.register(dispatcher);

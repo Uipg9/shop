@@ -195,6 +195,13 @@ public class PropertyManager {
                         // Repair needed!
                         long repairCost = (long)(propData.getPropertyType().getPurchaseCost() * 0.15);
                         
+                        // Apply worker discount (30% reduction if worker assigned with MAINTENANCE skill 5+)
+                        String propertyId = "PROPERTY_" + propData.getPropertyType().name();
+                        double workerBonus = com.shopmod.worker.WorkerManager.getWorkerBonus(playerUUID, propertyId);
+                        if (workerBonus >= 0.25) { // MAINTENANCE skill level 5 gives 25% bonus
+                            repairCost = (long)(repairCost * 0.70); // 30% discount
+                        }
+                        
                         ServerPlayer player = server.getPlayerList().getPlayer(playerUUID);
                         if (player != null) {
                             if (CurrencyManager.canAfford(player, repairCost)) {

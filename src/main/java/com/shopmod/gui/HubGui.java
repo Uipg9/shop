@@ -119,7 +119,24 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(21, new GuiElementBuilder(Items.DIAMOND)
+        setSlot(21, new GuiElementBuilder(Items.IRON_SHOVEL)
+            .setName(Component.literal("§6§l⚒ Workers"))
+            .addLoreLine(Component.literal("§7Hire workers for your business"))
+            .addLoreLine(Component.literal("§7+25% farm efficiency"))
+            .addLoreLine(Component.literal("§7-20% mine downtime"))
+            .addLoreLine(Component.literal("§7-30% repair costs"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Train skills, manage loyalty"))
+            .addLoreLine(Component.literal("§7Max 10 workers per player"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/workers"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new com.shopmod.worker.WorkerGui(player).open();
+            })
+        );
+        
+        setSlot(22, new GuiElementBuilder(Items.DIAMOND)
             .setName(Component.literal("§b§lAuction House"))
             .addLoreLine(Component.literal("§740 daily items"))
             .addLoreLine(Component.literal("§7Bid against NPCs"))
@@ -132,7 +149,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(22, new GuiElementBuilder(Items.PAPER)
+        setSlot(23, new GuiElementBuilder(Items.PAPER)
             .setName(Component.literal("§e§lStock Options"))
             .addLoreLine(Component.literal("§7Trade derivatives"))
             .addLoreLine(Component.literal("§7Call/Put positions"))
@@ -145,7 +162,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(23, new GuiElementBuilder(Items.EMERALD)
+        setSlot(24, new GuiElementBuilder(Items.EMERALD)
             .setName(Component.literal("§a§l⚡ Stock Market"))
             .addLoreLine(Component.literal("§717 companies"))
             .addLoreLine(Component.literal("§7Trade shares"))
@@ -159,7 +176,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(24, new GuiElementBuilder(Items.NETHER_STAR)
+        setSlot(25, new GuiElementBuilder(Items.NETHER_STAR)
             .setName(Component.literal("§5§lBlack Market"))
             .addLoreLine(Component.literal("§7Risky deals"))
             .addLoreLine(Component.literal("§740-70% discounts"))

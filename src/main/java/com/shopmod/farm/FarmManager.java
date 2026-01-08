@@ -197,6 +197,14 @@ public class FarmManager {
                 // Produce resources with fertilizer boost
                 ResourceType output = farmType.getOutputResource();
                 int baseProduction = farmType.getDailyOutput() * data.getFarmLevel();
+                
+                // Apply worker bonus (25% efficiency boost if worker assigned with HARVESTING skill 5+)
+                String farmId = "FARM_" + farmType.name();
+                double workerBonus = com.shopmod.worker.WorkerManager.getWorkerBonus(playerUUID, farmId);
+                if (workerBonus >= 0.25) { // HARVESTING skill level 5 gives 25% bonus
+                    productionMultiplier *= 1.25;
+                }
+                
                 int production = (int)(baseProduction * productionMultiplier);
                 
                 long current = farms.getHarvestedResources().getOrDefault(output, 0L);

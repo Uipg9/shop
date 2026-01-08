@@ -1,16 +1,80 @@
-# 🏪 Shop Mod v1.0.48 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.50 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.48-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.50-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **19 COMPLETE SYSTEMS** - NOW WITH STOCK TRADING & INTERACTIVE GAMES! All features have beautiful GUIs and are fully integrated!
+Transform your Minecraft world into a thriving economy with **22 COMPLETE SYSTEMS** - NOW WITH WORKERS, AUTOMATION & INSURANCE! All features have beautiful GUIs and are fully integrated!
 
 ---
 
-## 🆕 What's New in v1.0.48 - MASSIVE PHASE 1 UPDATE
+## 🆕 What's New in v1.0.50 - PHASE 3: WORKER MANAGEMENT
 
-### 📈 Stock Market Trading System ⭐ **BRAND NEW!**
+### 👷 Worker Management System ⭐ **BRAND NEW!**
+- **3 Worker Types**:
+  - 🌾 **Farm Hands**: +25% crop yield on assigned farms
+  - ⛏️ **Miners**: +20% income on assigned mines
+  - 🏠 **Property Managers**: -30% repair costs on properties
+  
+- **Skills & Training**:
+  - 5 trainable skills: Harvesting, Mining, Maintenance, Efficiency, Speed
+  - Each skill: Level 1-10 (train for $1K per level)
+  - 1-day cooldown between training sessions
+  - Skills directly boost performance bonuses
+  
+- **Loyalty System**:
+  - Loyalty: 0-100 scale
+  - +1 loyalty when paid on time (weekly)
+  - -5 loyalty for missed payments
+  - Workers quit if loyalty < 20 (10% chance weekly)
+  
+- **Worker Economics**:
+  - Hiring: $5,000 per worker (max 10 workers)
+  - Salaries: $100-$500/day (based on total skill level)
+  - Training: $1,000 per session
+  - Unassigned workers still cost salary but provide no benefits
+  
+- **Management GUI**:
+  - Overview: All workers with assignments and loyalty
+  - Hire: Choose from 3 worker types
+  - Manage: View individual worker details, fire workers
+  - Training: Upgrade skills (+1 level per session)
+  - Assignments: Assign workers to farms/mines/properties
+  
+- **Commands**: `/workers`, `/worker hire <type> <name>`, `/worker fire <name>`, `/worker assign <name> <target>`, `/worker list`, `/worker stats <name>`
+
+---
+
+## 📋 Previous Updates
+
+### v1.0.49 - Phase 2: Automation Hub + Banking + Insurance
+
+**🤖 Automation Hub**:
+- 5 automation toggles: Auto-pay loans, auto-collect farms, auto-deposit wallet, auto-sell harvests, auto-invest dividends
+- Configurable deposit threshold ($10K default)
+- Notification center (last 10 actions)
+- Daily statistics tracking
+- Manual "Run All Now" trigger
+- Commands: `/automation`, `/auto`
+
+**🏦 Banking Expansion**:
+- 4 account types: Checking (default), Savings (2% monthly interest), Investment (5% quarterly), Credit ($50K limit)
+- Credit card system with 10% monthly interest on balance
+- Transaction history (last 100 records)
+- 12 transaction types tracked
+- Multi-account overview GUI
+
+**🛡️ Insurance System**:
+- 4 policy types: Property ($500/month), Farm ($300/month), Mine ($800/month), Business ($1000/month)
+- Claims system with auto-approval
+- Fraud detection (max 1 claim per 30 days)
+- Premium multiplier increases 10% per claim (max 200%)
+- 2-payment grace period before cancellation
+- Commands: `/insurance`, `/insure`
+
+### v1.0.48 - Phase 1: Stock Market + Interactive Games
+
+**📈 Stock Market Trading**:
 - **17 Fictional Companies** across 7 industries:
   - Tech: TechCorp, CyberSystems, DataFlow Inc
   - Mining: DeepDrill Co, Ore Extractors Ltd

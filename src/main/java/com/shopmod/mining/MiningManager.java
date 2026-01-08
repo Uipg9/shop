@@ -109,13 +109,26 @@ public class MiningManager {
     public static void processDailyIncome(long currentDay, net.minecraft.server.MinecraftServer server) {
         server.getPlayerList().getPlayers().forEach(player -> {
             MiningData data = getMiningData(player.getUUID());
-            long income = data.calculateDailyIncome();
+            long baseIncome = data.calculateDailyIncome();
             
-            if (income > 0) {
-                CurrencyManager.addMoney(player, income);
-                data.addEarned(income);
+            // Apply worker bonus (20% income boost per mine if worker assigned with MINING skill 5+)
+            long totalIncome = baseIncome;
+            for (MineType mineType : MineType.values()) {
+                if (data.hasMine(mineType)) {
+                    String mineId = "MINE_" + mineType.name();
+                    double workerBonus = com.shopmod.worker.WorkerManager.getWorkerBonus(player.getUUID(), mineId);
+                    if (workerBonus >= 0.25) { // MINING skill level 5 gives 25% bonus
+                        long mineIncome = mineType.getIncome(data.getMineLevel(mineType));
+                        totalIncome += (long)(mineIncome * 0.20); // 20% bonus for this mine
+                    }
+                }
+            }
+            
+            if (totalIncome > 0) {
+                CurrencyManager.addMoney(player, totalIncome);
+                data.addEarned(totalIncome);
                 player.sendSystemMessage(Component.literal(
-                    "§6§l[MINING] §aYour mines produced §6$" + CurrencyManager.format(income) + "!"));
+                    "§6§l[MINING] §aYour mines produced §6$" + CurrencyManager.format(totalIncome) + "!"));
             }
         });
     }
