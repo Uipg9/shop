@@ -1,14 +1,77 @@
-# 🏪 Shop Mod v1.0.47 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.48 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.47-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.48-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **19 COMPLETE SYSTEMS** - NOW WITH STOCK MARKET TRADING! All features now have beautiful GUIs and are fully integrated into the Hub!
+Transform your Minecraft world into a thriving economy with **19 COMPLETE SYSTEMS** - NOW WITH STOCK TRADING & INTERACTIVE GAMES! All features have beautiful GUIs and are fully integrated!
 
 ---
 
-## 🆕 What's New in v1.0.47 - MASSIVE UPDATE
+## 🆕 What's New in v1.0.48 - MASSIVE PHASE 1 UPDATE
+
+### 📈 Stock Market Trading System ⭐ **BRAND NEW!**
+- **17 Fictional Companies** across 7 industries:
+  - Tech: TechCorp, CyberSystems, DataFlow Inc
+  - Mining: DeepDrill Co, Ore Extractors Ltd
+  - Agriculture: MegaFarm Corp, Harvest Holdings
+  - Real Estate: Property Masters, Land Empire Inc
+  - Energy: PowerGrid LLC, Solar Dynamics
+  - Finance: Credit Union Corp, Investment Partners
+  - Retail: MegaMart Chain, ShopWise Inc
+  
+- **Realistic Trading**:
+  - Daily price fluctuations (-5% to +5%)
+  - Market trends: Bull/Bear/Neutral
+  - Random events (company news, scandals, profits)
+  - Mean reversion for long-term balance
+  
+- **Portfolio Management**:
+  - Track all your investments
+  - See gains/losses, cost basis
+  - Dividend payments every 7 days (0-5% quarterly)
+  - Transaction fees (1%) prevent exploits
+  
+- **Professional GUI**:
+  - Market View: All 17 companies with live prices
+  - Trading View: Buy/sell 1/10/100 shares
+  - Portfolio View: Holdings dashboard
+  - News View: Market events and trends
+  
+- **Commands**: `/stockmarket`, `/market`, `/stocks`, `/portfolio`
+
+### 🎮 Interactive Games V2.0 ⭐ **COMPLETE REDESIGN!**
+
+**NO MORE BORING CLICK-AND-WIN!** Games are now truly interactive:
+
+**Enhanced Existing Games (5):**
+- **Number Guess** ($200): Choose from 10 buttons (not random!)
+- **Coin Flip** ($500): Visual HEADS/TAILS selection
+- **Dice Roll** ($1K): Click-to-roll with die display
+- **High-Low** ($300): MULTI-ROUND! Cash out or continue for multipliers!
+- **Slots** ($2K): Visual 3-reel spin with animations
+
+**Brand New Games (2):**
+- **🃏 Blackjack** ($1K): Full card game - HIT/STAND/DOUBLE
+  - Play against dealer AI
+  - Proper blackjack rules and payouts
+  - Visual card display
+  
+- **🎡 Roulette** ($2K): European wheel
+  - 8 bet types: RED/BLACK, ODD/EVEN, dozens, etc.
+  - Up to 35:1 payouts on single numbers
+  - Spinning wheel animation
+
+**Game Features:**
+- Dedicated lobby with all 7 games
+- Individual game screens
+- Strategy decisions (not just luck!)
+- Session persistence (resume interrupted games)
+- Per-game statistics tracking
+
+---
+
+## 📋 Previous Updates (v1.0.47)
 
 ### ⚡ Stock Market Trading System ⭐ **BRAND NEW!**
 - **17 Companies Across 7 Industries**:
