@@ -1,5 +1,34 @@
 # Changelog
 
+## [v1.0.51] - Phase 4: Lottery + Business + Games Expansion (January 8, 2026)
+### Added - Lottery System ⭐ NEW!
+- **Weekly Lottery**: Draws every 7 in-game days
+- 6 numbers (1-50 range), tickets $10K each (max 10)
+- 6 prize tiers: Jackpot (starts $500K, rolls over), $100K, $25K, $5K, $1K, free ticket
+- Rolling jackpot grows by 70% of ticket sales + $50K min per week
+- Commands: `/lottery`, `/lottery buy`, `/lottery info`
+
+### Added - Business Empire System ⭐ NEW!
+- **7 Business Types**: Restaurant ($500K), Casino ($2M), Stock Brokerage ($1M), Insurance Agency ($750K), Bank Branch ($1.5M), Mining Company ($1M), Farm Conglomerate ($800K)
+- Daily passive income: $5K-$20K/day depending on business type
+- 5-level upgrade system (+50% income per level)
+- Synergy bonuses: 3+ = 20%, 5+ = 50%, all 7 = 100%
+- Commands: `/business`, `/business buy`, `/business collect`
+
+### Added - 5 New Mini-Games (Total: 12 Games)
+- **Crash** ($5K): Multiplier rises, cash out before crash, up to 50x
+- **Wheel of Fortune** ($10K): 12 segments including $500K JACKPOT
+- **Keno** ($2K): Pick 10 from 80 numbers, up to $100K jackpot
+- **Mines** ($5K): 5x5 grid, reveal safe tiles, cash out anytime
+- **Plinko** ($3K): Ball drop through pegs, up to 5x multiplier
+
+### Enhancements
+- Farms: Irrigation upgrade ($100K, +20% yield)
+- Mines: Depth upgrades ($75K, better ore income)
+- Properties: Renovations ($50K, +10% value/rent, max 5 levels)
+- Stock Market: IPOs (new companies monthly), stock splits, market sentiment tracking
+- Workers: Promotion system ($25K, +1 to all skills, higher efficiency)
+
 ## [v1.0.50] - Phase 3: Worker Management System (January 7, 2026)
 ### Added - Worker Management System ⭐ NEW!
 - **3 Worker Types**:
