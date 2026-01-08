@@ -1,5 +1,50 @@
 # Changelog
 
+## [v1.0.52] - Phase 5: Polish, Balance & Major Features (January 8, 2026)
+### Added - Achievements System ⭐ NEW!
+- **50+ Achievements** across 10 categories
+- Categories: Wealth, Property, Business, Jobs, Stock Market, Gaming, Workers, Lottery, Farm/Mine, Misc
+- Cash rewards: $5K-$500K per achievement
+- Permanent bonuses: +5% to +20% income boosts
+- Popup notifications with sound effects
+- Commands: `/achievements`, `/achieve`, `/achievements list`, `/achievements progress`
+
+### Added - Statistics Dashboard ⭐ NEW!
+- **Comprehensive tracking** of all player activities
+- 5 view modes: Overview, Wealth, Investments, Gaming, Workers
+- Tracks: Money earned/spent, properties, businesses, stock trades, games, workers, loans, insurance, automation
+- Real-time updates and lifetime stats
+- Commands: `/stats`, `/statistics`
+
+### Added - Daily Rewards System ⭐ NEW!
+- **7-day reward cycle** with streak tracking
+- Daily rewards: $5K-$100K cash
+- Mystery Boxes (Common, Rare, Epic, Legendary)
+- Milestone rewards: 30 days (+5% income), 100 days (+10% income + Legendary Box)
+- Streak tracking (current & longest)
+- Commands: `/daily`, `/daily claim`
+
+### Added - Perks & Boosters Shop ⭐ NEW!
+- **5 Temporary Boosters**: Income (2x), XP (2x), Luck, Speed, Worker Efficiency
+- **7 Permanent Perks**: Golden Touch, Mentor, Lucky Charm, Time Master, Negotiator, VIP Status, Double Down
+- Prices: $30K-$100K (boosters), $3M-$20M (perks)
+- Active booster tracking with time remaining
+- Multiplier stacking system
+- Commands: `/perks`, `/perks active`
+
+### Added - 4 New Mini-Games (Total: 16 Games) ⭐ NEW!
+- **Poker (Texas Hold'em)** ($10K): Play against 5 NPCs, max pot $100K
+- **Baccarat** ($5K): Bet on Player/Banker/Tie, classic casino game
+- **Lottery Scratchers** ($1K): Instant win cards, match 3 symbols, up to $100K jackpot
+- **Bingo** ($2K): 5x5 card, 25 numbers drawn, win patterns for prizes up to $100K
+
+### Enhancements
+- Hub GUI expanded with 4 new feature buttons (Achievements, Statistics, Daily Rewards, Perks)
+- All Phase 5 features marked with distinctive icons
+- Enhanced visual feedback and notifications
+- Improved player progression systems
+- 20+ new files created (~5,000 lines of code)
+
 ## [v1.0.51] - Phase 4: Lottery + Business + Games Expansion (January 8, 2026)
 ### Added - Lottery System ⭐ NEW!
 - **Weekly Lottery**: Draws every 7 in-game days

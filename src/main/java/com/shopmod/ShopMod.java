@@ -261,6 +261,11 @@ public class ShopMod implements ModInitializer {
 			com.shopmod.insurance.InsuranceCommand.register(dispatcher);
 			LotteryCommand.register(dispatcher);
 			BusinessCommand.register(dispatcher);
+			// Phase 5 commands
+			com.shopmod.commands.AchievementCommand.register(dispatcher);
+			com.shopmod.commands.StatisticsCommand.register(dispatcher);
+			com.shopmod.commands.DailyCommand.register(dispatcher);
+			com.shopmod.commands.PerkCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

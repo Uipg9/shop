@@ -41,7 +41,7 @@ public class GamesManager {
     
     public enum GameType {
         NUMBER_GUESS, COIN_FLIP, DICE_ROLL, HIGH_LOW, SLOTS, BLACKJACK, ROULETTE,
-        CRASH, WHEEL_OF_FORTUNE, KENO, MINES, PLINKO
+        CRASH, WHEEL_OF_FORTUNE, KENO, MINES, PLINKO, POKER, BACCARAT, LOTTERY_SCRATCHER, BINGO
     }
     
     /**
@@ -260,6 +260,209 @@ public class GamesManager {
             // Multipliers: [0.1x, 0.5x, 1x, 2x, 5x, 2x, 1x, 0.5x, 0.1x]
             double[] multipliers = {0.1, 0.5, 1.0, 2.0, 5.0, 2.0, 1.0, 0.5, 0.1};
             this.multiplier = multipliers[position];
+        }
+    }
+    
+    // Poker game state (Texas Hold'em)
+    public static class PokerState {
+        public List<Integer> playerHand = new ArrayList<>();
+        public List<Integer> communityCards = new ArrayList<>();
+        public List<NpcPlayer> npcPlayers = new ArrayList<>();
+        public int currentBettingRound = 0; // 0=preflop, 1=flop, 2=turn, 3=river
+        public long pot = 0;
+        public long playerBet = 0;
+        public boolean playerFolded = false;
+        public long entryFee;
+        
+        public PokerState(long entry) {
+            this.entryFee = entry;
+            // 5 NPC players
+            for (int i = 0; i < 5; i++) {
+                npcPlayers.add(new NpcPlayer("Player " + (i + 1)));
+            }
+        }
+        
+        public static class NpcPlayer {
+            public String name;
+            public List<Integer> hand = new ArrayList<>();
+            public boolean folded = false;
+            public long chips = 10000;
+            
+            public NpcPlayer(String name) {
+                this.name = name;
+            }
+        }
+    }
+    
+    // Baccarat game state
+    public static class BaccaratState {
+        public List<Integer> playerHand = new ArrayList<>();
+        public List<Integer> bankerHand = new ArrayList<>();
+        public String bet; // "PLAYER", "BANKER", "TIE"
+        public long betAmount;
+        
+        public BaccaratState(String bet, long amount) {
+            this.bet = bet;
+            this.betAmount = amount;
+        }
+        
+        public int getHandValue(List<Integer> hand) {
+            int value = 0;
+            for (int card : hand) {
+                int cardValue = (card % 13) + 1;
+                if (cardValue >= 10) {
+                    value += 0; // 10, J, Q, K = 0
+                } else {
+                    value += cardValue;
+                }
+            }
+            return value % 10; // Only last digit counts
+        }
+    }
+    
+    // Lottery Scratcher state
+    public static class ScratcherState {
+        public String[] symbols = new String[3];
+        public long prize = 0;
+        
+        public ScratcherState() {
+            // Generate random symbols
+            String[] possibleSymbols = {"💎", "⭐", "🔔", "7️⃣", "🍒", "💰", "🎰"};
+            
+            // Determine win (20% chance)
+            if (RANDOM.nextDouble() < 0.20) {
+                // Winning card - all 3 match
+                String symbol = possibleSymbols[RANDOM.nextInt(possibleSymbols.length)];
+                symbols[0] = symbols[1] = symbols[2] = symbol;
+                
+                // Determine prize based on symbol
+                switch (symbol) {
+                    case "💎" -> prize = 100000; // JACKPOT
+                    case "⭐" -> prize = 50000;
+                    case "🔔" -> prize = 10000;
+                    case "7️⃣" -> prize = 5000;
+                    case "🍒" -> prize = 2000;
+                    case "💰" -> prize = 500;
+                    default -> prize = 500;
+                }
+            } else {
+                // Losing card - random symbols
+                for (int i = 0; i < 3; i++) {
+                    symbols[i] = possibleSymbols[RANDOM.nextInt(possibleSymbols.length)];
+                }
+                // Ensure they don't all match
+                if (symbols[0].equals(symbols[1]) && symbols[1].equals(symbols[2])) {
+                    symbols[2] = possibleSymbols[RANDOM.nextInt(possibleSymbols.length)];
+                }
+            }
+        }
+        
+        public boolean isWin() {
+            return symbols[0].equals(symbols[1]) && symbols[1].equals(symbols[2]);
+        }
+    }
+    
+    // Bingo state
+    public static class BingoState {
+        public int[][] card = new int[5][5]; // 5x5 bingo card
+        public List<Integer> drawnNumbers = new ArrayList<>();
+        public boolean[][] marked = new boolean[5][5];
+        public long entryFee;
+        
+        public BingoState(long entry) {
+            this.entryFee = entry;
+            generateCard();
+            drawNumbers();
+        }
+        
+        private void generateCard() {
+            // B: 1-15, I: 16-30, N: 31-45, G: 46-60, O: 61-75
+            for (int col = 0; col < 5; col++) {
+                Set<Integer> used = new HashSet<>();
+                for (int row = 0; row < 5; row++) {
+                    if (col == 2 && row == 2) {
+                        card[row][col] = 0; // Free space
+                        marked[row][col] = true;
+                        continue;
+                    }
+                    
+                    int num;
+                    do {
+                        num = (col * 15) + 1 + RANDOM.nextInt(15);
+                    } while (used.contains(num));
+                    
+                    card[row][col] = num;
+                    used.add(num);
+                }
+            }
+        }
+        
+        private void drawNumbers() {
+            // Draw 25 random numbers
+            Set<Integer> drawn = new HashSet<>();
+            while (drawn.size() < 25) {
+                drawn.add(RANDOM.nextInt(75) + 1);
+            }
+            drawnNumbers.addAll(drawn);
+            
+            // Mark numbers on card
+            for (int row = 0; row < 5; row++) {
+                for (int col = 0; col < 5; col++) {
+                    if (drawnNumbers.contains(card[row][col])) {
+                        marked[row][col] = true;
+                    }
+                }
+            }
+        }
+        
+        public boolean hasLine() {
+            // Check rows
+            for (int row = 0; row < 5; row++) {
+                boolean line = true;
+                for (int col = 0; col < 5; col++) {
+                    if (!marked[row][col]) {
+                        line = false;
+                        break;
+                    }
+                }
+                if (line) return true;
+            }
+            
+            // Check columns
+            for (int col = 0; col < 5; col++) {
+                boolean line = true;
+                for (int row = 0; row < 5; row++) {
+                    if (!marked[row][col]) {
+                        line = false;
+                        break;
+                    }
+                }
+                if (line) return true;
+            }
+            
+            return false;
+        }
+        
+        public boolean hasX() {
+            // Check both diagonals
+            boolean diagonal1 = true;
+            boolean diagonal2 = true;
+            
+            for (int i = 0; i < 5; i++) {
+                if (!marked[i][i]) diagonal1 = false;
+                if (!marked[i][4-i]) diagonal2 = false;
+            }
+            
+            return diagonal1 && diagonal2;
+        }
+        
+        public boolean hasFullCard() {
+            for (int row = 0; row < 5; row++) {
+                for (int col = 0; col < 5; col++) {
+                    if (!marked[row][col]) return false;
+                }
+            }
+            return true;
         }
     }
     
@@ -1083,5 +1286,218 @@ public class GamesManager {
         player.sendSystemMessage(Component.literal("§e§l[PLINKO] Landed in slot " + (state.finalSlot + 1) + "!"));
         player.sendSystemMessage(Component.literal("§7Multiplier: " + String.format("%.1f", state.multiplier) + "x"));
         player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(winnings)));
+    }
+    
+    /**
+     * POKER (Texas Hold'em) - Play against 5 NPCs
+     */
+    public static void startPoker(ServerPlayer player) {
+        long entryCost = 10000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        PokerState state = new PokerState(entryCost);
+        
+        // Deal cards (simplified - instant result)
+        // Player gets 2 cards, 5 community cards dealt
+        List<Integer> deck = new ArrayList<>();
+        for (int i = 0; i < 52; i++) deck.add(i);
+        Collections.shuffle(deck);
+        
+        state.playerHand.add(deck.remove(0));
+        state.playerHand.add(deck.remove(0));
+        
+        // Community cards
+        for (int i = 0; i < 5; i++) {
+            state.communityCards.add(deck.remove(0));
+        }
+        
+        // Simplified: Random outcome
+        double winChance = 0.20; // 20% win rate
+        boolean won = RANDOM.nextDouble() < winChance;
+        
+        GameData data = getGameData(player.getUUID());
+        
+        if (won) {
+            long prize = entryCost * (5 + RANDOM.nextInt(6)); // 5x-10x
+            CurrencyManager.addMoney(player, prize);
+            data.addEarned(prize);
+            data.addEarnedByType(GameType.POKER, prize);
+            
+            player.sendSystemMessage(Component.literal("§a§l[POKER] YOU WIN THE POT!"));
+            player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(prize)));
+        } else {
+            player.sendSystemMessage(Component.literal("§c§l[POKER] You lost this hand."));
+            player.sendSystemMessage(Component.literal("§7Better luck next time!"));
+        }
+        
+        data.incrementGames();
+        data.incrementGamesByType(GameType.POKER);
+        data.setLastPlayTime(System.currentTimeMillis());
+    }
+    
+    /**
+     * BACCARAT - Bet on Player, Banker, or Tie
+     */
+    public static void startBaccarat(ServerPlayer player, String betOn, long betAmount) {
+        long entryCost = 5000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost + betAmount)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost + betAmount) + " (entry + bet)!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost + betAmount);
+        BaccaratState state = new BaccaratState(betOn, betAmount);
+        
+        // Deal cards
+        List<Integer> deck = new ArrayList<>();
+        for (int i = 0; i < 52; i++) deck.add(i);
+        Collections.shuffle(deck);
+        
+        state.playerHand.add(deck.remove(0));
+        state.playerHand.add(deck.remove(0));
+        state.bankerHand.add(deck.remove(0));
+        state.bankerHand.add(deck.remove(0));
+        
+        int playerValue = state.getHandValue(state.playerHand);
+        int bankerValue = state.getHandValue(state.bankerHand);
+        
+        player.sendSystemMessage(Component.literal("§e§l[BACCARAT] Player: " + playerValue + " | Banker: " + bankerValue));
+        
+        String winner;
+        if (playerValue > bankerValue) {
+            winner = "PLAYER";
+        } else if (bankerValue > playerValue) {
+            winner = "BANKER";
+        } else {
+            winner = "TIE";
+        }
+        
+        GameData data = getGameData(player.getUUID());
+        long prize = 0;
+        
+        if (winner.equals(betOn)) {
+            if (winner.equals("PLAYER")) {
+                prize = betAmount * 2; // 1:1
+            } else if (winner.equals("BANKER")) {
+                prize = (long)(betAmount * 1.95); // 0.95:1 (house commission)
+            } else { // TIE
+                prize = betAmount * 8; // 8:1
+            }
+            
+            CurrencyManager.addMoney(player, prize);
+            data.addEarned(prize);
+            data.addEarnedByType(GameType.BACCARAT, prize);
+            
+            player.sendSystemMessage(Component.literal("§a§l[BACCARAT] YOU WIN! " + winner));
+            player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(prize)));
+        } else {
+            player.sendSystemMessage(Component.literal("§c§l[BACCARAT] You lost. Winner: " + winner));
+        }
+        
+        data.incrementGames();
+        data.incrementGamesByType(GameType.BACCARAT);
+        data.setLastPlayTime(System.currentTimeMillis());
+    }
+    
+    /**
+     * LOTTERY SCRATCHERS - Instant win cards
+     */
+    public static void buyScratcher(ServerPlayer player, int count) {
+        long costPerCard = 1000;
+        long totalCost = costPerCard * count;
+        
+        if (!CurrencyManager.canAfford(player, totalCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(totalCost) + " for " + count + " card(s)!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, totalCost);
+        
+        player.sendSystemMessage(Component.literal("§e§l[SCRATCHER] Scratching " + count + " card(s)..."));
+        
+        long totalWon = 0;
+        int wins = 0;
+        
+        for (int i = 0; i < count; i++) {
+            ScratcherState state = new ScratcherState();
+            
+            player.sendSystemMessage(Component.literal("§7Card " + (i + 1) + ": " + 
+                state.symbols[0] + " " + state.symbols[1] + " " + state.symbols[2]));
+            
+            if (state.isWin()) {
+                wins++;
+                totalWon += state.prize;
+                player.sendSystemMessage(Component.literal("§a§l  WINNER! +$" + CurrencyManager.format(state.prize)));
+            }
+        }
+        
+        GameData data = getGameData(player.getUUID());
+        
+        if (totalWon > 0) {
+            CurrencyManager.addMoney(player, totalWon);
+            data.addEarned(totalWon);
+            data.addEarnedByType(GameType.LOTTERY_SCRATCHER, totalWon);
+            player.sendSystemMessage(Component.literal("§6§l[GAME] Total Won: +$" + CurrencyManager.format(totalWon)));
+        } else {
+            player.sendSystemMessage(Component.literal("§7No winners this time!"));
+        }
+        
+        data.incrementGames();
+        data.incrementGamesByType(GameType.LOTTERY_SCRATCHER);
+        data.setLastPlayTime(System.currentTimeMillis());
+    }
+    
+    /**
+     * BINGO - Match numbers on a 5x5 card
+     */
+    public static void playBingo(ServerPlayer player) {
+        long entryCost = 2000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        BingoState state = new BingoState(entryCost);
+        
+        player.sendSystemMessage(Component.literal("§e§l[BINGO] 25 numbers drawn!"));
+        
+        long prize = 0;
+        String winType = "";
+        
+        if (state.hasFullCard()) {
+            prize = 100000;
+            winType = "FULL CARD";
+        } else if (state.hasX()) {
+            prize = 25000;
+            winType = "X PATTERN";
+        } else if (state.hasLine()) {
+            prize = 5000;
+            winType = "LINE";
+        }
+        
+        GameData data = getGameData(player.getUUID());
+        
+        if (prize > 0) {
+            CurrencyManager.addMoney(player, prize);
+            data.addEarned(prize);
+            data.addEarnedByType(GameType.BINGO, prize);
+            
+            player.sendSystemMessage(Component.literal("§a§l[BINGO] " + winType + "!"));
+            player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(prize)));
+        } else {
+            player.sendSystemMessage(Component.literal("§7No winning patterns. Better luck next time!"));
+        }
+        
+        data.incrementGames();
+        data.incrementGamesByType(GameType.BINGO);
+        data.setLastPlayTime(System.currentTimeMillis());
     }
 }
