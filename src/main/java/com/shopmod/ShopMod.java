@@ -15,6 +15,7 @@ import com.shopmod.commands.PetsCommand;
 import com.shopmod.commands.TeleportCommand;
 import com.shopmod.commands.GamesCommand;
 import com.shopmod.commands.VillageCommand;
+import com.shopmod.commands.TenantCommand;
 import com.shopmod.data.ShopDataManager;
 import com.shopmod.farm.FarmManager;
 import com.shopmod.property.PropertyManager;
@@ -176,6 +177,9 @@ public class ShopMod implements ModInitializer {
 					
 					// Process trade center auto-selling
 					com.shopmod.village.TradeCenterManager.processAutoSell(player);
+					
+					// Process tenant events and rent collection
+					com.shopmod.tenant.TenantManager.processDailyTenants(player, currentDay);
 				});
 				
 				// Process digital farm production (for all players)
@@ -214,6 +218,7 @@ public class ShopMod implements ModInitializer {
 			TeleportCommand.register(dispatcher);
 			GamesCommand.register(dispatcher);
 			VillageCommand.register(dispatcher);
+			TenantCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

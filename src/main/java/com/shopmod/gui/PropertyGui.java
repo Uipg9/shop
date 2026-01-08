@@ -192,6 +192,8 @@ public class PropertyGui extends SimpleGui {
                             } else {
                                 PropertyManager.rentOutProperty(player, propertyType);
                             }
+                            updateDisplay();
+                            return; // Prevent propagation
                         }
                         updateDisplay();
                     });

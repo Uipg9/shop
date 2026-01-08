@@ -12,12 +12,19 @@ import net.minecraft.server.level.ServerPlayer;
 
 public class TeleportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        // Main GUI
-        dispatcher.register(Commands.literal("teleport")
+        // Main GUI - changed to /tele to avoid vanilla conflict
+        dispatcher.register(Commands.literal("tele")
             .executes(TeleportCommand::executeTeleport));
         
-        dispatcher.register(Commands.literal("tp")
+        dispatcher.register(Commands.literal("warp")
             .executes(TeleportCommand::executeTeleport)
+            .then(Commands.argument("x", IntegerArgumentType.integer())
+                .then(Commands.argument("y", IntegerArgumentType.integer())
+                    .then(Commands.argument("z", IntegerArgumentType.integer())
+                        .executes(TeleportCommand::executeTpCoords)))));
+        
+        // Also register /tp for backwards compatibility (coordinate teleport only)
+        dispatcher.register(Commands.literal("tp")
             .then(Commands.argument("x", IntegerArgumentType.integer())
                 .then(Commands.argument("y", IntegerArgumentType.integer())
                     .then(Commands.argument("z", IntegerArgumentType.integer())

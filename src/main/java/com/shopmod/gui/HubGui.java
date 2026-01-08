@@ -104,7 +104,20 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(20, new GuiElementBuilder(Items.DIAMOND)
+        setSlot(20, new GuiElementBuilder(Items.VILLAGER_SPAWN_EGG)
+            .setName(Component.literal("§d§lTenant Management"))
+            .addLoreLine(Component.literal("§7Manage property tenants"))
+            .addLoreLine(Component.literal("§7Adjust rent prices"))
+            .addLoreLine(Component.literal("§7View relationships"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/tenant"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new TenantGui(player).open();
+            })
+        );
+        
+        setSlot(21, new GuiElementBuilder(Items.DIAMOND)
             .setName(Component.literal("§b§lAuction House"))
             .addLoreLine(Component.literal("§740 daily items"))
             .addLoreLine(Component.literal("§7Bid against NPCs"))
@@ -117,7 +130,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(21, new GuiElementBuilder(Items.PAPER)
+        setSlot(22, new GuiElementBuilder(Items.PAPER)
             .setName(Component.literal("§e§lStock Options"))
             .addLoreLine(Component.literal("§7Trade derivatives"))
             .addLoreLine(Component.literal("§7Call/Put positions"))
@@ -130,7 +143,7 @@ public class HubGui extends SimpleGui {
             })
         );
         
-        setSlot(22, new GuiElementBuilder(Items.NETHER_STAR)
+        setSlot(23, new GuiElementBuilder(Items.NETHER_STAR)
             .setName(Component.literal("§5§lBlack Market"))
             .addLoreLine(Component.literal("§7Risky deals"))
             .addLoreLine(Component.literal("§740-70% discounts"))

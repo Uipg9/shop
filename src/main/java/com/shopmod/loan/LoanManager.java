@@ -17,10 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LoanManager {
     private static final Map<UUID, LoanData> activeLoanS = new ConcurrentHashMap<>();
     
-    // Base interest rates (lower is better)
-    private static final double BASE_INTEREST_RATE = 0.15; // 15% base
-    private static final double MIN_INTEREST_RATE = 0.05;  // 5% minimum (excellent credit)
-    private static final double MAX_INTEREST_RATE = 0.30;  // 30% maximum (poor credit)
+    // Total loan interest rates (applied once over entire loan period)
+    private static final double MIN_INTEREST_RATE = 0.20;  // 20% total interest (excellent credit - score 100)
+    private static final double MAX_INTEREST_RATE = 0.50;  // 50% total interest (poor credit - score 20)
     
     // Credit score thresholds (based on total bank investments)
     private static final long EXCELLENT_CREDIT = 100000;  // $100k invested = excellent
@@ -91,10 +90,12 @@ public class LoanManager {
     }
     
     /**
-     * Calculate interest rate based on credit score
+     * Calculate total loan interest rate based on credit score (not daily!)
+     * Returns the total interest percentage to add to the principal
      */
     public static double calculateInterestRate(int creditScore) {
         // Linear interpolation between max and min rates
+        // Score 100 = 20% total interest, Score 20 = 50% total interest
         double normalizedScore = creditScore / 100.0;
         return MAX_INTEREST_RATE - (normalizedScore * (MAX_INTEREST_RATE - MIN_INTEREST_RATE));
     }
@@ -152,13 +153,15 @@ public class LoanManager {
         }
         
         int creditScore = calculateCreditScore(player.getUUID());
-        double interestRate = calculateInterestRate(creditScore);
+        double totalInterestRate = calculateInterestRate(creditScore);
         
-        // Calculate total amount to repay (principal + interest)
-        long totalToRepay = (long)(amount * (1.0 + (interestRate * durationDays)));
+        // Calculate total amount to repay (principal + total interest)
+        // Interest is applied ONCE over the entire loan period, not daily!
+        long totalInterest = (long)(amount * totalInterestRate);
+        long totalToRepay = amount + totalInterest;
         long dailyPayment = totalToRepay / durationDays;
         
-        LoanData loan = new LoanData(amount, interestRate, dailyPayment);
+        LoanData loan = new LoanData(amount, totalInterestRate, dailyPayment);
         activeLoanS.put(player.getUUID(), loan);
         
         CurrencyManager.addMoney(player, amount);
@@ -169,7 +172,7 @@ public class LoanManager {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
             "§aCredit Score: §e" + creditScore + "/100"));
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
-            "§aInterest Rate: §e" + String.format("%.1f%%", interestRate * 100) + " per day"));
+            "§aTotal Interest: §e" + String.format("%.1f%%", totalInterestRate * 100) + " §7(" + CurrencyManager.format(totalInterest) + ")"));
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
             "§aDaily Payment: §6" + CurrencyManager.format(dailyPayment)));
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(

@@ -14,11 +14,11 @@ public class MiningManager {
     private static final Map<UUID, MiningData> playerMines = new ConcurrentHashMap<>();
     
     public enum MineType {
-        COAL_MINE("Coal Mine", 25000, 300, 1.0),
-        IRON_MINE("Iron Mine", 75000, 600, 1.5),
-        GOLD_MINE("Gold Mine", 150000, 1200, 2.0),
-        DIAMOND_MINE("Diamond Mine", 500000, 3000, 3.0),
-        NETHERITE_MINE("Netherite Mine", 2000000, 10000, 5.0);
+        COAL_MINE("Coal Mine", 12500, 300, 1.0),      // 50% cheaper
+        IRON_MINE("Iron Mine", 37500, 600, 1.5),      // 50% cheaper
+        GOLD_MINE("Gold Mine", 75000, 1200, 2.0),     // 50% cheaper
+        DIAMOND_MINE("Diamond Mine", 250000, 3000, 3.0),  // 50% cheaper
+        NETHERITE_MINE("Netherite Mine", 1000000, 10000, 5.0);  // 50% cheaper
         
         private final String displayName;
         private final long baseCost;

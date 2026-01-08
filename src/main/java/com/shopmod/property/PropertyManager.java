@@ -246,64 +246,19 @@ public class PropertyManager {
     }
     
     /**
-     * Rent out property to digital villager
+     * Rent out property to digital villager - now uses TenantManager
      */
     public static boolean rentOutProperty(ServerPlayer player, PropertyType propertyType) {
-        PlayerProperties props = getPlayerProperties(player.getUUID());
-        PropertyData data = props.getProperties().get(propertyType);
-        
-        if (data == null) {
-            player.sendSystemMessage(Component.literal(
-                "§c§l[PROPERTY] You don't own this property!"));
-            return false;
-        }
-        
-        if (data.isRented()) {
-            player.sendSystemMessage(Component.literal(
-                "§c§l[PROPERTY] This property is already rented!"));
-            return false;
-        }
-        
-        // Generate random villager name
-        String renterName = VILLAGER_NAMES[RANDOM.nextInt(VILLAGER_NAMES.length)];
-        data.setRented(true);
-        data.setRenterName(renterName);
-        
-        // Set repair countdown (7-14 days)
-        data.setDaysUntilRepair(7 + RANDOM.nextInt(8));
-        
-        player.sendSystemMessage(Component.literal(
-            "§a§l[PROPERTY] Rented out to " + renterName + "!"));
-        player.sendSystemMessage(Component.literal(
-            "§7They will pay §6+50% rent §7but property may need repairs."));
-        
-        return true;
+        // Delegate to TenantManager for proper tenant tracking
+        return com.shopmod.tenant.TenantManager.rentOutProperty(player, propertyType);
     }
     
     /**
-     * Evict renter from property
+     * Evict renter from property - now uses TenantManager
      */
     public static boolean evictRenter(ServerPlayer player, PropertyType propertyType) {
-        PlayerProperties props = getPlayerProperties(player.getUUID());
-        PropertyData data = props.getProperties().get(propertyType);
-        
-        if (data == null || !data.isRented()) {
-            player.sendSystemMessage(Component.literal(
-                "§c§l[PROPERTY] No renter to evict!"));
-            return false;
-        }
-        
-        String oldRenter = data.getRenterName();
-        data.setRented(false);
-        data.setRenterName("");
-        data.setDaysUntilRepair(-1);
-        
-        player.sendSystemMessage(Component.literal(
-            "§a§l[PROPERTY] Evicted " + oldRenter + "!"));
-        player.sendSystemMessage(Component.literal(
-            "§7Property income back to normal."));
-        
-        return true;
+        // Delegate to TenantManager for proper tenant tracking
+        return com.shopmod.tenant.TenantManager.evictTenant(player, propertyType);
     }
     
     /**

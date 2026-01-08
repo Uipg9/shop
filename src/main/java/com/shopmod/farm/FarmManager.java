@@ -23,6 +23,10 @@ public class FarmManager {
         private final Map<ResourceType, Long> harvestedResources = new HashMap<>();
         private int farmLevel = 1; // Player's farm technology level
         private long lastProcessedDay = -1;
+        private boolean autoSellEnabled = false;
+        private boolean hasFertilizer = false;
+        private long totalHarvested = 0;
+        private long totalEarned = 0;
         
         public PlayerFarms() {
             // Initialize harvested storage
@@ -37,6 +41,18 @@ public class FarmManager {
         public void setFarmLevel(int level) { this.farmLevel = level; }
         public long getLastProcessedDay() { return lastProcessedDay; }
         public void setLastProcessedDay(long day) { this.lastProcessedDay = day; }
+        public boolean isAutoSellEnabled() { return autoSellEnabled; }
+        public void setAutoSellEnabled(boolean enabled) { this.autoSellEnabled = enabled; }
+        public boolean hasFertilizer() { return hasFertilizer; }
+        public void setHasFertilizer(boolean fertilizer) { this.hasFertilizer = fertilizer; }
+        public long getTotalHarvested() { return totalHarvested; }
+        public void addTotalHarvested(long amount) { this.totalHarvested += amount; }
+        public long getTotalEarned() { return totalEarned; }
+        public void addTotalEarned(long amount) { this.totalEarned += amount; }
+        
+        public int getActiveFarmCount() {
+            return (int) farms.values().stream().filter(FarmData::isActive).count();
+        }
     }
     
     /**
@@ -167,6 +183,7 @@ public class FarmManager {
             }
             
             long totalSalary = 0;
+            double productionMultiplier = farms.hasFertilizer() ? 1.5 : 1.0;
             
             for (Map.Entry<FarmType, FarmData> entry : farms.getFarms().entrySet()) {
                 FarmType farmType = entry.getKey();
@@ -177,12 +194,14 @@ public class FarmManager {
                 // Pay salary (deduct from player balance)
                 totalSalary += farmType.getDailySalary();
                 
-                // Produce resources
+                // Produce resources with fertilizer boost
                 ResourceType output = farmType.getOutputResource();
-                int production = farmType.getDailyOutput() * data.getFarmLevel();
+                int baseProduction = farmType.getDailyOutput() * data.getFarmLevel();
+                int production = (int)(baseProduction * productionMultiplier);
                 
                 long current = farms.getHarvestedResources().getOrDefault(output, 0L);
                 farms.getHarvestedResources().put(output, current + production);
+                farms.addTotalHarvested(production);
                 
                 data.addProduction(production);
                 
@@ -190,6 +209,29 @@ public class FarmManager {
                 if (farmType == FarmType.ANIMAL_FARM) {
                     long woolCurrent = farms.getHarvestedResources().getOrDefault(ResourceType.WOOL, 0L);
                     farms.getHarvestedResources().put(ResourceType.WOOL, woolCurrent + production);
+                    farms.addTotalHarvested(production);
+                }
+            }
+            
+            // Clear fertilizer after use
+            if (farms.hasFertilizer()) {
+                farms.setHasFertilizer(false);
+            }
+            
+            // Auto-sell if enabled
+            if (farms.isAutoSellEnabled()) {
+                long totalValue = 0;
+                for (Map.Entry<ResourceType, Long> entry : farms.getHarvestedResources().entrySet()) {
+                    long amount = entry.getValue();
+                    if (amount > 0) {
+                        totalValue += amount * entry.getKey().getValuePerUnit();
+                        entry.setValue(0L); // Clear harvested
+                    }
+                }
+                
+                if (totalValue > 0) {
+                    farms.addTotalEarned(totalValue);
+                    // Note: Money will be added when player is online via server tick
                 }
             }
             
@@ -223,6 +265,50 @@ public class FarmManager {
         
         player.sendSystemMessage(Component.literal(
             String.format("§a§l[FARM] Upgraded to Farm Level %d!", farms.getFarmLevel())));
+        
+        return true;
+    }
+    
+    /**
+     * Toggle auto-sell for player
+     */
+    public static void toggleAutoSell(ServerPlayer player) {
+        PlayerFarms farms = getPlayerFarms(player.getUUID());
+        farms.setAutoSellEnabled(!farms.isAutoSellEnabled());
+        
+        player.sendSystemMessage(Component.literal(
+            "§" + (farms.isAutoSellEnabled() ? "a" : "c") + "§l[FARM] Auto-Sell " + 
+            (farms.isAutoSellEnabled() ? "ENABLED" : "DISABLED") + "!"));
+    }
+    
+    /**
+     * Get auto-sell status
+     */
+    public static boolean getAutoSellEnabled(UUID playerUUID) {
+        return getPlayerFarms(playerUUID).isAutoSellEnabled();
+    }
+    
+    /**
+     * Purchase fertilizer for next harvest
+     */
+    public static boolean purchaseFertilizer(ServerPlayer player, long cost) {
+        PlayerFarms farms = getPlayerFarms(player.getUUID());
+        
+        if (farms.hasFertilizer()) {
+            player.sendSystemMessage(Component.literal("§c§l[FARM] Fertilizer already active!"));
+            return false;
+        }
+        
+        if (!CurrencyManager.canAfford(player, cost)) {
+            player.sendSystemMessage(Component.literal(
+                "§c§l[FARM] Insufficient funds! Need " + CurrencyManager.format(cost)));
+            return false;
+        }
+        
+        CurrencyManager.removeMoney(player, cost);
+        farms.setHasFertilizer(true);
+        
+        player.sendSystemMessage(Component.literal("§a§l[FARM] Fertilizer applied! Next harvest +50%"));
         
         return true;
     }

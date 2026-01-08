@@ -186,11 +186,50 @@ public class FarmGui extends SimpleGui {
     }
     
     private void displayHarvestView(FarmManager.PlayerFarms farms) {
-        setSlot(10, new GuiElementBuilder(Items.GOLD_BLOCK)
+        // Harvest All button
+        setSlot(10, new GuiElementBuilder(Items.GOLDEN_HOE)
+            .setName(Component.literal("§6§l⚡ Harvest All"))
+            .addLoreLine(Component.literal("§7Collect ALL resources"))
+            .addLoreLine(Component.literal("§7and sell them instantly"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Total value: §6" + CurrencyManager.format(getTotalHarvestValue(farms))))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§a§lCLICK §7to harvest and sell all!"))
+            .setCallback((index, type, action) -> {
+                harvestAll(farms);
+                updateDisplay();
+            })
+            .glow()
+        );
+        
+        // Auto-Sell toggle
+        boolean autoSell = FarmManager.getAutoSellEnabled(player.getUUID());
+        setSlot(11, new GuiElementBuilder(autoSell ? Items.GREEN_WOOL : Items.RED_WOOL)
+            .setName(Component.literal((autoSell ? "§a" : "§c") + "§lAuto-Sell: " + (autoSell ? "ON" : "OFF")))
+            .addLoreLine(Component.literal("§7Automatically sell harvested"))
+            .addLoreLine(Component.literal("§7resources as they're produced"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§b§lCLICK §7to toggle"))
+            .setCallback((index, type, action) -> {
+                FarmManager.toggleAutoSell(player);
+                updateDisplay();
+            })
+        );
+        
+        // Total harvest value
+        setSlot(13, new GuiElementBuilder(Items.GOLD_BLOCK)
             .setName(Component.literal("§6§lTotal Harvest Value"))
             .addLoreLine(Component.literal(CurrencyManager.format(getTotalHarvestValue(farms))))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§7Value of all harvested resources"))
+        );
+        
+        // Farm statistics
+        setSlot(15, new GuiElementBuilder(Items.WRITABLE_BOOK)
+            .setName(Component.literal("§e§l📊 Farm Statistics"))
+            .addLoreLine(Component.literal("§7Total Harvested: §e" + farms.getTotalHarvested()))
+            .addLoreLine(Component.literal("§7Total Earned: §6" + CurrencyManager.format(farms.getTotalEarned())))
+            .addLoreLine(Component.literal("§7Active Farms: §a" + farms.getActiveFarmCount()))
         );
         
         int slot = 18;
@@ -224,6 +263,23 @@ public class FarmGui extends SimpleGui {
     }
     
     private void displayManagementView(FarmManager.PlayerFarms farms) {
+        // Fertilizer purchase button
+        long fertilizerCost = 5000L;
+        setSlot(10, new GuiElementBuilder(Items.BONE_MEAL)
+            .setName(Component.literal("§2§l🌱 Fertilizer System"))
+            .addLoreLine(Component.literal("§7Boost next harvest by §e+50%"))
+            .addLoreLine(Component.literal("§7Applies to all active farms"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Cost: §6" + CurrencyManager.format(fertilizerCost)))
+            .addLoreLine(Component.literal("§7Active: " + (farms.hasFertilizer() ? "§a✓ YES" : "§c✗ NO")))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§a§lCLICK §7to purchase fertilizer"))
+            .setCallback((index, type, action) -> {
+                FarmManager.purchaseFertilizer(player, fertilizerCost);
+                updateDisplay();
+            })
+        );
+        
         int slot = 18;
         
         for (Map.Entry<FarmType, FarmManager.FarmData> entry : farms.getFarms().entrySet()) {
@@ -262,5 +318,33 @@ public class FarmGui extends SimpleGui {
             total += entry.getValue() * entry.getKey().getValuePerUnit();
         }
         return total;
+    }
+    
+    private void harvestAll(FarmManager.PlayerFarms farms) {
+        long totalValue = 0;
+        int totalItems = 0;
+        
+        for (Map.Entry<ResourceType, Long> entry : farms.getHarvestedResources().entrySet()) {
+            ResourceType type = entry.getKey();
+            long amount = entry.getValue();
+            
+            if (amount > 0) {
+                long value = amount * type.getValuePerUnit();
+                totalValue += value;
+                totalItems += amount;
+                
+                // Clear the harvested resources
+                farms.getHarvestedResources().put(type, 0L);
+            }
+        }
+        
+        if (totalValue > 0) {
+            CurrencyManager.addMoney(player, totalValue);
+            player.sendSystemMessage(Component.literal(
+                "§a§l[FARM] Harvested " + totalItems + " items and sold for §6" + 
+                CurrencyManager.format(totalValue) + "§a!"));
+        } else {
+            player.sendSystemMessage(Component.literal("§c§l[FARM] No resources to harvest!"));
+        }
     }
 }
