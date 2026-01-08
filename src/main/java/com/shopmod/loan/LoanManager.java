@@ -397,4 +397,21 @@ public class LoanManager {
             }
         }
     }
+    
+    /**
+     * Get active loan (for automation system)
+     */
+    public static LoanData getActiveLoan(UUID playerUUID) {
+        return activeLoanS.get(playerUUID);
+    }
+    
+    /**
+     * Get daily payment amount (for automation system)
+     */
+    public static long getDailyPayment(UUID playerUUID) {
+        LoanData loan = getActiveLoan(playerUUID);
+        if (loan == null) return 0;
+        return loan.getDailyPayment();
+    }
+
 }

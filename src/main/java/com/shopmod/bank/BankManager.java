@@ -42,6 +42,13 @@ public class BankManager {
         private long lastProcessedDay = -1;
         private int storageLevel = 0; // 0 = base 27 slots, 1 = 36, 2 = 45, 3 = 54
         
+        // New account types
+        private long checkingBalance = 0;
+        private long investmentBalance = 0;  // Stock portfolio value
+        private final CreditCardData creditCard = new CreditCardData();
+        private final java.util.LinkedList<TransactionRecord> transactionHistory = new java.util.LinkedList<>();
+        private static final int MAX_TRANSACTION_HISTORY = 100;
+        
         public BankData() {
             // Initialize with 27 slots (like chest)
             for (int i = 0; i < 27; i++) {
@@ -84,6 +91,38 @@ public class BankManager {
         
         public void setLastProcessedDay(long day) {
             this.lastProcessedDay = day;
+        }
+        
+        // New account methods
+        public long getCheckingBalance() {
+            return checkingBalance;
+        }
+        
+        public void setCheckingBalance(long balance) {
+            this.checkingBalance = Math.max(0, balance);
+        }
+        
+        public long getInvestmentBalance() {
+            return investmentBalance;
+        }
+        
+        public void setInvestmentBalance(long balance) {
+            this.investmentBalance = Math.max(0, balance);
+        }
+        
+        public CreditCardData getCreditCard() {
+            return creditCard;
+        }
+        
+        public java.util.List<TransactionRecord> getTransactionHistory() {
+            return transactionHistory;
+        }
+        
+        public void addTransaction(TransactionRecord transaction) {
+            transactionHistory.addFirst(transaction);
+            while (transactionHistory.size() > MAX_TRANSACTION_HISTORY) {
+                transactionHistory.removeLast();
+            }
         }
     }
     
@@ -279,5 +318,229 @@ public class BankManager {
         // Load investment data - NBT persistence disabled for now due to API issues
         // Data starts at 0 from BankData constructor
         // TODO: Fix CompoundTag.getLong() Optional<Long> issue in 1.21.11
+    }
+    
+    // ===== NEW ACCOUNT SYSTEM METHODS =====
+    
+    /**
+     * Deposit money into checking account
+     */
+    public static boolean depositToChecking(ServerPlayer player, long amount) {
+        if (amount <= 0) return false;
+        
+        long balance = CurrencyManager.getBalance(player);
+        if (balance < amount) return false;
+        
+        BankData data = getBankData(player.getUUID());
+        CurrencyManager.removeMoney(player, amount);
+        data.setCheckingBalance(data.getCheckingBalance() + amount);
+        
+        // Record transaction
+        data.addTransaction(new TransactionRecord(
+            TransactionRecord.TransactionType.DEPOSIT,
+            amount,
+            data.getCheckingBalance(),
+            "Deposit to checking",
+            AccountType.CHECKING
+        ));
+        
+        return true;
+    }
+    
+    /**
+     * Withdraw money from checking account
+     */
+    public static boolean withdrawFromChecking(ServerPlayer player, long amount) {
+        if (amount <= 0) return false;
+        
+        BankData data = getBankData(player.getUUID());
+        if (data.getCheckingBalance() < amount) return false;
+        
+        data.setCheckingBalance(data.getCheckingBalance() - amount);
+        CurrencyManager.addMoney(player, amount);
+        
+        // Record transaction
+        data.addTransaction(new TransactionRecord(
+            TransactionRecord.TransactionType.WITHDRAW,
+            amount,
+            data.getCheckingBalance(),
+            "Withdrawal from checking",
+            AccountType.CHECKING
+        ));
+        
+        return true;
+    }
+    
+    /**
+     * Transfer between accounts
+     */
+    public static boolean transferBetweenAccounts(ServerPlayer player, AccountType from, AccountType to, long amount) {
+        if (amount <= 0) return false;
+        
+        BankData data = getBankData(player.getUUID());
+        
+        // Determine source and destination balances
+        long sourceBalance = switch (from) {
+            case CHECKING -> data.getCheckingBalance();
+            case SAVINGS -> data.getInvestedMoney();
+            case INVESTMENT -> data.getInvestmentBalance();
+            case CREDIT -> 0;  // Can't transfer from credit
+        };
+        
+        if (sourceBalance < amount) return false;
+        
+        // Perform transfer
+        switch (from) {
+            case CHECKING -> data.setCheckingBalance(data.getCheckingBalance() - amount);
+            case SAVINGS -> data.setInvestedMoney(data.getInvestedMoney() - amount);
+            case INVESTMENT -> data.setInvestmentBalance(data.getInvestmentBalance() - amount);
+            case CREDIT -> {} // Can't transfer from credit
+        }
+        
+        switch (to) {
+            case CHECKING -> data.setCheckingBalance(data.getCheckingBalance() + amount);
+            case SAVINGS -> data.setInvestedMoney(data.getInvestedMoney() + amount);
+            case INVESTMENT -> data.setInvestmentBalance(data.getInvestmentBalance() + amount);
+            case CREDIT -> {} // Can't transfer to credit
+        }
+        
+        // Record transaction
+        data.addTransaction(new TransactionRecord(
+            TransactionRecord.TransactionType.TRANSFER,
+            amount,
+            sourceBalance - amount,
+            String.format("Transfer from %s to %s", from.getDisplayName(), to.getDisplayName()),
+            from
+        ));
+        
+        return true;
+    }
+    
+    // ===== CREDIT CARD METHODS =====
+    
+    /**
+     * Borrow money from credit card
+     */
+    public static boolean borrowFromCredit(ServerPlayer player, long amount) {
+        if (amount <= 0) return false;
+        
+        BankData data = getBankData(player.getUUID());
+        CreditCardData credit = data.getCreditCard();
+        
+        if (credit.getAvailableCredit() < amount) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                String.format("§c§l[BANK] Insufficient credit! Available: §6$%,d", 
+                    credit.getAvailableCredit())));
+            return false;
+        }
+        
+        if (credit.borrow(amount)) {
+            CurrencyManager.addMoney(player, amount);
+            
+            // Record transaction
+            data.addTransaction(new TransactionRecord(
+                TransactionRecord.TransactionType.CREDIT_BORROW,
+                amount,
+                credit.getBalance(),
+                "Credit card borrow",
+                AccountType.CREDIT
+            ));
+            
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                String.format("§a§l[BANK] Borrowed §6$%,d§a! New balance: §6$%,d", 
+                    amount, credit.getBalance())));
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Pay credit card balance
+     */
+    public static boolean payCreditBalance(ServerPlayer player, long amount) {
+        if (amount <= 0) return false;
+        
+        BankData data = getBankData(player.getUUID());
+        CreditCardData credit = data.getCreditCard();
+        
+        if (credit.getBalance() == 0) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                "§e§l[BANK] No credit card balance to pay!"));
+            return false;
+        }
+        
+        // Can't pay more than balance
+        amount = Math.min(amount, credit.getBalance());
+        
+        // Try to pay from wallet
+        if (!CurrencyManager.canAfford(player, amount)) {
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                String.format("§c§l[BANK] Insufficient funds! Need §6$%,d", amount)));
+            return false;
+        }
+        
+        if (CurrencyManager.removeMoney(player, amount)) {
+            credit.pay(amount);
+            
+            // Record transaction
+            data.addTransaction(new TransactionRecord(
+                TransactionRecord.TransactionType.CREDIT_PAYMENT,
+                amount,
+                credit.getBalance(),
+                "Credit card payment",
+                AccountType.CREDIT
+            ));
+            
+            player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                String.format("§a§l[BANK] Paid §6$%,d§a! Remaining: §6$%,d", 
+                    amount, credit.getBalance())));
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Get available credit
+     */
+    public static long getCreditAvailable(UUID playerUUID) {
+        return getBankData(playerUUID).getCreditCard().getAvailableCredit();
+    }
+    
+    /**
+     * Process monthly credit card interest
+     * Called from ShopMod monthly processing
+     */
+    public static void processCreditCardInterest(ServerPlayer player) {
+        BankData data = getBankData(player.getUUID());
+        CreditCardData credit = data.getCreditCard();
+        
+        if (credit.getBalance() == 0) return;
+        
+        long balanceBefore = credit.getBalance();
+        
+        // Check if payment is late (more than 30 days since last payment)
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        java.time.LocalDateTime lastPayment = credit.getLastPaymentDate();
+        long daysSince = java.time.temporal.ChronoUnit.DAYS.between(lastPayment, now);
+        
+        boolean isLate = daysSince > 30;
+        credit.applyMonthlyInterest(isLate);
+        
+        long interest = credit.getBalance() - balanceBefore;
+        
+        // Record transaction
+        data.addTransaction(new TransactionRecord(
+            TransactionRecord.TransactionType.INTEREST,
+            interest,
+            credit.getBalance(),
+            isLate ? "Credit interest + LATE FEE" : "Credit card interest",
+            AccountType.CREDIT
+        ));
+        
+        player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
+            String.format("§c§l[BANK] Credit card interest charged: §6$%,d %s", 
+                interest, isLate ? "§c(LATE PENALTY!)" : "")));
     }
 }

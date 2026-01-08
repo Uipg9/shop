@@ -312,4 +312,22 @@ public class FarmManager {
         
         return true;
     }
+    
+    /**
+     * Collect all available farm resources (for automation)
+     * Returns number of items collected
+     */
+    public static int collectAllFarms(ServerPlayer player) {
+        PlayerFarms farms = getPlayerFarms(player.getUUID());
+        int totalCollected = 0;
+        
+        for (Map.Entry<ResourceType, Long> entry : farms.getHarvestedResources().entrySet()) {
+            if (entry.getValue() > 0) {
+                totalCollected += entry.getValue();
+                entry.setValue(0L);  // Reset to 0 after collection
+            }
+        }
+        
+        return totalCollected;
+    }
 }

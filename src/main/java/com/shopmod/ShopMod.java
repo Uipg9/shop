@@ -186,6 +186,12 @@ public class ShopMod implements ModInitializer {
 					
 					// Process tenant events and rent collection
 					com.shopmod.tenant.TenantManager.processDailyTenants(player, currentDay);
+					
+					// Process automation system
+					com.shopmod.automation.AutomationManager.processDailyAutomation(player);
+					
+					// Reset automation stats
+					com.shopmod.automation.AutomationManager.resetDailyStats(player.getUUID());
 				});
 				
 			// Process stock market daily updates
@@ -200,7 +206,19 @@ public class ShopMod implements ModInitializer {
 				// Process mining operations income
 				MiningManager.processDailyIncome(currentDay, server);
 				
-LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, and mining!");
+				// Process insurance monthly billing (check if it's been 30 days)
+				server.getPlayerList().getPlayers().forEach(player -> {
+					com.shopmod.insurance.InsuranceManager.processMonthlyBilling(player, currentDay);
+				});
+				
+				// Process credit card interest monthly
+				if (currentDay % 30 == 0) {  // Every 30 days
+					server.getPlayerList().getPlayers().forEach(player -> {
+						com.shopmod.bank.BankManager.processCreditCardInterest(player);
+					});
+				}
+				
+LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, mining, automation, and insurance!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -226,6 +244,8 @@ LOGGER.info("Daily processing complete: interest, investments, loans, village, s
 			GamesCommand.register(dispatcher);
 			VillageCommand.register(dispatcher);
 			TenantCommand.register(dispatcher);
+			com.shopmod.automation.AutomationCommand.register(dispatcher);
+			com.shopmod.insurance.InsuranceCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

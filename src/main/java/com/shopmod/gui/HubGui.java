@@ -70,6 +70,8 @@ public class HubGui extends SimpleGui {
             .setName(Component.literal("§a§lBank"))
             .addLoreLine(Component.literal("§7Store items safely"))
             .addLoreLine(Component.literal("§7Deposit and withdraw"))
+            .addLoreLine(Component.literal("§7Multiple account types"))
+            .addLoreLine(Component.literal("§7Credit cards & history"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§8Command: §f/bank"))
             .addLoreLine(Component.literal("§e§lCLICK §7to open"))
@@ -220,6 +222,38 @@ public class HubGui extends SimpleGui {
             .addLoreLine(Component.literal("§e§lCLICK §7to open"))
             .setCallback((index, type, action) -> {
                 new MiningGui(player).open();
+            })
+        );
+        
+        setSlot(31, new GuiElementBuilder(Items.COMPARATOR)
+            .setName(Component.literal("§6§l⚙ Automation Hub"))
+            .addLoreLine(Component.literal("§7Automate repetitive tasks"))
+            .addLoreLine(Component.literal("§7Auto-pay loans"))
+            .addLoreLine(Component.literal("§7Auto-collect farms"))
+            .addLoreLine(Component.literal("§7Auto-deposit wallet"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§a§lFREE TO USE!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/automation"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new com.shopmod.automation.AutomationGui(player).open();
+            })
+        );
+        
+        setSlot(32, new GuiElementBuilder(Items.SHIELD)
+            .setName(Component.literal("§9§l🛡 Insurance"))
+            .addLoreLine(Component.literal("§7Protect your investments"))
+            .addLoreLine(Component.literal("§7Property, Farm, Mine coverage"))
+            .addLoreLine(Component.literal("§7File claims for damages"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Monthly premiums"))
+            .addLoreLine(Component.literal("§7Up to $250K coverage"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§8Command: §f/insurance"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new com.shopmod.insurance.InsuranceGui(player).open();
             })
         );
         
