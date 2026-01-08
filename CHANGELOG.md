@@ -1,5 +1,72 @@
 # Changelog
 
+## [v1.0.50] - Phase 3: Worker Management System (January 7, 2026)
+### Added - Worker Management System ⭐ NEW!
+- **3 Worker Types**:
+  - Farm Hands: +25% crop yield on assigned farms
+  - Miners: +20% mining income on assigned mines
+  - Property Managers: -30% repair costs on properties
+  
+- **Skills & Training**:
+  - 5 trainable skills (Harvesting, Mining, Maintenance, Efficiency, Speed)
+  - Levels 1-10 per skill
+  - $1,000 per training session, 1-day cooldown between training
+  
+- **Loyalty System**:
+  - 0-100 loyalty scale (+1 when paid, -5 for missed payments)
+  - Workers quit if loyalty < 20 (10% chance weekly)
+  
+- **Economics**:
+  - Hiring cost: $5,000 per worker (max 10 workers)
+  - Daily salaries: $100-$500 based on total skill level
+  - Unassigned workers still cost salary but provide no benefits
+  
+- **GUI & Commands**:
+  - 5 view modes: Overview, Hire, Manage, Training, Assignments
+  - Commands: `/workers`, `/worker hire/fire/assign/list/stats`
+
+### Integration
+- Farm efficiency boost applied automatically when worker assigned
+- Mine income bonus on collection
+- Property repair cost reduction
+- Daily salary payments in ShopMod
+- Weekly loyalty updates
+
+## [v1.0.49] - Phase 2: Automation + Banking + Insurance (January 7, 2026)
+### Added - Automation Hub ⭐ NEW!
+- 5 automation toggles (loans/farms/deposit/sell/invest)
+- Notification center (last 10 actions)
+- Daily statistics tracking
+- Configurable deposit threshold
+- Manual "Run All Now" trigger
+
+### Added - Banking Expansion
+- 4 account types (Checking/Savings/Investment/Credit)
+- Credit card system ($50K limit, 10% monthly interest)
+- Transaction history (last 100 records)
+- Multi-account overview GUI
+
+### Added - Insurance System ⭐ NEW!
+- 4 policy types (Property/Farm/Mine/Business)
+- Claims system with fraud detection
+- Premium adjustments (10% increase per claim, max 200%)
+- 2-payment grace period before cancellation
+
+## [v1.0.48] - Phase 1: Stock Market + Interactive Games (January 6, 2026)
+### Added - Stock Market Trading ⭐ NEW!
+- 17 fictional companies across 7 industries
+- Realistic price fluctuations with trends and events
+- Portfolio management with gains/losses tracking
+- Dividend payments every 7 days (0-5% quarterly)
+- 4-view GUI (Market/Trading/Portfolio/News)
+
+### Added - Interactive Games V2.0 ⭐ REDESIGNED!
+- Enhanced 5 existing games (Number Guess, Coin Flip, Dice Roll, High-Low, Slots)
+- Added Blackjack with dealer AI and proper rules
+- Added Roulette (European wheel) with 8 bet types
+- Dedicated lobby and individual game screens
+- Session persistence for multi-round games
+
 ## [Unreleased] - v1.0.26
 ### Added
 - **🌐 Village Web Dashboard**: Revolutionary localhost web interface for village management
