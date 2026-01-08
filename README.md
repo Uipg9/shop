@@ -1,14 +1,56 @@
-# 🏪 Shop Mod v1.0.46 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.47 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.46-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.47-orange.svg)](https://github.com/yourusername/shop-mod/releases)
 
-Transform your Minecraft world into a thriving economy with **17 COMPLETE SYSTEMS**: All features now have beautiful GUIs and are fully integrated into the Hub! Villages, Loans, Games, Teleports, Properties, Auctions, Mining, Pets, and MORE!
+Transform your Minecraft world into a thriving economy with **18 COMPLETE SYSTEMS** - NOW WITH TENANT MANAGEMENT! All features now have beautiful GUIs and are fully integrated into the Hub!
 
 ---
 
-## 🆕 What's New in v1.0.46
+## 🆕 What's New in v1.0.47 - MASSIVE UPDATE
+
+### 🏘️ Tenant Management System ⭐ **BRAND NEW!**
+- **Complete Rental Tracking**: Manage all rented properties in one place
+- **Tenant Relationships**: 0-100 relationship scores affect behavior
+- **Random Events**:
+  - 🎁 Tenants give gifts (money or items)
+  - 💥 Property damage requires repairs
+  - 💰 Rent change requests
+- **Rent Adjustment**: Increase or decrease rent (±10%)
+- **Eviction System**: Remove tenants with relationship-based penalties
+- **Command**: `/tenant` opens management GUI
+
+### 🗺️ Teleport System Enhanced ⭐
+- **Home System**: `/sethome` and `/home` commands
+- **Coordinate Teleport**: `/tele x y z` for precise navigation
+- **Waypoint Management**: Save custom locations with names
+- **No OP Required**: Works without operator permissions
+- **Fixed Commands**: Now uses `/tele` and `/warp` (no vanilla conflicts)
+
+### 🌾 Farming QOL Features ⭐
+- **Harvest All**: One-click collection from all farms
+- **Auto-Sell**: Toggle automatic selling of harvested items
+- **Fertilizer System**: Pay $5K for +50% boost on next harvest
+- **Farm Statistics**: Track total harvested, earned, active farms
+- **Much More Productive**: Farms now 3x more profitable!
+
+### 💰 Loan System Fixed ⭐
+- **Reasonable Interest**: Max 1.5x total repayment (was 5.5x!)
+- **Better Rates**: 
+  - Excellent credit (100): 20% total interest
+  - Poor credit (20): 50% total interest
+- **Fair Terms**: Interest is now total, not daily compound
+- **Player Friendly**: Actually possible to pay off loans now!
+
+### ⛏️ Mining More Affordable ⭐
+- **50% Cost Reduction**: All mining operations half price
+- **Better ROI**: Much faster to pay off investments
+- **Same Income**: Daily earnings unchanged
+
+---
+
+## 📋 Previous Updates (v1.0.46)
 
 ### 🎮 Games Economy Rebalance ⭐
 - **Entry Costs Added**: All games now require an upfront fee to play!
