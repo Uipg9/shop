@@ -2,7 +2,7 @@
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.50-orange.svg)](https://github.com/yourusername/shop-mod/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.50-orange.svg)](https://github.com/Uipg9/shop/releases)
 
 Transform your Minecraft world into a thriving economy with **22 COMPLETE SYSTEMS** - NOW WITH WORKERS, AUTOMATION & INSURANCE! All features have beautiful GUIs and are fully integrated!
 
@@ -451,7 +451,7 @@ Earn by playing naturally!
 
 ### Installation
 1. **Download** [Fabric Loader 0.18.4+](https://fabricmc.net/) for Minecraft 1.21.11
-2. **Download** the latest `shop-1.0.41.jar` from [Releases](https://github.com/yourusername/shop-mod/releases)
+2. **Download** the latest `shop-1.0.50.jar` from [Releases](https://github.com/Uipg9/shop/releases)
 3. **Copy** the JAR to `.minecraft/mods/` folder
 4. **Launch** Minecraft and start earning!
 
@@ -597,7 +597,7 @@ Earn by playing naturally!
 
 ✅ **All major bugs fixed in v1.0.41!**
 
-Report new bugs: [GitHub Issues](https://github.com/yourusername/shop-mod/issues)
+Report new bugs: [GitHub Issues](https://github.com/Uipg9/shop/issues)
 
 ---
 
@@ -658,7 +658,7 @@ We welcome contributions! Here's how:
 
 ### Development Setup
 ```bash
-git clone https://github.com/yourusername/shop-mod.git
+git clone https://github.com/Uipg9/shop.git
 cd shop-mod
 ./gradlew build
 ```
@@ -694,7 +694,7 @@ Special thanks to:
 ## 📞 Support & Community
 
 ### Get Help
-- **GitHub Issues**: [Report bugs](https://github.com/yourusername/shop-mod/issues)
+- **GitHub Issues**: [Report bugs](https://github.com/Uipg9/shop/issues)
 - **Discord**: [Join our server](#) (Coming soon)
 - **Wiki**: [Full documentation](#) (Coming soon)
 
