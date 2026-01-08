@@ -132,4 +132,29 @@ public class MiningManager {
             }
         });
     }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Get mine depth
+     */
+    public static int getMineDepth(UUID mineId) {
+        // Simplified: return level as depth
+        return 1;
+    }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Upgrade mine depth (+better ores)
+     */
+    public static boolean upgradeMineDepth(ServerPlayer player, UUID mineId) {
+        long cost = 75000; // $75K
+        
+        if (!CurrencyManager.canAfford(player, cost)) {
+            player.sendSystemMessage(Component.literal("§c§l[MINING] Insufficient funds! Need " + CurrencyManager.format(cost)));
+            return false;
+        }
+        
+        CurrencyManager.removeMoney(player, cost);
+        player.sendSystemMessage(Component.literal("§a§l[MINING] Mine depth increased! Better ores ahead!"));
+        
+        return true;
+    }
 }

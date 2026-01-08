@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.network.chat.Component;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 
-import java.util.Random;
+import java.util.*;
 
 /**
  * Interactive Games GUI v2.0
@@ -177,6 +177,91 @@ public class GamesGui extends SimpleGui {
             .addLoreLine(Component.literal("§e§lCLICK to play!"))
             .glow()
             .setCallback((index, type, action) -> showRoulette())
+        );
+        
+        // Game 8: Crash (NEW!)
+        setSlot(30, new GuiElementBuilder(Items.FIREWORK_ROCKET)
+            .setName(Component.literal("§c§l📈 Crash"))
+            .addLoreLine(Component.literal("§7Cash out before crash!"))
+            .addLoreLine(Component.literal("§7Multiplier increases"))
+            .addLoreLine(Component.literal("§7High risk, high reward"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$5,000"))
+            .addLoreLine(Component.literal("§a§lMax Win: §6$250,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4!"))
+            .addLoreLine(Component.literal("§8Played: " + data.getGamesPlayedByType().getOrDefault(GameType.CRASH, 0)))
+            .addLoreLine(Component.literal("§e§lCLICK to play!"))
+            .glow()
+            .setCallback((index, type, action) -> showCrash())
+        );
+        
+        // Game 9: Wheel of Fortune (NEW!)
+        setSlot(31, new GuiElementBuilder(Items.COMPASS)
+            .setName(Component.literal("§6§l🎡 Wheel of Fortune"))
+            .addLoreLine(Component.literal("§7Spin the wheel!"))
+            .addLoreLine(Component.literal("§712 segments with prizes"))
+            .addLoreLine(Component.literal("§7Jackpot: $500,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$10,000"))
+            .addLoreLine(Component.literal("§a§lMax Win: §6$500,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4!"))
+            .addLoreLine(Component.literal("§8Played: " + data.getGamesPlayedByType().getOrDefault(GameType.WHEEL_OF_FORTUNE, 0)))
+            .addLoreLine(Component.literal("§e§lCLICK to play!"))
+            .glow()
+            .setCallback((index, type, action) -> showWheelOfFortune())
+        );
+        
+        // Game 10: Keno (NEW!)
+        setSlot(32, new GuiElementBuilder(Items.ENDER_PEARL)
+            .setName(Component.literal("§5§l🎱 Keno"))
+            .addLoreLine(Component.literal("§7Pick 10 numbers from 1-80"))
+            .addLoreLine(Component.literal("§720 numbers drawn"))
+            .addLoreLine(Component.literal("§7Match all 10 = $100K!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$2,000"))
+            .addLoreLine(Component.literal("§a§lMax Win: §6$100,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4!"))
+            .addLoreLine(Component.literal("§8Played: " + data.getGamesPlayedByType().getOrDefault(GameType.KENO, 0)))
+            .addLoreLine(Component.literal("§e§lCLICK to play!"))
+            .glow()
+            .setCallback((index, type, action) -> showKeno())
+        );
+        
+        // Game 11: Mines (NEW!)
+        setSlot(33, new GuiElementBuilder(Items.TNT)
+            .setName(Component.literal("§c§l💣 Mines"))
+            .addLoreLine(Component.literal("§75x5 grid, 5 hidden mines"))
+            .addLoreLine(Component.literal("§7Reveal tiles for multiplier"))
+            .addLoreLine(Component.literal("§7Cash out or risk it!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$5,000"))
+            .addLoreLine(Component.literal("§a§lMax Win: §6$100,000+"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4!"))
+            .addLoreLine(Component.literal("§8Played: " + data.getGamesPlayedByType().getOrDefault(GameType.MINES, 0)))
+            .addLoreLine(Component.literal("§e§lCLICK to play!"))
+            .glow()
+            .setCallback((index, type, action) -> showMines())
+        );
+        
+        // Game 12: Plinko (NEW!)
+        setSlot(34, new GuiElementBuilder(Items.SLIME_BALL)
+            .setName(Component.literal("§a§l⚫ Plinko"))
+            .addLoreLine(Component.literal("§7Drop ball through pegs"))
+            .addLoreLine(Component.literal("§7Land in prize slots"))
+            .addLoreLine(Component.literal("§7Physics-based gameplay"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lEntry: §6$3,000"))
+            .addLoreLine(Component.literal("§a§lMax Win: §6$15,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4!"))
+            .addLoreLine(Component.literal("§8Played: " + data.getGamesPlayedByType().getOrDefault(GameType.PLINKO, 0)))
+            .addLoreLine(Component.literal("§e§lCLICK to play!"))
+            .glow()
+            .setCallback((index, type, action) -> showPlinko())
         );
         
         // Info
@@ -761,6 +846,308 @@ public class GamesGui extends SimpleGui {
             .addLoreLine(Component.literal("§7Bet: §6$" + CurrencyManager.format(defaultBet)))
             .setCallback((index, type, action) -> {
                 GamesManager.startRoulette(player, RouletteState.BetType.DOZEN3, 0, defaultBet);
+                showLobby();
+            })
+        );
+        
+        setSlot(49, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§e§l← Back to Lobby"))
+            .setCallback((index, type, action) -> showLobby())
+        );
+    }
+    
+    /**
+     * CRASH GAME
+     */
+    private void showCrash() {
+        GameSession session = GamesManager.getSession(player.getUUID());
+        
+        if (session == null || session.type != GameType.CRASH) {
+            GamesManager.startCrash(player);
+            session = GamesManager.getSession(player.getUUID());
+            if (session == null) return;
+        }
+        
+        currentView = GameType.CRASH;
+        CrashState state = (CrashState) session.gameState;
+        
+        this.setTitle(Component.literal("§c§l📈 Crash"));
+        
+        for (int i = 0; i < 54; i++) {
+            setSlot(i, new GuiElementBuilder(Items.AIR));
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(i, new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE).setName(Component.literal("")));
+            setSlot(i + 45, new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE).setName(Component.literal("")));
+        }
+        
+        // Display multiplier
+        setSlot(13, new GuiElementBuilder(Items.EMERALD)
+            .setName(Component.literal("§a§l§nCurrent: " + String.format("%.2f", state.multiplier) + "x"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§7Potential Win: §6$" + CurrencyManager.format((long)(state.entryFee * state.multiplier))))
+            .glow()
+        );
+        
+        // Cash out button
+        setSlot(31, new GuiElementBuilder(Items.GOLD_BLOCK)
+            .setName(Component.literal("§6§l§n💰 CASH OUT"))
+            .addLoreLine(Component.literal("§7Cash out now!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§a§lWin: §6$" + CurrencyManager.format((long)(state.entryFee * state.multiplier))))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lCLICK to cash out"))
+            .glow()
+            .setCallback((index, type, action) -> {
+                GamesManager.cashOutCrash(player);
+                showLobby();
+            })
+        );
+        
+        // Increment multiplier
+        state.multiplier += 0.1;
+        
+        // Check for crash
+        if (state.multiplier >= state.crashPoint) {
+            player.sendSystemMessage(Component.literal("§c§l[CRASH] CRASHED at " + String.format("%.2f", state.crashPoint) + "x!"));
+            GameData data = GamesManager.getGameData(player.getUUID());
+            data.incrementGames();
+            data.incrementGamesByType(GameType.CRASH);
+            GamesManager.endSession(player.getUUID());
+            showLobby();
+        }
+        
+        setSlot(49, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§e§l← Back to Lobby"))
+            .setCallback((index, type, action) -> {
+                GamesManager.endSession(player.getUUID());
+                showLobby();
+            })
+        );
+    }
+    
+    /**
+     * WHEEL OF FORTUNE GAME
+     */
+    private void showWheelOfFortune() {
+        currentView = GameType.WHEEL_OF_FORTUNE;
+        this.setTitle(Component.literal("§6§l🎡 Wheel of Fortune"));
+        
+        for (int i = 0; i < 54; i++) {
+            setSlot(i, new GuiElementBuilder(Items.AIR));
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(i, new GuiElementBuilder(Items.YELLOW_STAINED_GLASS_PANE).setName(Component.literal("")));
+            setSlot(i + 45, new GuiElementBuilder(Items.YELLOW_STAINED_GLASS_PANE).setName(Component.literal("")));
+        }
+        
+        setSlot(4, new GuiElementBuilder(Items.COMPASS)
+            .setName(Component.literal("§6§lWheel of Fortune"))
+            .addLoreLine(Component.literal("§7Spin for prizes!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lCost: $10,000"))
+        );
+        
+        setSlot(22, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§d§l§n⭐ SPIN"))
+            .addLoreLine(Component.literal("§7Click to spin the wheel!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lCLICK to spin"))
+            .glow()
+            .setCallback((index, type, action) -> {
+                GamesManager.spinWheel(player);
+                showLobby();
+            })
+        );
+        
+        setSlot(49, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§e§l← Back to Lobby"))
+            .setCallback((index, type, action) -> showLobby())
+        );
+    }
+    
+    /**
+     * KENO GAME
+     */
+    private void showKeno() {
+        currentView = GameType.KENO;
+        this.setTitle(Component.literal("§5§l🎱 Keno - Select 10 Numbers"));
+        
+        // Simple implementation: Quick play with random numbers
+        for (int i = 0; i < 54; i++) {
+            setSlot(i, new GuiElementBuilder(Items.AIR));
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(i, new GuiElementBuilder(Items.PURPLE_STAINED_GLASS_PANE).setName(Component.literal("")));
+            setSlot(i + 45, new GuiElementBuilder(Items.PURPLE_STAINED_GLASS_PANE).setName(Component.literal("")));
+        }
+        
+        setSlot(13, new GuiElementBuilder(Items.ENDER_PEARL)
+            .setName(Component.literal("§5§lKeno"))
+            .addLoreLine(Component.literal("§7Pick 10 from 1-80, 20 drawn"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lCost: $2,000"))
+        );
+        
+        setSlot(31, new GuiElementBuilder(Items.NETHER_STAR)
+            .setName(Component.literal("§d§l§n⭐ QUICK PLAY"))
+            .addLoreLine(Component.literal("§7Auto-select 10 random numbers"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lCLICK to play"))
+            .glow()
+            .setCallback((index, type, action) -> {
+                List<Integer> numbers = new ArrayList<>();
+                Set<Integer> used = new HashSet<>();
+                while (numbers.size() < 10) {
+                    int num = RANDOM.nextInt(80) + 1;
+                    if (used.add(num)) {
+                        numbers.add(num);
+                    }
+                }
+                GamesManager.startKeno(player, numbers);
+                showLobby();
+            })
+        );
+        
+        setSlot(49, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§e§l← Back to Lobby"))
+            .setCallback((index, type, action) -> showLobby())
+        );
+    }
+    
+    /**
+     * MINES GAME
+     */
+    private void showMines() {
+        GameSession session = GamesManager.getSession(player.getUUID());
+        
+        if (session == null || session.type != GameType.MINES) {
+            GamesManager.startMines(player);
+            session = GamesManager.getSession(player.getUUID());
+            if (session == null) return;
+        }
+        
+        currentView = GameType.MINES;
+        MinesState state = (MinesState) session.gameState;
+        
+        this.setTitle(Component.literal("§c§l💣 Mines - " + state.tilesRevealed + "/20 revealed"));
+        
+        for (int i = 0; i < 54; i++) {
+            setSlot(i, new GuiElementBuilder(Items.AIR));
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(i, new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE).setName(Component.literal("")));
+            setSlot(i + 45, new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE).setName(Component.literal("")));
+        }
+        
+        // 5x5 grid
+        int[] gridSlots = {
+            10, 11, 12, 13, 14,
+            19, 20, 21, 22, 23,
+            28, 29, 30, 31, 32,
+            37, 38, 39, 40, 41,
+            46, 47, 48, 50, 51
+        };
+        
+        int idx = 0;
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 5; col++) {
+                int finalRow = row;
+                int finalCol = col;
+                int slot = gridSlots[idx++];
+                
+                if (state.revealed[row][col]) {
+                    if (state.mines[row][col]) {
+                        setSlot(slot, new GuiElementBuilder(Items.TNT)
+                            .setName(Component.literal("§c§l💣 MINE!")));
+                    } else {
+                        setSlot(slot, new GuiElementBuilder(Items.DIAMOND)
+                            .setName(Component.literal("§a§l✓ SAFE")));
+                    }
+                } else {
+                    setSlot(slot, new GuiElementBuilder(Items.GRAY_CONCRETE)
+                        .setName(Component.literal("§7§l?"))
+                        .addLoreLine(Component.literal("§7Click to reveal"))
+                        .setCallback((index, type, action) -> {
+                            GamesManager.revealMineTile(player, finalRow, finalCol);
+                            showMines(); // Refresh
+                        })
+                    );
+                }
+            }
+        }
+        
+        // Cash out button
+        setSlot(4, new GuiElementBuilder(Items.GOLD_BLOCK)
+            .setName(Component.literal("§6§l§n💰 CASH OUT"))
+            .addLoreLine(Component.literal("§7Multiplier: §e" + String.format("%.2f", state.multiplier) + "x"))
+            .addLoreLine(Component.literal("§7Win: §6$" + CurrencyManager.format((long)(state.entryFee * state.multiplier))))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lCLICK to cash out"))
+            .glow()
+            .setCallback((index, type, action) -> {
+                GamesManager.cashOutMines(player);
+                showLobby();
+            })
+        );
+        
+        setSlot(49, new GuiElementBuilder(Items.ARROW)
+            .setName(Component.literal("§e§l← Back to Lobby"))
+            .setCallback((index, type, action) -> {
+                GamesManager.endSession(player.getUUID());
+                showLobby();
+            })
+        );
+    }
+    
+    /**
+     * PLINKO GAME
+     */
+    private void showPlinko() {
+        currentView = GameType.PLINKO;
+        this.setTitle(Component.literal("§a§l⚫ Plinko"));
+        
+        for (int i = 0; i < 54; i++) {
+            setSlot(i, new GuiElementBuilder(Items.AIR));
+        }
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(i, new GuiElementBuilder(Items.LIME_STAINED_GLASS_PANE).setName(Component.literal("")));
+            setSlot(i + 45, new GuiElementBuilder(Items.LIME_STAINED_GLASS_PANE).setName(Component.literal("")));
+        }
+        
+        setSlot(4, new GuiElementBuilder(Items.SLIME_BALL)
+            .setName(Component.literal("§a§lPlinko"))
+            .addLoreLine(Component.literal("§7Drop ball through pegs"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§c§lCost: $3,000"))
+        );
+        
+        // Show multiplier slots
+        String[] multipliers = {"0.1x", "0.5x", "1x", "2x", "5x", "2x", "1x", "0.5x", "0.1x"};
+        Item[] slotColors = {
+            Items.RED_CONCRETE, Items.ORANGE_CONCRETE, Items.YELLOW_CONCRETE,
+            Items.LIME_CONCRETE, Items.EMERALD_BLOCK, Items.LIME_CONCRETE,
+            Items.YELLOW_CONCRETE, Items.ORANGE_CONCRETE, Items.RED_CONCRETE
+        };
+        
+        for (int i = 0; i < 9; i++) {
+            setSlot(36 + i, new GuiElementBuilder(slotColors[i])
+                .setName(Component.literal("§e§l" + multipliers[i])));
+        }
+        
+        setSlot(22, new GuiElementBuilder(Items.SLIME_BALL)
+            .setName(Component.literal("§a§l§n⚫ DROP BALL"))
+            .addLoreLine(Component.literal("§7Click to drop!"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lCLICK to play"))
+            .glow()
+            .setCallback((index, type, action) -> {
+                GamesManager.dropPlinko(player);
                 showLobby();
             })
         );

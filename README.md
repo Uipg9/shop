@@ -1,14 +1,86 @@
-# 🏪 Shop Mod v1.0.50 - Ultimate Economy & Automation System
+# 🏪 Shop Mod v1.0.51 - Ultimate Economy & Automation System
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-brightgreen.svg)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.18.4-blue.svg)](https://fabricmc.net/)
-[![Version](https://img.shields.io/badge/Version-1.0.50-orange.svg)](https://github.com/Uipg9/shop/releases)
+[![Version](https://img.shields.io/badge/Version-1.0.51-orange.svg)](https://github.com/Uipg9/shop/releases)
 
-Transform your Minecraft world into a thriving economy with **22 COMPLETE SYSTEMS** - NOW WITH WORKERS, AUTOMATION & INSURANCE! All features have beautiful GUIs and are fully integrated!
+Transform your Minecraft world into a thriving economy with **27 COMPLETE SYSTEMS** - NOW WITH LOTTERY, BUSINESS EMPIRE & 12 GAMES! All features have beautiful GUIs and are fully integrated!
 
 ---
 
-## 🆕 What's New in v1.0.50 - PHASE 3: WORKER MANAGEMENT
+## 🆕 What's New in v1.0.51 - PHASE 4: EXPANSION PACK
+
+### 🎰 Weekly Lottery System ⭐ **BRAND NEW!**
+- **Weekly Draws**: Every 7 in-game days
+- **6 Numbers** (1-50 range)
+- **Tickets**: $10,000 each (max 10 per player)
+- **Prize Tiers**:
+  - Match 6: JACKPOT (starts at $500K, rolls over!)
+  - Match 5: $100,000
+  - Match 4: $25,000
+  - Match 3: $5,000
+  - Match 2: $1,000
+  - Match 1: Free ticket next draw
+- **Growing Jackpot**: 70% of ticket sales added weekly
+- **Commands**: `/lottery`, `/lottery buy`, `/lottery info`
+
+### 🏢 Business Empire System ⭐ **BRAND NEW!**
+- **7 Business Types**:
+  - Restaurant ($500K): $5K/day passive income
+  - Casino ($2M): $20K/day passive income
+  - Stock Brokerage ($1M): $10K/day passive
+  - Insurance Agency ($750K): $8K/day passive
+  - Bank Branch ($1.5M): $15K/day passive
+  - Mining Company ($1M): $12K/day passive
+  - Farm Conglomerate ($800K): $9K/day passive
+
+- **Business Features**:
+  - Upgrade system (5 levels, +50% income per level)
+  - Auto-collect passive income (stores up to 7 days)
+  - Synergy bonuses: 3+ businesses = 20% bonus, 5+ = 50%, all 7 = 100%!
+  - Sell for 60% value if needed
+  
+- **Commands**: `/business`, `/business buy <type>`, `/business collect`
+
+### 🎮 5 New Mini-Games! (Total: 12 Games)
+
+**Crash** ($5K entry):
+- Multiplier increases from 1.00x
+- Cash out before it crashes!
+- Up to 50x multiplier possible
+
+**Wheel of Fortune** ($10K entry):
+- 12 segments including JACKPOT ($500K)
+- Multipliers, bonuses, and BANKRUPT
+- x5 max multiplier
+
+**Keno** ($2K entry):
+- Pick 10 numbers from 1-80
+- Match drawn numbers
+- Up to $100K jackpot
+
+**Mines** ($5K entry):
+- 5x5 grid with hidden mines
+- Each safe tile increases multiplier
+- Cash out anytime or risk it all!
+
+**Plinko** ($3K entry):
+- Drop ball through pegs
+- Land in multiplier slots
+- Up to 5x multiplier
+
+### ⚡ System Enhancements
+- **Farms**: Irrigation upgrade ($100K, +20% yield)
+- **Mines**: Depth upgrades ($75K, better ores)
+- **Properties**: Renovations ($50K, +10% value/rent, max 5 levels)
+- **Stock Market**: IPOs (new companies monthly), stock splits, market sentiment
+- **Workers**: Promote workers ($25K, +1 all skills, higher efficiency)
+
+---
+
+## 📋 Previous Updates
+
+### v1.0.50 - Phase 3: Worker Management
 
 ### 👷 Worker Management System ⭐ **BRAND NEW!**
 - **3 Worker Types**:

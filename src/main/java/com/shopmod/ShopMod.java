@@ -17,6 +17,10 @@ import com.shopmod.commands.TeleportCommand;
 import com.shopmod.commands.GamesCommand;
 import com.shopmod.commands.VillageCommand;
 import com.shopmod.commands.TenantCommand;
+import com.shopmod.lottery.LotteryManager;
+import com.shopmod.commands.LotteryCommand;
+import com.shopmod.business.BusinessManager;
+import com.shopmod.commands.BusinessCommand;
 import com.shopmod.data.ShopDataManager;
 import com.shopmod.farm.FarmManager;
 import com.shopmod.property.PropertyManager;
@@ -208,8 +212,9 @@ public class ShopMod implements ModInitializer {
 				
 				// Process worker salaries and loyalty
 				com.shopmod.worker.WorkerManager.processDailyPayments(currentDay, server);
-				
-				// Process insurance monthly billing (check if it's been 30 days)
+			
+			// Process business daily income
+			BusinessManager.processDailyIncome(currentDay, server);
 				server.getPlayerList().getPlayers().forEach(player -> {
 					com.shopmod.insurance.InsuranceManager.processMonthlyBilling(player, currentDay);
 				});
@@ -224,9 +229,8 @@ public class ShopMod implements ModInitializer {
 				// Process worker weekly loyalty updates and quit checks
 				if (currentDay % 7 == 0) {  // Every 7 days
 					com.shopmod.worker.WorkerManager.processWeeklyUpdates(currentDay, server);
+					LotteryManager.processWeeklyDraw(currentDay, server);
 				}
-				
-LOGGER.info("Daily processing complete: interest, investments, loans, village, stock market, farms, properties, research, mining, automation, workers, and insurance!");
 				
 				lastDailyUpdate = currentDay;
 			}
@@ -255,6 +259,8 @@ LOGGER.info("Daily processing complete: interest, investments, loans, village, s
 			TenantCommand.register(dispatcher);
 			com.shopmod.automation.AutomationCommand.register(dispatcher);
 			com.shopmod.insurance.InsuranceCommand.register(dispatcher);
+			LotteryCommand.register(dispatcher);
+			BusinessCommand.register(dispatcher);
 		});
 		
 		LOGGER.info("Shop Mod initialized! Use /shop to open the shop.");

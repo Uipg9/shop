@@ -538,4 +538,34 @@ public class StockMarketManager {
         long daysSinceLastDividend = currentDay - lastDividendPayout;
         return currentDay + (DIVIDEND_INTERVAL_DAYS - daysSinceLastDividend);
     }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Initiate IPO - New company launches monthly
+     */
+    public static void initiateIPO() {
+        // Simplified implementation - would add new company to market
+        ShopMod.LOGGER.info("IPO initiated - new company launching!");
+    }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Perform stock split (2:1 split for stocks >$500)
+     */
+    public static void performStockSplit(String companyName) {
+        StockCompany company = companies.get(companyName);
+        if (company != null && company.getCurrentPrice() > 500) {
+            double newPrice = company.getCurrentPrice() / 2.0;
+            company.updatePrice(newPrice);
+            ShopMod.LOGGER.info("Stock split: " + companyName + " 2:1 at $" + newPrice);
+        }
+    }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Get market sentiment (affects all prices)
+     */
+    public static String getMarketSentiment() {
+        double rand = random.nextDouble();
+        if (rand < 0.30) return "BULLISH";
+        else if (rand < 0.70) return "NEUTRAL";
+        else return "BEARISH";
+    }
 }

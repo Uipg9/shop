@@ -40,7 +40,8 @@ public class GamesManager {
     }
     
     public enum GameType {
-        NUMBER_GUESS, COIN_FLIP, DICE_ROLL, HIGH_LOW, SLOTS, BLACKJACK, ROULETTE
+        NUMBER_GUESS, COIN_FLIP, DICE_ROLL, HIGH_LOW, SLOTS, BLACKJACK, ROULETTE,
+        CRASH, WHEEL_OF_FORTUNE, KENO, MINES, PLINKO
     }
     
     /**
@@ -129,6 +130,136 @@ public class GamesManager {
             this.betType = type;
             this.betNumber = number;
             this.betAmount = amount;
+        }
+    }
+    
+    // Crash game state
+    public static class CrashState {
+        public double multiplier;
+        public boolean cashedOut;
+        public long entryFee;
+        public double crashPoint;
+        
+        public CrashState(long entry) {
+            this.multiplier = 1.00;
+            this.cashedOut = false;
+            this.entryFee = entry;
+            // Generate crash point (weighted toward lower values)
+            double random = RANDOM.nextDouble();
+            if (random < 0.50) {
+                this.crashPoint = 1.01 + RANDOM.nextDouble() * 1.99; // 50% chance: 1.01-3.00x
+            } else if (random < 0.80) {
+                this.crashPoint = 3.00 + RANDOM.nextDouble() * 7.00; // 30% chance: 3.00-10.00x
+            } else if (random < 0.95) {
+                this.crashPoint = 10.00 + RANDOM.nextDouble() * 15.00; // 15% chance: 10.00-25.00x
+            } else {
+                this.crashPoint = 25.00 + RANDOM.nextDouble() * 25.00; // 5% chance: 25.00-50.00x
+            }
+        }
+    }
+    
+    // Keno game state
+    public static class KenoState {
+        public List<Integer> selectedNumbers; // 10 numbers from 1-80
+        public List<Integer> drawnNumbers; // 20 numbers drawn
+        public long entryFee;
+        
+        public KenoState(List<Integer> selected, long entry) {
+            this.selectedNumbers = new ArrayList<>(selected);
+            this.entryFee = entry;
+            this.drawnNumbers = new ArrayList<>();
+            
+            // Draw 20 random numbers
+            Set<Integer> drawn = new HashSet<>();
+            while (drawn.size() < 20) {
+                drawn.add(RANDOM.nextInt(80) + 1);
+            }
+            this.drawnNumbers.addAll(drawn);
+        }
+        
+        public int countMatches() {
+            int matches = 0;
+            for (Integer num : selectedNumbers) {
+                if (drawnNumbers.contains(num)) {
+                    matches++;
+                }
+            }
+            return matches;
+        }
+    }
+    
+    // Mines game state
+    public static class MinesState {
+        public boolean[][] revealed; // 5x5 grid
+        public boolean[][] mines; // 5 mines placed
+        public int tilesRevealed;
+        public double multiplier;
+        public long entryFee;
+        public boolean hitMine;
+        
+        public MinesState(long entry) {
+            this.revealed = new boolean[5][5];
+            this.mines = new boolean[5][5];
+            this.tilesRevealed = 0;
+            this.multiplier = 1.0;
+            this.entryFee = entry;
+            this.hitMine = false;
+            
+            // Place 5 random mines
+            Set<Integer> minePositions = new HashSet<>();
+            while (minePositions.size() < 5) {
+                minePositions.add(RANDOM.nextInt(25));
+            }
+            
+            for (Integer pos : minePositions) {
+                int row = pos / 5;
+                int col = pos % 5;
+                mines[row][col] = true;
+            }
+        }
+        
+        public boolean revealTile(int row, int col) {
+            if (revealed[row][col]) return false;
+            
+            revealed[row][col] = true;
+            
+            if (mines[row][col]) {
+                hitMine = true;
+                return false; // Hit mine!
+            }
+            
+            tilesRevealed++;
+            // Multiplier progression: 1.1x, 1.2x, 1.4x, 1.7x, 2.1x, 2.6x, etc.
+            multiplier = 1.0 + (tilesRevealed * 0.1) + (tilesRevealed * tilesRevealed * 0.02);
+            return true; // Safe!
+        }
+    }
+    
+    // Plinko game state  
+    public static class PlinkoState {
+        public int finalSlot; // 0-8
+        public double multiplier;
+        public long entryFee;
+        
+        public PlinkoState(long entry) {
+            this.entryFee = entry;
+            
+            // Simulate ball drop through 10 rows (50% left, 50% right at each peg)
+            int position = 4; // Start at center (0-8 range)
+            
+            for (int row = 0; row < 10; row++) {
+                if (RANDOM.nextBoolean()) {
+                    position = Math.min(8, position + 1); // Right
+                } else {
+                    position = Math.max(0, position - 1); // Left
+                }
+            }
+            
+            this.finalSlot = position;
+            
+            // Multipliers: [0.1x, 0.5x, 1x, 2x, 5x, 2x, 1x, 0.5x, 0.1x]
+            double[] multipliers = {0.1, 0.5, 1.0, 2.0, 5.0, 2.0, 1.0, 0.5, 0.1};
+            this.multiplier = multipliers[position];
         }
     }
     
@@ -691,5 +822,266 @@ public class GamesManager {
         data.incrementGamesByType(GameType.ROULETTE);
         data.setLastPlayTime(System.currentTimeMillis());
         endSession(player.getUUID());
+    }
+    
+    /**
+     * CRASH GAME - Multiplier increases, cash out before crash
+     */
+    public static void startCrash(ServerPlayer player) {
+        long entryCost = 5000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        CrashState state = new CrashState(entryCost);
+        startSession(player.getUUID(), GameType.CRASH, entryCost, state);
+        
+        player.sendSystemMessage(Component.literal("§a§l[CRASH] Game started! Cash out before it crashes!"));
+    }
+    
+    public static void cashOutCrash(ServerPlayer player) {
+        GameSession session = getSession(player.getUUID());
+        if (session == null || session.type != GameType.CRASH) {
+            return;
+        }
+        
+        CrashState state = (CrashState) session.gameState;
+        if (state.cashedOut) return;
+        
+        state.cashedOut = true;
+        long winnings = (long)(state.entryFee * state.multiplier);
+        
+        CurrencyManager.addMoney(player, winnings);
+        GameData data = getGameData(player.getUUID());
+        data.addEarned(winnings);
+        data.addEarnedByType(GameType.CRASH, winnings);
+        data.incrementGames();
+        data.incrementGamesByType(GameType.CRASH);
+        
+        player.sendSystemMessage(Component.literal("§a§l[CRASH] Cashed out at " + String.format("%.2f", state.multiplier) + "x!"));
+        player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(winnings)));
+        
+        endSession(player.getUUID());
+    }
+    
+    /**
+     * WHEEL OF FORTUNE - Spin for prizes
+     */
+    public static void spinWheel(ServerPlayer player) {
+        long entryCost = 10000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        
+        // Weighted segments
+        double rand = RANDOM.nextDouble();
+        String result;
+        long prize = 0;
+        double multiplier = 1.0;
+        
+        if (rand < 0.30) {
+            result = "$5,000";
+            prize = 5000;
+        } else if (rand < 0.50) {
+            result = "$10,000";
+            prize = 10000;
+        } else if (rand < 0.65) {
+            result = "$25,000";
+            prize = 25000;
+        } else if (rand < 0.75) {
+            result = "$50,000";
+            prize = 50000;
+        } else if (rand < 0.83) {
+            result = "$100,000";
+            prize = 100000;
+        } else if (rand < 0.88) {
+            result = "$250,000";
+            prize = 250000;
+        } else if (rand < 0.90) {
+            result = "JACKPOT ($500,000)";
+            prize = 500000;
+        } else if (rand < 0.93) {
+            result = "BANKRUPT";
+            prize = 0;
+        } else if (rand < 0.95) {
+            result = "-$10,000";
+            prize = -10000;
+        } else if (rand < 0.97) {
+            result = "x2";
+            multiplier = 2.0;
+            prize = entryCost * 2;
+        } else if (rand < 0.99) {
+            result = "x3";
+            multiplier = 3.0;
+            prize = entryCost * 3;
+        } else {
+            result = "x5";
+            multiplier = 5.0;
+            prize = entryCost * 5;
+        }
+        
+        if (prize > 0) {
+            CurrencyManager.addMoney(player, prize);
+        } else if (prize < 0) {
+            CurrencyManager.removeMoney(player, Math.abs(prize));
+        }
+        
+        GameData data = getGameData(player.getUUID());
+        data.addEarned(Math.max(0, prize));
+        data.addEarnedByType(GameType.WHEEL_OF_FORTUNE, Math.max(0, prize));
+        data.incrementGames();
+        data.incrementGamesByType(GameType.WHEEL_OF_FORTUNE);
+        
+        player.sendSystemMessage(Component.literal("§e§l[WHEEL] Landed on: " + result));
+        if (prize > 0) {
+            player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(prize)));
+        } else if (prize < 0) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] -$" + CurrencyManager.format(Math.abs(prize))));
+        }
+    }
+    
+    /**
+     * KENO - Pick 10 numbers, 20 drawn
+     */
+    public static void startKeno(ServerPlayer player, List<Integer> selectedNumbers) {
+        long entryCost = 2000;
+        
+        if (selectedNumbers.size() != 10) {
+            player.sendSystemMessage(Component.literal("§c§l[KENO] Must select exactly 10 numbers!"));
+            return;
+        }
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        KenoState state = new KenoState(selectedNumbers, entryCost);
+        
+        int matches = state.countMatches();
+        long prize = 0;
+        
+        switch (matches) {
+            case 10: prize = 100000; break;
+            case 9: prize = 10000; break;
+            case 8: prize = 1000; break;
+            case 7: prize = 100; break;
+            case 6: prize = 20; break;
+            case 5: prize = 5; break;
+            default: prize = 0;
+        }
+        
+        if (prize > 0) {
+            CurrencyManager.addMoney(player, prize);
+        }
+        
+        GameData data = getGameData(player.getUUID());
+        data.addEarned(prize);
+        data.addEarnedByType(GameType.KENO, prize);
+        data.incrementGames();
+        data.incrementGamesByType(GameType.KENO);
+        
+        player.sendSystemMessage(Component.literal("§e§l[KENO] Matched " + matches + "/10 numbers!"));
+        if (prize > 0) {
+            player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(prize)));
+        }
+    }
+    
+    /**
+     * MINES - Click tiles, avoid mines
+     */
+    public static void startMines(ServerPlayer player) {
+        long entryCost = 5000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        MinesState state = new MinesState(entryCost);
+        startSession(player.getUUID(), GameType.MINES, entryCost, state);
+        
+        player.sendSystemMessage(Component.literal("§a§l[MINES] Game started! Avoid the 5 mines!"));
+    }
+    
+    public static void revealMineTile(ServerPlayer player, int row, int col) {
+        GameSession session = getSession(player.getUUID());
+        if (session == null || session.type != GameType.MINES) {
+            return;
+        }
+        
+        MinesState state = (MinesState) session.gameState;
+        boolean safe = state.revealTile(row, col);
+        
+        if (!safe && state.hitMine) {
+            player.sendSystemMessage(Component.literal("§c§l[MINES] BOOM! You hit a mine!"));
+            player.sendSystemMessage(Component.literal("§7Better luck next time!"));
+            
+            GameData data = getGameData(player.getUUID());
+            data.incrementGames();
+            data.incrementGamesByType(GameType.MINES);
+            endSession(player.getUUID());
+        } else {
+            player.sendSystemMessage(Component.literal("§a§l[MINES] Safe! Multiplier: " + String.format("%.2f", state.multiplier) + "x"));
+        }
+    }
+    
+    public static void cashOutMines(ServerPlayer player) {
+        GameSession session = getSession(player.getUUID());
+        if (session == null || session.type != GameType.MINES) {
+            return;
+        }
+        
+        MinesState state = (MinesState) session.gameState;
+        long winnings = (long)(state.entryFee * state.multiplier);
+        
+        CurrencyManager.addMoney(player, winnings);
+        GameData data = getGameData(player.getUUID());
+        data.addEarned(winnings);
+        data.addEarnedByType(GameType.MINES, winnings);
+        data.incrementGames();
+        data.incrementGamesByType(GameType.MINES);
+        
+        player.sendSystemMessage(Component.literal("§a§l[MINES] Cashed out at " + String.format("%.2f", state.multiplier) + "x!"));
+        player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(winnings)));
+        
+        endSession(player.getUUID());
+    }
+    
+    /**
+     * PLINKO - Drop ball, land in slot
+     */
+    public static void dropPlinko(ServerPlayer player) {
+        long entryCost = 3000;
+        
+        if (!CurrencyManager.canAfford(player, entryCost)) {
+            player.sendSystemMessage(Component.literal("§c§l[GAME] Need $" + CurrencyManager.format(entryCost) + " to play!"));
+            return;
+        }
+        
+        CurrencyManager.removeMoney(player, entryCost);
+        PlinkoState state = new PlinkoState(entryCost);
+        
+        long winnings = (long)(entryCost * state.multiplier);
+        CurrencyManager.addMoney(player, winnings);
+        
+        GameData data = getGameData(player.getUUID());
+        data.addEarned(winnings);
+        data.addEarnedByType(GameType.PLINKO, winnings);
+        data.incrementGames();
+        data.incrementGamesByType(GameType.PLINKO);
+        
+        player.sendSystemMessage(Component.literal("§e§l[PLINKO] Landed in slot " + (state.finalSlot + 1) + "!"));
+        player.sendSystemMessage(Component.literal("§7Multiplier: " + String.format("%.1f", state.multiplier) + "x"));
+        player.sendSystemMessage(Component.literal("§6§l[GAME] +$" + CurrencyManager.format(winnings)));
     }
 }

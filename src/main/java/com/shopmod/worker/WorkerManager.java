@@ -348,4 +348,45 @@ public class WorkerManager {
     public static long getTrainingCost() {
         return TRAINING_COST;
     }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Promote worker (costs $25K, increases all skills +1)
+     */
+    public static boolean promoteWorker(ServerPlayer player, UUID workerId) {
+        Worker worker = getWorkerById(player.getUUID(), workerId);
+        
+        if (worker == null) {
+            player.sendSystemMessage(Component.literal("§c§l[WORKERS] Worker not found!"));
+            return false;
+        }
+        
+        long cost = 25000; // $25K
+        
+        if (!CurrencyManager.canAfford(player, cost)) {
+            player.sendSystemMessage(Component.literal("§c§l[WORKERS] Insufficient funds! Need " + CurrencyManager.format(cost)));
+            return false;
+        }
+        
+        CurrencyManager.removeMoney(player, cost);
+        
+        // Increase all skills +1
+        for (WorkerSkill skill : WorkerSkill.values()) {
+            int currentSkill = worker.getSkillLevel(skill);
+            if (currentSkill < 10) {
+                worker.setSkillLevel(skill, currentSkill + 1);
+            }
+        }
+        
+        player.sendSystemMessage(Component.literal("§a§l[WORKERS] Promoted " + worker.getName() + "! All skills +1"));
+        
+        return true;
+    }
+    
+    /**
+     * PHASE 4 ENHANCEMENT: Get worker promotion level
+     */
+    public static int getWorkerPromotion(UUID workerId) {
+        // Simplified implementation - would track in Worker class
+        return 0;
+    }
 }

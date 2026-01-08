@@ -332,14 +332,19 @@ public class HubGui extends SimpleGui {
             .addLoreLine(Component.literal("§7Interactive mini-games!"))
             .addLoreLine(Component.literal("§7Real gameplay mechanics"))
             .addLoreLine(Component.literal(""))
-            .addLoreLine(Component.literal("§e§l7 Games Available:"))
+            .addLoreLine(Component.literal("§e§l12 Games Available:"))
             .addLoreLine(Component.literal("§7• Number Guess"))
             .addLoreLine(Component.literal("§7• Coin Flip"))
             .addLoreLine(Component.literal("§7• Dice Roll"))
             .addLoreLine(Component.literal("§7• High-Low"))
             .addLoreLine(Component.literal("§7• Lucky Slots"))
-            .addLoreLine(Component.literal("§d§l• Blackjack ★ NEW!"))
-            .addLoreLine(Component.literal("§d§l• Roulette ★ NEW!"))
+            .addLoreLine(Component.literal("§7• Blackjack"))
+            .addLoreLine(Component.literal("§7• Roulette"))
+            .addLoreLine(Component.literal("§d§l• Crash ★ NEW!"))
+            .addLoreLine(Component.literal("§d§l• Wheel of Fortune ★ NEW!"))
+            .addLoreLine(Component.literal("§d§l• Keno ★ NEW!"))
+            .addLoreLine(Component.literal("§d§l• Mines ★ NEW!"))
+            .addLoreLine(Component.literal("§d§l• Plinko ★ NEW!"))
             .addLoreLine(Component.literal(""))
             .addLoreLine(Component.literal("§6Max Win: $50,000!"))
             .addLoreLine(Component.literal(""))
@@ -347,6 +352,50 @@ public class HubGui extends SimpleGui {
             .addLoreLine(Component.literal("§e§lCLICK §7to open"))
             .setCallback((index, type, action) -> {
                 new GamesGui(player).open();
+            })
+        );
+        
+        setSlot(42, new GuiElementBuilder(Items.ENCHANTED_GOLDEN_APPLE)
+            .setName(Component.literal("§6§l✦ Lottery"))
+            .glow()
+            .addLoreLine(Component.literal("§7Weekly jackpot draws!"))
+            .addLoreLine(Component.literal("§7Pick 6 numbers from 1-50"))
+            .addLoreLine(Component.literal("§7Tickets: §6$10,000 §7each"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§lPrize Tiers:"))
+            .addLoreLine(Component.literal("§76 matches: §6JACKPOT"))
+            .addLoreLine(Component.literal("§75 matches: §6$50,000"))
+            .addLoreLine(Component.literal("§74 matches: §6$10,000"))
+            .addLoreLine(Component.literal("§73 matches: §6$1,000"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4 FEATURE!"))
+            .addLoreLine(Component.literal("§8Command: §f/lottery"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new com.shopmod.lottery.LotteryGui(player).open();
+            })
+        );
+        
+        setSlot(43, new GuiElementBuilder(Items.EMERALD_BLOCK)
+            .setName(Component.literal("§a§l✦ Business Empire"))
+            .addLoreLine(Component.literal("§7Build your business empire!"))
+            .addLoreLine(Component.literal("§7Passive daily income"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§e§l7 Business Types:"))
+            .addLoreLine(Component.literal("§7• Restaurant §6($500K)"))
+            .addLoreLine(Component.literal("§7• Tech Startup §6($600K)"))
+            .addLoreLine(Component.literal("§7• Real Estate §6($650K)"))
+            .addLoreLine(Component.literal("§7• Oil Company §6($700K)"))
+            .addLoreLine(Component.literal("§7• Shipping Co. §6($720K)"))
+            .addLoreLine(Component.literal("§7• Bank §6($750K)"))
+            .addLoreLine(Component.literal("§7• Farm Conglomerate §6($800K)"))
+            .addLoreLine(Component.literal(""))
+            .addLoreLine(Component.literal("§6Upgrade, collect, synergies!"))
+            .addLoreLine(Component.literal("§d§l★ PHASE 4 FEATURE!"))
+            .addLoreLine(Component.literal("§8Command: §f/business"))
+            .addLoreLine(Component.literal("§e§lCLICK §7to open"))
+            .setCallback((index, type, action) -> {
+                new com.shopmod.business.BusinessGui(player).open();
             })
         );
         
